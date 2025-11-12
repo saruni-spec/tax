@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     ];
 
     const enhancedData = filteredData.map((item, index) => {
-      const key = Object.keys(item)[0];
+      const key = Object.keys(item)[0] as keyof typeof item;
       const value = item[key];
 
       return {
