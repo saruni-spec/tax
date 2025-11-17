@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       compute_assessments: boolean;
     } = await req.json();
 
-    // conver the quantity and value to numbers
+    // Convert quantity and value to numbers
     const items = body.items.map((item) => ({
       ...item,
       quantity: Number(item.quantity),
@@ -131,22 +131,41 @@ export async function POST(req: NextRequest) {
 
     const data: Declaration = await results.json();
 
-    //get the total amount of tax to be paid
+    // --- 1. CALCULATE TOTAL TAX ---
     let totalTax = 0;
     if (data.assesments && Array.isArray(data.assesments)) {
       data.assesments.forEach((assessment) => {
         totalTax += parseFloat(assessment.tax_amount);
       });
     }
+    console.log("Total Tax Calculated:", totalTax);
 
-    console.log("Total Tax Calculated:", totalTax, data);
+    // --- 2. FORMAT DATA (Grouped & Short) ---
+    let formattedData = "";
 
-    //format the data into a readable string format
-    const formattedData = data.assesments
-      .map((assessment) => {
-        return `Item ID: ${assessment.metadata.f88ItemId}, Tax Amount: ${assessment.tax_amount}`;
-      })
-      .join("\n");
+    if (data.assesments && Array.isArray(data.assesments)) {
+      // A. Create a dictionary to group taxes by Item ID
+      const groupedByItem: Record<string, string[]> = {};
+
+      data.assesments.forEach((assessment) => {
+        // Fallback to 'General' if ID is missing
+        const itemId = assessment.metadata.f88ItemId ?? "General";
+
+        if (!groupedByItem[itemId]) {
+          groupedByItem[itemId] = [];
+        }
+        // Format: "TaxType: Amount" (Compact)
+        groupedByItem[itemId].push(
+          `${assessment.tax_type}: ${assessment.tax_amount}`
+        );
+      });
+
+      // B. Convert dictionary to a clean string
+      // Result: "Item #1: Import Duty: 500, VAT: 200"
+      formattedData = Object.entries(groupedByItem)
+        .map(([id, taxes]) => `Item #${id}: ${taxes.join(", ")}`)
+        .join("\n");
+    }
 
     console.log("Formatted Assessment Data:\n", formattedData);
 
