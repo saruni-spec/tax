@@ -29,9 +29,6 @@ export async function POST(req: NextRequest) {
       }
 
 
-//Add value to every item
-      // @ts-ignore
-      item["value"] = item.amount || item.valueOfFund;
       
       // Category-specific fields
       if (item.category === "Mobile Device") {
@@ -57,6 +54,7 @@ export async function POST(req: NextRequest) {
         if (item.currency) result.currency = item.currency;
         if (item.hsCode) result.hsCode = item.hsCode;
       }
+      result.value = item.amount || item.valueOfFund;
 
       return toSnakeCase(result);
     });
