@@ -175,32 +175,35 @@ const ProgressSteps = ({ currentStep }: { currentStep: number }) => {
   ];
 
   return (
-    <div className="flex items-center justify-between mb-8 overflow-x-auto pb-2">
-      {steps.map((step, idx) => (
-        <div key={step.num} className="flex items-center min-w-0">
-          <div className="flex flex-col items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === step.num 
-                ? 'bg-orange-500 text-white' 
-                : currentStep > step.num
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-200 text-gray-500'
-            }`}>
-              {currentStep > step.num ? '✓' : step.num}
+
+    <div className="mb-8 overflow-x-auto pb-2">
+      <div className="flex items-center min-w-max gap-4 px-2">
+        {steps.map((step, idx) => (
+          <div key={step.num} className="flex items-center">
+            <div className="flex flex-col items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                currentStep === step.num 
+                  ? 'bg-orange-500 text-white' 
+                  : currentStep > step.num
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-200 text-gray-500'
+              }`}>
+                {currentStep > step.num ? '✓' : step.num}
+              </div>
+              <span className={`text-xs mt-2 text-center whitespace-nowrap ${
+                currentStep === step.num ? 'text-gray-900 font-medium' : 'text-gray-500'
+              }`}>
+                {step.label}
+              </span>
             </div>
-            <span className={`text-xs mt-2 text-center whitespace-nowrap ${
-              currentStep === step.num ? 'text-gray-900 font-medium' : 'text-gray-500'
-            }`}>
-              {step.label}
-            </span>
+            {idx < steps.length - 1 && (
+              <div className={`h-0.5 w-12 mx-2 ${
+                currentStep > step.num ? 'bg-orange-500' : 'bg-gray-200'
+              }`} />
+            )}
           </div>
-          {idx < steps.length - 1 && (
-            <div className={`h-0.5 w-8 mx-2 ${
-              currentStep > step.num ? 'bg-orange-500' : 'bg-gray-200'
-            }`} />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
@@ -550,7 +553,16 @@ const PassengerInformation = () => {
     if (!formData.firstName) newErrors.firstName = 'Required';
     if (!formData.passportNo) newErrors.passportNo = 'Required';
     if (!formData.nationality) newErrors.nationality = 'Required';
-    if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Required';
+    if (!formData.nationality) newErrors.nationality = 'Required';
+    
+    // Date validation (DD/MM/YYYY)
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = 'Required';
+    } else if (!dateRegex.test(formData.dateOfBirth)) {
+      newErrors.dateOfBirth = 'Format must be DD/MM/YYYY';
+    }
+
     if (!formData.gender) newErrors.gender = 'Required';
     if (!formData.phone) newErrors.phone = 'Required';
     if (!formData.email) newErrors.email = 'Required';
@@ -564,13 +576,17 @@ const PassengerInformation = () => {
     if (validate()) {
       setLoading(true);
       try {
+        // Convert DD/MM/YYYY to ISO Date
+        const [day, month, year] = formData.dateOfBirth.split('/');
+        const isoDate = new Date(`${year}-${month}-${day}`).toISOString();
+
         const payload = {
             ref_no: refNo,
             firstname: formData.firstName,
             surname: formData.surname,
             passport_number: formData.passportNo,
             nationality: formData.nationality === 'Kenya' ? 'KE' : 'UG', // Simplified mapping
-            dob: new Date(formData.dateOfBirth).toISOString(),
+            dob: isoDate,
             profession: formData.profession,
             gender: formData.gender === 'Male' ? 'M' : 'F',
             language: 'en',
@@ -698,9 +714,16 @@ const PassengerInformation = () => {
               Date Of Birth <span className="text-red-500">*</span>
             </label>
             <input
-              type="date"
+              type="text"
+              placeholder="DD/MM/YYYY"
               value={formData.dateOfBirth}
-              onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
+              onChange={(e) => {
+                // Allow only numbers and slashes
+                const val = e.target.value;
+                if (/^[\d/]*$/.test(val) && val.length <= 10) {
+                   updateFormData({ dateOfBirth: val });
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
             {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
@@ -840,7 +863,15 @@ const TravelInformation = () => {
 
   const validate = () => {
     const newErrors: any = {};
-    if (!formData.arrivalDate) newErrors.arrivalDate = 'Required';
+    
+    // Date validation (DD/MM/YYYY)
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!formData.arrivalDate) {
+      newErrors.arrivalDate = 'Required';
+    } else if (!dateRegex.test(formData.arrivalDate)) {
+      newErrors.arrivalDate = 'Format must be DD/MM/YYYY';
+    }
+
     if (!formData.arrivingFrom) newErrors.arrivingFrom = 'Required';
     if (!formData.conveyanceMode) newErrors.conveyanceMode = 'Required';
     
@@ -852,10 +883,14 @@ const TravelInformation = () => {
     if (validate()) {
       setLoading(true);
       try {
+        // Convert DD/MM/YYYY to ISO Date
+        const [day, month, year] = formData.arrivalDate.split('/');
+        const isoDate = new Date(`${year}-${month}-${day}`).toISOString();
+
         const payload = {
             ref_no: refNo,
             travel_information: {
-                arrival_date: new Date(formData.arrivalDate).toISOString(),
+                arrival_date: isoDate,
                 arrival_from: formData.arrivingFrom === 'Uganda' ? 'UG' : 'TZ', // Simplified
                 mode_of_conveyance: formData.conveyanceMode === 'Air' ? 'A' : (formData.conveyanceMode === 'Sea' ? 'S' : 'L'),
                 point_of_boarding: 'NBO', // Default or add field
@@ -903,9 +938,15 @@ const TravelInformation = () => {
             Arrival Date <span className="text-red-500">*</span>
           </label>
           <input
-            type="date"
+            type="text"
+            placeholder="DD/MM/YYYY"
             value={formData.arrivalDate}
-            onChange={(e) => updateFormData({ arrivalDate: e.target.value })}
+            onChange={(e) => {
+                const val = e.target.value;
+                if (/^[\d/]*$/.test(val) && val.length <= 10) {
+                   updateFormData({ arrivalDate: val });
+                }
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
           {errors.arrivalDate && <p className="text-red-500 text-xs mt-1">{errors.arrivalDate}</p>}
@@ -1303,15 +1344,32 @@ const TaxComputation = () => {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-        <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-            <FormProvider>
-            <MainContent />
-            </FormProvider>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold">
+              F
+            </div>
+            <span className="font-bold text-lg">F88 Form</span>
+          </div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50">
+              Save Draft
+            </button>
+            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
+              🇬🇧 <span className="hidden sm:inline">English</span>
+            </button>
+          </div>
         </div>
-        </div>
-    </Suspense>
+      </div>
+
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <FormProvider>
+          <MainContent />
+        </FormProvider>
+      </div>
+    </div>
   );
 }
 
