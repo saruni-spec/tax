@@ -6,6 +6,7 @@ import { Layout, Card, Input, Button } from '../../../_components/Layout';
 import { fetchInvoices } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { ChevronRight, Loader2, Phone } from 'lucide-react';
+import { getUserSession } from '../../../_lib/store';
 
 export default function BuyerInitiatedBuyerPending() {
   const router = useRouter();
@@ -14,6 +15,13 @@ export default function BuyerInitiatedBuyerPending() {
   const [invoices, setInvoices] = useState<FetchedInvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const session = getUserSession();
+    if (session?.msisdn) {
+      setPhoneNumber(session.msisdn);
+    }
+  }, []);
 
   const handleFetchInvoices = async () => {
     if (!phoneNumber.trim()) return;

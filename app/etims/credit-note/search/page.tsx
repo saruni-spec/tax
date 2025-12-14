@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card, Input, Button } from '../../_components/Layout';
-import { saveCreditNote, Invoice, InvoiceItem } from '../../_lib/store';
+import { saveCreditNote, Invoice, InvoiceItem, getUserSession } from '../../_lib/store';
 import { searchCreditNoteInvoice } from '../../../actions/etims';
 import { Loader2 } from 'lucide-react';
 
@@ -13,6 +13,13 @@ export default function CreditNoteSearch() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const session = getUserSession();
+    if (session?.msisdn) {
+      setPhoneNumber(session.msisdn);
+    }
+  }, []);
 
   const handleSearch = async () => {
     setError('');

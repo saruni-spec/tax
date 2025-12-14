@@ -107,8 +107,30 @@ export const getBuyerInitiated = (): Partial<BuyerInitiatedInvoice> | null => {
 };
 
 export const clearBuyerInitiated = () => {
-  if (typeof window === 'undefined') return;
   sessionStorage.removeItem(BUYER_INITIATED_KEY);
+};
+
+// User Session Store
+const USER_SESSION_KEY = 'etims_user_session';
+
+export interface UserSession {
+  msisdn: string;
+}
+
+export const saveUserSession = (data: UserSession) => {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify(data));
+};
+
+export const getUserSession = (): UserSession | null => {
+  if (typeof window === 'undefined') return null;
+  const data = sessionStorage.getItem(USER_SESSION_KEY);
+  return data ? JSON.parse(data) : null;
+};
+
+export const clearUserSession = () => {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(USER_SESSION_KEY);
 };
 
 // Calculate totals

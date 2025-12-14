@@ -1,18 +1,28 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FileText, FileMinus, UserCheck, LogOut } from 'lucide-react';
 import { Layout, Card } from './_components/Layout';
-import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from './_lib/store';
+import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated, saveUserSession } from './_lib/store';
 
-export default function EtimsHome() {
+function EtimsHomeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const number = searchParams.get('number');
+
+  useEffect(() => {
+    if (number) {
+      saveUserSession({ msisdn: number });
+    }
+  }, [number]);
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to log out?')) {
       clearSalesInvoice();
       clearCreditNote();
       clearBuyerInitiated();
+      // clearUserSession(); // Should we clear phone number on logout? Probably yes.
       alert('Logged out successfully');
     }
   };
@@ -117,5 +127,13 @@ export default function EtimsHome() {
         </button>
       </div>
     </Layout>
+  );
+}
+
+export default function EtimsHome() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EtimsHomeContent />
+    </Suspense>
   );
 }
