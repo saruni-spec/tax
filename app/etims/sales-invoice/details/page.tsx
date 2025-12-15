@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Input, Button, TotalsCard } from '../../_components/Layout';
+import { Layout, Card, Input, Button } from '../../_components/Layout';
 import { saveSalesInvoice, getSalesInvoice, calculateTotals, InvoiceItem } from '../../_lib/store';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 
@@ -37,8 +37,26 @@ export default function SalesInvoiceDetails() {
   };
 
   const handleAddItem = () => {
-    if (!itemName.trim() || !unitPrice || parseFloat(unitPrice) <= 0 || parseInt(quantity) <= 0) {
-      alert('Please fill in all required fields with valid values');
+    // Validate each field with specific error messages
+    if (!itemName.trim()) {
+      alert('Item name is required. Please enter a name for this item.');
+      return;
+    }
+    
+    if (!unitPrice || unitPrice.trim() === '') {
+      alert('Unit price is required. Please enter the price for this item.');
+      return;
+    }
+    
+    const price = parseFloat(unitPrice);
+    if (isNaN(price) || price <= 0) {
+      alert('Invalid price. Please enter a price greater than 0.');
+      return;
+    }
+    
+    const qty = parseInt(quantity);
+    if (isNaN(qty) || qty <= 0) {
+      alert('Invalid quantity. Please enter a quantity of at least 1.');
       return;
     }
 
@@ -47,8 +65,8 @@ export default function SalesInvoiceDetails() {
       type: itemType,
       name: itemName.trim(),
       description: description.trim() || undefined,
-      unitPrice: parseFloat(unitPrice),
-      quantity: parseInt(quantity),
+      unitPrice: price,
+      quantity: qty,
     };
 
     if (editingId) {
@@ -264,9 +282,16 @@ export default function SalesInvoiceDetails() {
           </Card>
         )}
 
-        {/* Totals */}
+        {/* Total */}
         {items.length > 0 && (
-          <TotalsCard subtotal={totals.subtotal} tax={totals.tax} total={totals.total} />
+          <Card>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-medium">Total</span>
+              <span className="text-lg font-bold text-gray-900">
+                KES {totals.total.toLocaleString()}
+              </span>
+            </div>
+          </Card>
         )}
 
         {/* Review Button */}

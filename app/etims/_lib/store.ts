@@ -116,6 +116,7 @@ const USER_SESSION_KEY = 'etims_user_session';
 
 export interface UserSession {
   msisdn: string;
+  name?: string;
 }
 
 export const saveUserSession = (data: UserSession) => {

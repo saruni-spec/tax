@@ -21,14 +21,30 @@ import {
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
-// Helper to handle API errors
-const handleApiError = (error: any) => {
-  console.error('ETIMS API Error:', error.response?.data || error.message);
-  throw new Error(
-    error.response?.data?.message || 
-    error.response?.data?.error || 
-    'An error occurred while communicating with the server'
-  );
+// Helper to handle API errors - logs detailed error on server, returns friendly message
+const handleApiError = (error: any, context: string = 'API') => {
+  // Log detailed error for debugging (server-side only)
+  console.error(`[${context}] API Error:`, {
+    status: error.response?.status,
+    data: error.response?.data,
+    message: error.message,
+    url: error.config?.url,
+  });
+  
+  // Return user-friendly error message
+  const status = error.response?.status;
+  
+  if (status === 401 || status === 403) {
+    throw new Error('Session expired. Please try again.');
+  } else if (status === 404) {
+    throw new Error('Service not found. Please try again later.');
+  } else if (status === 500 || status === 502 || status === 503) {
+    throw new Error('Service temporarily unavailable. Please try again later.');
+  } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+    throw new Error('Request timed out. Please check your connection and try again.');
+  } else {
+    throw new Error('Something went wrong. Please try again.');
+  }
 };
 
 /**
@@ -80,16 +96,29 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
         };
     }
   } catch (error: any) {
+    // Log detailed error on server
+    console.error('[Customer Lookup] Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    
+    // Return friendly error message
     if (error.response?.status === 404) {
       return {
-          success: false,
-          error: 'Customer not found. Please verify the PIN/ID and try again'
+        success: false,
+        error: 'Buyer not found. Please check the PIN/ID and try again.'
+      };
+    } else if (error.response?.status >= 500) {
+      return {
+        success: false,
+        error: 'Service temporarily unavailable. Please try again later.'
       };
     }
-    console.error('Customer lookup error', error);
+    
     return {
-        success: false,
-        error: error.message || 'An error occurred during lookup'
+      success: false,
+      error: 'Could not verify buyer. Please try again.'
     };
   }
 }

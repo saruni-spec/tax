@@ -183,6 +183,11 @@ export const isValidPIN = (pin: string): boolean => {
   return /^[A-Z]\d{9}[A-Z]$/i.test(pin);
 };
 
+export const isValidPINOrID = (value: string): boolean => {
+  if (!value) return false;
+  return isValidPIN(value) || isValidID(value);
+};
+
 export const formatPIN = (pin: string): string => {
   return pin.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
 };
@@ -196,3 +201,122 @@ export const maskID = (id: string): string => {
   if (!id || id.length < 4) return id;
   return `${id.slice(0, 4)}****${id.slice(-2)}`;
 };
+
+
+// ============= PIN or ID Input Component =============
+// Accepts either PIN (11 chars: A + 9 digits + letter) or ID (6-8 numeric digits)
+
+interface PINOrIDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  label?: string;
+  helperText?: string;
+  error?: string;
+  onChange?: (value: string) => void;
+  onValidationChange?: (isValid: boolean, type: 'pin' | 'id' | 'invalid' | 'empty') => void;
+}
+
+export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
+  ({ label, helperText, error, onChange, onValidationChange, className = '', value, ...props }, ref) => {
+    const [internalError, setInternalError] = useState('');
+    const [detectedType, setDetectedType] = useState<'pin' | 'id' | 'invalid' | 'empty'>('empty');
+
+    const validateValue = (val: string): { error: string; type: 'pin' | 'id' | 'invalid' | 'empty' } => {
+      if (!val || val.trim() === '') {
+        return { error: '', type: 'empty' };
+      }
+
+      const trimmed = val.trim().toUpperCase();
+
+      // Check if it looks like a PIN (contains letters)
+      if (/[A-Z]/.test(trimmed)) {
+        // Validate as PIN
+        if (trimmed.length < 11) {
+          return { error: 'PIN must be 11 characters', type: 'invalid' };
+        }
+        if (trimmed.length === 11) {
+          const pinRegex = /^[A-Z]\d{9}[A-Z]$/;
+          if (!pinRegex.test(trimmed)) {
+            return { error: 'Invalid PIN format (e.g., A012345678Z)', type: 'invalid' };
+          }
+          return { error: '', type: 'pin' };
+        }
+        return { error: 'Invalid format', type: 'invalid' };
+      } else {
+        // Validate as ID (numeric only)
+        if (!/^\d+$/.test(trimmed)) {
+          return { error: 'ID must be numeric', type: 'invalid' };
+        }
+        if (trimmed.length < 6) {
+          return { error: 'ID must be at least 6 digits', type: 'invalid' };
+        }
+        if (trimmed.length > 8) {
+          return { error: 'ID must be at most 8 digits', type: 'invalid' };
+        }
+        return { error: '', type: 'id' };
+      }
+    };
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      let inputValue = e.target.value.toUpperCase();
+      
+      // Only allow alphanumeric characters
+      inputValue = inputValue.replace(/[^A-Z0-9]/g, '');
+      
+      // Limit length
+      const maxLength = /[A-Z]/.test(inputValue) ? 11 : 8;
+      const truncatedValue = inputValue.slice(0, maxLength);
+      
+      // Validate
+      const { error: validationError, type } = validateValue(truncatedValue);
+      
+      setInternalError(validationError);
+      setDetectedType(type);
+      onValidationChange?.(type === 'pin' || type === 'id', type);
+      onChange?.(truncatedValue);
+    };
+
+    const displayError = error || internalError;
+    const currentValue = (value as string) || '';
+
+    return (
+      <div className="w-full">
+        {label && (
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {label}
+          </label>
+        )}
+        <input
+          ref={ref}
+          type="text"
+          value={value}
+          onChange={handleChange}
+          placeholder="e.g., A012345678Z or 12345678"
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
+            displayError ? 'border-red-500' : 'border-gray-300'
+          } ${className}`}
+          {...props}
+        />
+        <div className="flex justify-between items-center mt-1">
+          <div>
+            {displayError && (
+              <p className="text-sm text-red-600">{displayError}</p>
+            )}
+            {helperText && !displayError && (
+              <p className="text-sm text-gray-500">{helperText}</p>
+            )}
+          </div>
+          {currentValue.length > 0 && (
+            <span className={`text-xs ${
+              detectedType === 'pin' || detectedType === 'id' ? 'text-green-600' : 'text-gray-400'
+            }`}>
+              {detectedType === 'pin' && '✓ PIN'}
+              {detectedType === 'id' && '✓ ID'}
+              {detectedType === 'invalid' && `${currentValue.length} chars`}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+PINOrIDInput.displayName = 'PINOrIDInput';

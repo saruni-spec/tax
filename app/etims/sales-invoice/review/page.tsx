@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button, TotalsCard, IdentityStrip } from '../../_components/Layout';
+import { Layout, Card, Button, IdentityStrip } from '../../_components/Layout';
 import { getSalesInvoice, Invoice, getUserSession } from '../../_lib/store';
 import { submitInvoice } from '../../../actions/etims';
 import { Loader2 } from 'lucide-react';
@@ -10,8 +10,10 @@ import { Loader2 } from 'lucide-react';
 export default function SalesInvoiceReview() {
   const router = useRouter();
   const [invoice, setInvoice] = useState<Partial<Invoice> | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [sellerName, setSellerName] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -21,21 +23,31 @@ export default function SalesInvoiceReview() {
       return;
     }
     setInvoice(saved);
+    
+    // Get seller info from session
+    const session = getUserSession();
+    if (session?.name) {
+      setSellerName(session.name);
+    } else if (session?.msisdn) {
+      // Format phone as fallback
+      setSellerName(`+${session.msisdn}`);
+    }
   }, [router]);
 
-  const handleGenerate = async () => {
-    setIsGenerating(true);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError('');
     
     try {
       const session = getUserSession();
       if (!session?.msisdn) {
-        alert('User session not found. Please go back to home page.');
+        setError('Session expired. Please go back to home page and try again.');
         return;
       }
   
       if (!invoice || !invoice.items) {
-         alert('Invalid invoice data');
-         return;
+        setError('Invoice data is missing. Please go back and add items.');
+        return;
       }
 
       // Calculate total if not present
@@ -54,12 +66,14 @@ export default function SalesInvoiceReview() {
       if (result.success) {
         router.push('/etims/sales-invoice/success');
       } else {
-        alert(result.error || 'Failed to submit invoice');
+        // Show friendly error message
+        setError('Could not submit invoice. Please check your details and try again.');
       }
-    } catch (error: any) {
-      alert(error.message || 'An error occurred while submitting the invoice');
+    } catch (err: any) {
+      // Show friendly error message
+      setError('Something went wrong. Please try again later.');
     } finally {
-      setIsGenerating(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -74,6 +88,14 @@ export default function SalesInvoiceReview() {
       onBack={() => router.push('/etims/sales-invoice/details')}
     >
       <div className="space-y-3">
+        {/* Seller Info */}
+        {sellerName && (
+          <IdentityStrip 
+            label="Seller"
+            value={sellerName}
+          />
+        )}
+
         {/* Buyer Info */}
         {invoice.buyer && (
           <IdentityStrip 
@@ -101,21 +123,16 @@ export default function SalesInvoiceReview() {
                 {invoice.items?.map((item) => (
                   <tr key={item.id} className="border-b border-gray-100 last:border-0">
                     <td className="py-2.5">
-                      <div className="flex flex-col">
-                        <span className="text-gray-900 font-medium">{item.name}</span>
-                        {item.description && (
-                          <span className="text-xs text-gray-500 line-clamp-1">{item.description}</span>
-                        )}
-                      </div>
+                      <span className="text-gray-900 font-medium">{item.name}</span>
                     </td>
                     <td className="text-right py-2.5 text-gray-700 whitespace-nowrap">
-                      KES {item.unitPrice.toLocaleString()}
+                      {item.unitPrice.toLocaleString()}
                     </td>
                     <td className="text-center py-2.5 text-gray-700">
                       {item.quantity}
                     </td>
                     <td className="text-right py-2.5 text-gray-900 font-medium whitespace-nowrap">
-                      KES {(item.unitPrice * item.quantity).toLocaleString()}
+                      {(item.unitPrice * item.quantity).toLocaleString()}
                     </td>
                   </tr>
                 ))}
@@ -124,27 +141,37 @@ export default function SalesInvoiceReview() {
           </div>
         </Card>
 
-        {/* Totals */}
-        {invoice.subtotal !== undefined && invoice.tax !== undefined && invoice.total !== undefined && (
-          <TotalsCard 
-            subtotal={invoice.subtotal} 
-            tax={invoice.tax} 
-            total={invoice.total} 
-          />
+        {/* Total */}
+        {invoice.total !== undefined && (
+          <Card>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-medium">Total</span>
+              <span className="text-lg font-bold text-gray-900">
+                KES {invoice.total.toLocaleString()}
+              </span>
+            </div>
+          </Card>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <Card className="bg-red-50 border-red-200">
+            <p className="text-sm text-red-600">{error}</p>
+          </Card>
         )}
 
         {/* Actions */}
-        {isGenerating ? (
+        {isSubmitting ? (
           <Card className="bg-blue-50 border-blue-200">
             <div className="flex items-center justify-center gap-3 py-4">
               <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-              <p className="text-blue-900 font-medium">Generating Invoice...</p>
+              <p className="text-blue-900 font-medium">Submitting Invoice...</p>
             </div>
           </Card>
         ) : (
           <div className="space-y-3">
-            <Button onClick={handleGenerate}>
-              Generate Invoice
+            <Button onClick={handleSubmit}>
+              Submit
             </Button>
             <Button variant="secondary" onClick={() => router.push('/etims/sales-invoice/details')}>
               Edit Details
