@@ -1073,6 +1073,106 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Session & TCC",
+            "description": "Session initialization and TCC application endpoints",
+            "item": [
+                {
+                    "name": "Initiate Session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id_number\": \"36447996\",\n    \"msisdn\": \"254712345678\",\n    \"type\": \"citizen\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/initiate-session",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "initiate-session"
+                            ]
+                        },
+                        "description": "Initiate a session for WhatsApp/USSD integration. Type can be 'citizen' or 'resident'."
+                    }
+                },
+                {
+                    "name": "TCC Application",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"tax_payer_pin\": \"A012345678Z\",\n    \"reason_for_tcc\": \"Business Contract\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/ussd/tcc-application",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ussd",
+                                "tcc-application"
+                            ]
+                        },
+                        "description": "Apply for a Tax Compliance Certificate (TCC)."
+                    }
+                },
+                {
+                    "name": "Fetch Taxpayer Obligations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "x-forwarded-for",
+                                "value": "triple_2_ussd"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/itax/fetch-taxpayer-obligations?tax_payer_pin=A005655394M",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "itax",
+                                "fetch-taxpayer-obligations"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tax_payer_pin",
+                                    "value": "A005655394M"
+                                }
+                            ]
+                        },
+                        "description": "Fetch all tax obligations registered for a taxpayer by their KRA PIN."
+                    }
+                }
+            ]
         }
     ],
     "variable": [

@@ -221,6 +221,9 @@ This document provides an overview of all Postman collections in this directory 
 |----------|--------|-------------|
 | `/api/ussd/file-return` | POST | File NIL return |
 | `/api/ussd/obligation-filling-period` | POST | Fetch filing period |
+| `/api/ussd/initiate-session` | POST | Initiate WhatsApp/USSD session (NEW) |
+| `/api/ussd/tcc-application` | POST | Apply for Tax Compliance Certificate (NEW) |
+| `/api/itax/fetch-taxpayer-obligations` | GET | Fetch taxpayer obligations by PIN (NEW) |
 
 ### Taxpayer Verification (Checkers)
 | Endpoint | Method | Description |

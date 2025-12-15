@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Input, Button } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../_components/Layout';
+import { PINInput, isValidPIN } from '@/app/_components/KRAInputs';
 import { saveSalesInvoice } from '../../_lib/store';
 import { CheckCircle } from 'lucide-react';
 import { lookupCustomer } from '../../../actions/etims';
@@ -10,6 +11,7 @@ import { lookupCustomer } from '../../../actions/etims';
 export default function SalesInvoiceBuyer() {
   const router = useRouter();
   const [buyerPin, setBuyerPin] = useState('');
+  const [isPinValid, setIsPinValid] = useState(false);
   const [buyerInfo, setBuyerInfo] = useState<{ pin: string; name: string } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,12 +62,12 @@ export default function SalesInvoiceBuyer() {
         {!buyerInfo ? (
           <>
             <Card>
-              <Input
-                label="Buyer PIN / ID"
+              <PINInput
+                label="Buyer PIN"
                 value={buyerPin}
                 onChange={setBuyerPin}
-                placeholder="e.g. A001234567X"
-                required
+                onValidationChange={setIsPinValid}
+                helperText="Enter 11-character KRA PIN (e.g., A012345678Z)"
               />
               {error && (
                 <p className="mt-2 text-sm text-red-600">{error}</p>
@@ -73,7 +75,7 @@ export default function SalesInvoiceBuyer() {
             </Card>
 
             <div className="space-y-3">
-              <Button onClick={handleValidate} disabled={!buyerPin.trim() || loading}>
+              <Button onClick={handleValidate} disabled={!isPinValid || loading}>
                 {loading ? 'Validating...' : 'Validate Buyer'}
               </Button>
               <Button variant="secondary" onClick={handleSkip}>

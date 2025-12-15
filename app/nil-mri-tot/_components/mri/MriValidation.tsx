@@ -6,15 +6,19 @@ import Link from 'next/link';
 import { Home, ArrowLeft, Loader2 } from 'lucide-react';
 import { lookupTaxpayerById } from '../../../actions/tax-filing';
 import { taxpayerStore } from '../../_lib/store';
+import { IDInput } from '@/app/_components/KRAInputs';
 
 export function MriValidation() {
   const router = useRouter();
   const [yob, setYob] = useState('');
   const [idNumber, setIdNumber] = useState('');
+  const [isIdValid, setIsIdValid] = useState(false);
   const [validated, setValidated] = useState(false);
   const [taxpayerInfo, setTaxpayerInfo] = useState<any>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isYobValid = yob.length === 4 && /^\d{4}$/.test(yob);
 
   const handleValidate = async () => {
     setError('');
@@ -79,28 +83,27 @@ export function MriValidation() {
                     Year of Birth
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     id="yob"
+                    inputMode="numeric"
+                    maxLength={4}
                     value={yob}
-                    onChange={(e) => setYob(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setYob(val);
+                    }}
                     placeholder="e.g., 1990"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="idNumber" className="block text-gray-700 mb-2 font-medium">
-                    ID Number
-                  </label>
-                  <input
-                    type="text"
-                    id="idNumber"
-                    value={idNumber}
-                    onChange={(e) => setIdNumber(e.target.value)}
-                    placeholder="Enter ID Number"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
+                <IDInput
+                  label="ID Number"
+                  value={idNumber}
+                  onChange={setIdNumber}
+                  onValidationChange={setIsIdValid}
+                  helperText="Enter 6-8 digit National ID"
+                />
 
                 {error && (
                   <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -111,7 +114,7 @@ export function MriValidation() {
 
               <button
                 onClick={handleValidate}
-                disabled={!yob || !idNumber || loading}
+                disabled={!isYobValid || !isIdValid || loading}
                 className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (

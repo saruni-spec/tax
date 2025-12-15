@@ -137,7 +137,7 @@ export const clearUserSession = () => {
 // Calculate totals
 export const calculateTotals = (items: InvoiceItem[]) => {
   const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-  const tax = subtotal * 0.16; // 16% VAT
-  const total = subtotal + tax;
+  const tax = 0; // Removed VAT calculation as requested
+  const total = subtotal;
   return { subtotal, tax, total };
 };

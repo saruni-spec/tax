@@ -7,51 +7,51 @@ import { Clock, CheckCircle, XCircle, FilePlus } from 'lucide-react';
 export default function BuyerInitiatedHome() {
   const router = useRouter();
 
-  const sellerActions = [
+  const buyerActions = [
     {
-      title: 'Create Buyer-Initiated Invoice',
+      title: 'Create Invoice',
       icon: FilePlus,
       color: 'blue' as const,
-      onClick: () => router.push('/etims/buyer-initiated/seller/create'),
+      onClick: () => router.push('/etims/buyer-initiated/buyer/create'),
     },
     {
       title: 'Pending Invoices',
       icon: Clock,
       color: 'yellow' as const,
-      onClick: () => router.push('/etims/buyer-initiated/seller/invoices?status=pending'),
+      onClick: () => router.push('/etims/buyer-initiated/buyer/invoices?status=pending'),
     },
     {
       title: 'Completed Invoices',
       icon: CheckCircle,
       color: 'green' as const,
-      onClick: () => router.push('/etims/buyer-initiated/seller/invoices?status=completed'),
+      onClick: () => router.push('/etims/buyer-initiated/buyer/invoices?status=completed'),
     },
     {
       title: 'Rejected Invoices',
       icon: XCircle,
       color: 'red' as const,
-      onClick: () => router.push('/etims/buyer-initiated/seller/invoices?status=rejected'),
+      onClick: () => router.push('/etims/buyer-initiated/buyer/invoices?status=rejected'),
     },
   ];
 
-  const buyerActions = [
+  const sellerActions = [
     {
       title: 'Invoices Awaiting Action',
       icon: Clock,
       color: 'orange' as const,
-      onClick: () => router.push('/etims/buyer-initiated/buyer/pending'),
+      onClick: () => router.push('/etims/buyer-initiated/seller/pending'),
     },
     {
       title: 'Accepted Invoices',
       icon: CheckCircle,
       color: 'green' as const,
-      onClick: () => router.push('/etims/buyer-initiated/buyer/pending?status=accepted'),
+      onClick: () => router.push('/etims/buyer-initiated/seller/pending?status=accepted'),
     },
     {
       title: 'Rejected Invoices',
       icon: XCircle,
       color: 'red' as const,
-      onClick: () => router.push('/etims/buyer-initiated/buyer/pending?status=rejected'),
+      onClick: () => router.push('/etims/buyer-initiated/seller/pending?status=rejected'),
     },
   ];
 
@@ -102,9 +102,9 @@ export default function BuyerInitiatedHome() {
       <div className="space-y-6">
         {/* Seller Actions */}
         <div>
-          <h2 className="text-gray-900 font-medium mb-3">Seller Actions</h2>
+          <h2 className="text-gray-900 font-medium mb-3">Buyer Actions</h2>
           <div className="space-y-2">
-            {sellerActions.map((action) => (
+            {buyerActions.map((action) => (
               <ActionButton key={action.title} action={action} />
             ))}
           </div>
@@ -112,9 +112,9 @@ export default function BuyerInitiatedHome() {
 
         {/* Buyer Actions */}
         <div>
-          <h2 className="text-gray-900 font-medium mb-3">Buyer Actions</h2>
+          <h2 className="text-gray-900 font-medium mb-3">Seller Actions</h2>
           <div className="space-y-2">
-            {buyerActions.map((action) => (
+            {sellerActions.map((action) => (
               <ActionButton key={action.title} action={action} />
             ))}
           </div>

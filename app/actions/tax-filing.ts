@@ -237,12 +237,11 @@ export async function fileNilReturn(
   } catch (error: any) {
     console.error('File NIL Return Error:', error.response?.data || error.message);
     
-    // Return mock success for testing
+    // Return actual error - do not hide failures from user
     return {
-      success: true,
-      code: 200,
-      message: 'NIL Return filed successfully (Mock)',
-      receiptNumber: `NIL-${Date.now()}`,
+      success: false,
+      code: error.response?.status || 500,
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file NIL return. Please try again or contact support.',
     };
   }
 }
@@ -286,12 +285,11 @@ export async function fileMriReturn(
   } catch (error: any) {
     console.error('File MRI Return Error:', error.response?.data || error.message);
     
-    // Return mock success for testing
+    // Return actual error - do not hide failures from user
     return {
-      success: true,
-      code: 200,
-      message: 'MRI Return filed successfully (Mock)',
-      receiptNumber: `MRI-${Date.now()}`,
+      success: false,
+      code: error.response?.status || 500,
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file MRI return. Please try again or contact support.',
     };
   }
 }
@@ -337,12 +335,11 @@ export async function fileTotReturn(
   } catch (error: any) {
     console.error('File TOT Return Error:', error.response?.data || error.message);
     
-    // Return mock success for testing
+    // Return actual error - do not hide failures from user
     return {
-      success: true,
-      code: 200,
-      message: 'TOT Return filed successfully (Mock)',
-      receiptNumber: `TOT-${Date.now()}`,
+      success: false,
+      code: error.response?.status || 500,
+      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file TOT return. Please try again or contact support.',
     };
   }
 }
