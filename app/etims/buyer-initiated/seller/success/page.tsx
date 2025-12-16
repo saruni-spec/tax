@@ -9,7 +9,7 @@ function BuyerSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const action = searchParams.get('action') || 'accepted';
-  const isAccepted = action === 'accepted';
+  const isAccepted = action === 'accepted' || action === 'approve';
 
   const handleGoHome = () => {
     router.push('/etims/buyer-initiated');
