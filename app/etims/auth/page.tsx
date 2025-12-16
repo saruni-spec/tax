@@ -42,7 +42,14 @@ function AuthContent() {
         });
         router.push(`/etims/auth/login?${params.toString()}`);
       } else {
-        // User not registered - go to signup
+        // User not registered - check if they are eligible for eTIMS
+        // Business rule: Users with VAT registration are NOT eligible for eTIMS
+        if (result.hasVat) {
+          setError('You are not eligible for eTIMS registration. VAT-registered taxpayers cannot use the eTIMS USSD service.');
+          setLoading(false);
+          return;
+        }
+        // User is eligible - go to signup
         router.push(`/etims/auth/signup?number=${encodeURIComponent(msisdn)}`);
       }
     } catch (err: any) {
