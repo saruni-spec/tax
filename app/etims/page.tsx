@@ -81,6 +81,11 @@ function EtimsHomeContent() {
   return (
     <Layout title="eTIMS Home" showMenu={false}>
       <div className="space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <img src="/kra_logo.png" alt="KRA Logo" className="h-16 w-auto" />
+        </div>
+
         {/* Action Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           {actionCards.map((card) => {

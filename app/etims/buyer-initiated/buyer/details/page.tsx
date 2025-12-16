@@ -167,8 +167,10 @@ export default function BuyerInitiatedDetails() {
                     <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity}</td>
                     <td className="py-1.5 px-1 text-right font-medium">{(item.unitPrice * item.quantity).toLocaleString()}</td>
                     <td className="py-1.5 px-1 text-right">
-                      <button onClick={() => handleEditItem(item)} className="p-1 text-blue-600"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => handleRemoveItem(item.id)} className="p-1 text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleEditItem(item)} className="p-1 text-blue-600"><Edit2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleRemoveItem(item.id)} className="p-1 text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
                     </td>
                   </tr>
                 ))}

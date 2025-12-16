@@ -16,7 +16,7 @@ interface LayoutProps {
   showFooter?: boolean;
 }
 
-export function Layout({ children, title, step, onBack, showMenu = true, showHeader = true, showFooter = true }: LayoutProps) {
+export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true }: LayoutProps) {
   const router = useRouter();
   
   // Session management - auto-refresh and timeout handling

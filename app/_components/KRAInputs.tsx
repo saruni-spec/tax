@@ -9,12 +9,13 @@ interface IDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>,
   label?: string;
   helperText?: string;
   error?: string;
+  required?: boolean;
   onChange?: (value: string) => void;
   onValidationChange?: (isValid: boolean) => void;
 }
 
 export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
-  ({ label, helperText, error, onChange, onValidationChange, className = '', value, ...props }, ref) => {
+  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
     const [internalError, setInternalError] = useState('');
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +46,7 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label}
+            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
           </label>
         )}
         <input
@@ -83,12 +84,13 @@ interface PINInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   label?: string;
   helperText?: string;
   error?: string;
+  required?: boolean;
   onChange?: (value: string) => void;
   onValidationChange?: (isValid: boolean) => void;
 }
 
 export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
-  ({ label, helperText, error, onChange, onValidationChange, className = '', value, ...props }, ref) => {
+  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
     const [internalError, setInternalError] = useState('');
 
     const validatePIN = (pin: string): string => {
@@ -133,7 +135,7 @@ export const PINInput = forwardRef<HTMLInputElement, PINInputProps>(
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label}
+            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
           </label>
         )}
         <input
@@ -210,12 +212,13 @@ interface PINOrIDInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   label?: string;
   helperText?: string;
   error?: string;
+  required?: boolean;
   onChange?: (value: string) => void;
   onValidationChange?: (isValid: boolean, type: 'pin' | 'id' | 'invalid' | 'empty') => void;
 }
 
 export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
-  ({ label, helperText, error, onChange, onValidationChange, className = '', value, ...props }, ref) => {
+  ({ label, helperText, error, required = true, onChange, onValidationChange, className = '', value, ...props }, ref) => {
     const [internalError, setInternalError] = useState('');
     const [detectedType, setDetectedType] = useState<'pin' | 'id' | 'invalid' | 'empty'>('empty');
 
@@ -281,7 +284,7 @@ export const PINOrIDInput = forwardRef<HTMLInputElement, PINOrIDInputProps>(
       <div className="w-full">
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {label}
+            {label} {required ? <span className="text-red-500">*</span> : <span className="text-gray-400 text-xs">(optional)</span>}
           </label>
         )}
         <input

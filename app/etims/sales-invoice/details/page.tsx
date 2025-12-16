@@ -286,17 +286,7 @@ export default function SalesInvoiceDetails() {
           </Card>
         )}
 
-        {/* Total */}
-        {items.length > 0 && (
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700 font-medium">Total</span>
-              <span className="text-lg font-bold text-gray-900">
-                KES {totals.total.toLocaleString()}
-              </span>
-            </div>
-          </Card>
-        )}
+     
 
         {/* Review Button */}
         <Button onClick={handleReview} disabled={items.length === 0}>

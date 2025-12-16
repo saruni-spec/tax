@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { fetchInvoices } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
+import { getUserSession } from '../../../_lib/store';
 import { Loader2, Download, ArrowLeft } from 'lucide-react';
 
 function BuyerViewContent() {
@@ -15,10 +16,18 @@ function BuyerViewContent() {
   const fromStatus = searchParams.get('status') || 'pending';
   
   const [invoice, setInvoice] = useState<FetchedInvoice | null>(null);
+  const [buyerName, setBuyerName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Get buyer name from session
+    const session = getUserSession();
+    if (session?.name) {
+      setBuyerName(session.name);
+    } else if (session?.msisdn) {
+      setBuyerName(`+${session.msisdn}`);
+    }
     if (!id || !phone) { setIsLoading(false); setError('Missing data'); return; }
     const loadInvoice = async () => {
       try {
@@ -62,7 +71,7 @@ function BuyerViewContent() {
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-gray-100 rounded-lg px-3 py-2">
             <p className="text-[10px] text-gray-500">BUYER</p>
-            <p className="text-sm font-medium truncate">{invoice.buyer_name || 'You'}</p>
+            <p className="text-sm font-medium truncate">{invoice.buyer_name || buyerName || 'N/A'}</p>
           </div>
           <div className="bg-blue-50 rounded-lg px-3 py-2">
             <p className="text-[10px] text-blue-600">SELLER</p>
@@ -81,7 +90,8 @@ function BuyerViewContent() {
             <thead className="bg-gray-50">
               <tr className="border-b">
                 <th className="text-left py-1.5 px-1 font-medium text-gray-600">Item</th>
-                <th className="text-center py-1.5 px-1 font-medium text-gray-600">Qty × Price</th>
+                <th className="text-right py-1.5 px-1 font-medium text-gray-600">Price</th>
+                <th className="text-center py-1.5 px-1 font-medium text-gray-600">Qty</th>
                 <th className="text-right py-1.5 px-1 font-medium text-gray-600">Total</th>
               </tr>
             </thead>
@@ -89,14 +99,15 @@ function BuyerViewContent() {
               {invoice.items?.map((item, i) => (
                 <tr key={i} className="border-b last:border-0">
                   <td className="py-1.5 px-1 text-gray-800">{item.item_name}</td>
-                  <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity} × {item.unit_price.toLocaleString()}</td>
+                  <td className="py-1.5 px-1 text-right text-gray-600">{item.unit_price.toLocaleString()}</td>
+                  <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity}</td>
                   <td className="py-1.5 px-1 text-right font-medium">{(item.unit_price * item.quantity).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="bg-[var(--kra-black)] text-white">
               <tr>
-                <td colSpan={2} className="py-2 px-1 font-medium">Total</td>
+                <td colSpan={3} className="py-2 px-1 font-medium">Total</td>
                 <td className="py-2 px-1 text-right font-bold">KES {invoice.total_amount.toLocaleString()}</td>
               </tr>
             </tfoot>

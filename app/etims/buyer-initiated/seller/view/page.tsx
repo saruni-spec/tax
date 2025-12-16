@@ -83,7 +83,8 @@ function SellerViewContent() {
             <thead className="bg-gray-50">
               <tr className="border-b">
                 <th className="text-left py-1.5 px-1 font-medium text-gray-600">Item</th>
-                <th className="text-center py-1.5 px-1 font-medium text-gray-600">Qty × Price</th>
+                <th className="text-right py-1.5 px-1 font-medium text-gray-600">Price</th>
+                <th className="text-center py-1.5 px-1 font-medium text-gray-600">Qty</th>
                 <th className="text-right py-1.5 px-1 font-medium text-gray-600">Total</th>
               </tr>
             </thead>
@@ -91,14 +92,15 @@ function SellerViewContent() {
               {invoice.items?.map((item, i) => (
                 <tr key={i} className="border-b last:border-0">
                   <td className="py-1.5 px-1 text-gray-800">{item.item_name}</td>
-                  <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity} × {item.unit_price.toLocaleString()}</td>
+                  <td className="py-1.5 px-1 text-right text-gray-600">{item.unit_price.toLocaleString()}</td>
+                  <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity}</td>
                   <td className="py-1.5 px-1 text-right font-medium">{(item.unit_price * item.quantity).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="bg-[var(--kra-black)] text-white">
               <tr>
-                <td colSpan={2} className="py-2 px-1 font-medium">Total</td>
+                <td colSpan={3} className="py-2 px-1 font-medium">Total</td>
                 <td className="py-2 px-1 text-right font-bold">KES {invoice.total_amount.toLocaleString()}</td>
               </tr>
             </tfoot>

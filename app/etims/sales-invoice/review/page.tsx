@@ -88,28 +88,27 @@ export default function SalesInvoiceReview() {
       onBack={() => router.push('/etims/sales-invoice/details')}
     >
       <div className="space-y-3">
-        {/* Seller Info */}
-        {sellerName && (
-          <IdentityStrip 
-            label="Seller"
-            value={sellerName}
-          />
-        )}
-
-        {/* Buyer Info */}
-        {invoice.buyer && (
-          <IdentityStrip 
-            label="Buyer"
-            value={`${invoice.buyer.name} (${invoice.buyer.pin})`}
-          />
-        )}
-
-        {/* Items Summary - Table Format */}
+        {/* Items Summary with Seller/Buyer Info */}
         <Card>
-          <h3 className="text-sm text-gray-900 font-medium mb-3">
-            Products/Services ({invoice.items?.length || 0})
+          {/* Seller/Buyer Row */}
+          <div className="grid grid-cols-2 gap-2 mb-3 pb-2 border-b border-gray-200">
+            <div className="bg-gray-50 rounded px-2 py-1.5">
+              <p className="text-[10px] text-gray-500 uppercase">Seller</p>
+              <p className="text-xs font-medium text-gray-800 truncate">{sellerName || 'N/A'}</p>
+            </div>
+            {invoice.buyer && (
+              <div className="bg-blue-50 rounded px-2 py-1.5">
+                <p className="text-[10px] text-blue-600 uppercase">Buyer</p>
+                <p className="text-xs font-medium text-blue-800 truncate">{invoice.buyer.name || invoice.buyer.pin}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Items Table Header */}
+          <h3 className="text-sm text-gray-900 font-medium mb-2">
+            Items ({invoice.items?.length || 0})
           </h3>
-          <div className="overflow-x-auto -mx-4 px-4">
+          <div className="overflow-x-auto -mx-3 px-3">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -122,16 +121,16 @@ export default function SalesInvoiceReview() {
               <tbody>
                 {invoice.items?.map((item) => (
                   <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                    <td className="py-2.5">
-                      <span className="text-gray-900 font-medium">{item.name}</span>
+                    <td className="py-2">
+                      <span className="text-gray-900 font-medium text-xs">{item.name}</span>
                     </td>
-                    <td className="text-right py-2.5 text-gray-700 whitespace-nowrap">
+                    <td className="text-right py-2 text-xs text-gray-700 whitespace-nowrap">
                       {item.unitPrice.toLocaleString()}
                     </td>
-                    <td className="text-center py-2.5 text-gray-700">
+                    <td className="text-center py-2 text-xs text-gray-700">
                       {item.quantity}
                     </td>
-                    <td className="text-right py-2.5 text-gray-900 font-medium whitespace-nowrap">
+                    <td className="text-right py-2 text-xs text-gray-900 font-medium whitespace-nowrap">
                       {(item.unitPrice * item.quantity).toLocaleString()}
                     </td>
                   </tr>
@@ -139,8 +138,8 @@ export default function SalesInvoiceReview() {
               </tbody>
               <tfoot className="bg-[var(--kra-black)] text-white">
                 <tr>
-                  <td colSpan={2} className="py-2.5 px-1 font-medium">Total</td>
-                  <td colSpan={2} className="py-2.5 px-1 text-right font-bold">KES {invoice.total?.toLocaleString()}</td>
+                  <td colSpan={2} className="py-2 px-1 font-medium text-sm">Total</td>
+                  <td colSpan={2} className="py-2 px-1 text-right font-bold text-sm">KES {invoice.total?.toLocaleString()}</td>
                 </tr>
               </tfoot>
             </table>
