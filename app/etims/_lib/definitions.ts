@@ -107,6 +107,7 @@ export interface CreditNoteInvoice {
 export interface SearchCreditNoteResult {
   success: boolean;
   invoice?: CreditNoteInvoice;
+  hasPartialCreditNote?: boolean;
   error?: string;
 }
 

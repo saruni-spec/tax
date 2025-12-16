@@ -342,7 +342,8 @@ export async function searchCreditNoteInvoice(
 
     return {
       success: true,
-      invoice
+      invoice,
+      hasPartialCreditNote: response.data.has_partial_credit_note || false
     };
   } catch (error: any) {
     console.error('Search credit note error:', error.response?.data || error.message);
