@@ -553,3 +553,136 @@ export async function submitBuyerInitiatedInvoice(
     );
   }
 }
+
+// ==================== AUTHENTICATION ACTIONS ====================
+
+export interface CheckUserStatusResult {
+  success: boolean;
+  isRegistered: boolean;
+  hasEtims?: boolean;
+  hasVat?: boolean;
+  name?: string;
+  pin?: string;
+  entities?: Array<{ name: string; pin: string }>;
+  error?: string;
+}
+
+/**
+ * Check if user is registered for eTIMS service
+ */
+export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusResult> {
+  let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
+  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
+
+  console.log('Checking user status for:', cleanNumber);
+
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/init`,
+      { msisdn: cleanNumber },
+      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+    );
+
+    console.log('Init response:', JSON.stringify(response.data, null, 2));
+
+    // code 1 = registered, code 0 = not registered
+    const isRegistered = response.data.code === 1;
+    
+    return {
+      success: true,
+      isRegistered,
+      hasEtims: response.data.has_etims,
+      hasVat: response.data.has_vat,
+      name: response.data.name,
+      pin: response.data.entities?.[0]?.pin,
+      entities: response.data.entities,
+    };
+  } catch (error: any) {
+    console.error('Check user status error:', error.response?.data || error.message);
+    return {
+      success: false,
+      isRegistered: false,
+      error: error.response?.data?.message || 'Failed to check registration status'
+    };
+  }
+}
+
+export interface LookupByIdResult {
+  success: boolean;
+  idNumber?: string;
+  name?: string;
+  error?: string;
+}
+
+/**
+ * Lookup user details by ID number
+ */
+export async function lookupById(idNumber: string): Promise<LookupByIdResult> {
+  if (!idNumber || !/^\d{6,8}$/.test(idNumber.trim())) {
+    return { success: false, error: 'Invalid ID number format (6-8 digits)' };
+  }
+
+  console.log('Looking up ID:', idNumber);
+
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/id-lookup`,
+      { id_number: idNumber.trim() },
+      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+    );
+
+    console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
+
+    // code 3 = valid, code 4 = invalid
+    if (response.data.code === 3) {
+      return {
+        success: true,
+        idNumber: response.data.id_number,
+        name: response.data.name,
+      };
+    } else {
+      return { success: false, error: response.data.message || 'Invalid ID number' };
+    }
+  } catch (error: any) {
+    console.error('ID lookup error:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+  }
+}
+
+export interface RegisterTaxpayerResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+/**
+ * Register taxpayer for USSD/eTIMS service
+ */
+export async function registerTaxpayer(idNumber: string, msisdn: string): Promise<RegisterTaxpayerResult> {
+  let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
+  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
+
+  console.log('Registering taxpayer:', { idNumber, msisdn: cleanNumber });
+
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/register-tax-payer`,
+      { id_number: idNumber.trim(), msisdn: cleanNumber },
+      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+    );
+
+    console.log('Register response:', JSON.stringify(response.data, null, 2));
+
+    // code 5 = registration successful
+    if (response.data.code === 5) {
+      return { success: true, message: response.data.message || 'Registration successful' };
+    } else {
+      return { success: false, error: response.data.message || 'Registration failed' };
+    }
+  } catch (error: any) {
+    console.error('Register taxpayer error:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.message || 'Registration failed' };
+  }
+}
