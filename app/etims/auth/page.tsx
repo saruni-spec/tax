@@ -62,7 +62,7 @@ function AuthContent() {
   };
 
   return (
-    <Layout title="eTIMS" showHeader={false}>
+    <Layout title="eTIMS" showHeader={false} showFooter={false}>
       <div className="min-h-[80vh] flex flex-col justify-center space-y-4">
         {/* Header */}
         <div className="text-center mb-4">

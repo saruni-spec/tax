@@ -83,7 +83,7 @@ function LoginContent() {
   }
 
   return (
-    <Layout title="Verify Phone" showHeader={false} onBack={() => router.push('/etims/auth')}>
+    <Layout title="Verify Phone" showHeader={false} showFooter={false} onBack={() => router.push('/etims/auth')}>
       <div className="space-y-4">
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">

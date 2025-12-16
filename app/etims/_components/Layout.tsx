@@ -2,8 +2,9 @@
 
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Menu } from 'lucide-react';
+import { ArrowLeft, Menu, Home, LogOut, Headphones } from 'lucide-react';
 import { useSessionManager } from '../_lib/useSession';
+import { clearUserSession } from '../_lib/store';
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,9 +13,10 @@ interface LayoutProps {
   onBack?: () => void;
   showMenu?: boolean;
   showHeader?: boolean;
+  showFooter?: boolean;
 }
 
-export function Layout({ children, title, step, onBack, showMenu = true, showHeader = true }: LayoutProps) {
+export function Layout({ children, title, step, onBack, showMenu = true, showHeader = true, showFooter = true }: LayoutProps) {
   const router = useRouter();
   
   // Session management - auto-refresh and timeout handling
@@ -27,8 +29,21 @@ export function Layout({ children, title, step, onBack, showMenu = true, showHea
     }
   };
 
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      clearUserSession();
+      sessionStorage.clear();
+      router.push('/etims/auth');
+    }
+  };
+
+  const handleConnectAgent = () => {
+    // Mock: In production, this would open a chat or call interface
+    alert('Connecting to a support agent...\n\nThis feature will open a chat or call with a KRA support agent.');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header - KRA Dark Theme */}
       {showHeader && (
         <div className="bg-[var(--kra-black)] text-white sticky top-0 z-10 shadow-md">
@@ -62,9 +77,40 @@ export function Layout({ children, title, step, onBack, showMenu = true, showHea
       )}
 
       {/* Content - Compact padding */}
-      <div className="max-w-4xl mx-auto px-3 py-3">
+      <div className="flex-1 max-w-4xl mx-auto px-3 py-3 w-full">
         {children}
       </div>
+
+      {/* Footer Navigation */}
+      {showFooter && (
+        <div className="bg-white border-t border-gray-200 sticky bottom-0 z-10">
+          <div className="max-w-4xl mx-auto px-3 py-2">
+            <div className="grid grid-cols-3 gap-2">
+              <button 
+                onClick={() => router.push('/etims')}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-[10px]"
+              >
+                <Home className="w-4 h-4" />
+                Main Menu
+              </button>
+              <button 
+                onClick={handleConnectAgent}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 font-medium text-[10px]"
+              >
+                <Headphones className="w-4 h-4" />
+                Connect Agent
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-red-700 font-medium text-[10px]"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

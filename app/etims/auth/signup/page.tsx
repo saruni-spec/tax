@@ -68,7 +68,7 @@ function SignupContent() {
   }
 
   return (
-    <Layout title="Sign Up" showHeader={false} onBack={() => step === 1 ? router.push('/etims/auth') : setStep(1)}>
+    <Layout title="Sign Up" showHeader={false} showFooter={false} onBack={() => step === 1 ? router.push('/etims/auth') : setStep(1)}>
       <div className="space-y-4">
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">

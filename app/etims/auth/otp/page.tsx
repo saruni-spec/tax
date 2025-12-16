@@ -98,7 +98,7 @@ function OTPContent() {
 
   if (success) {
     return (
-      <Layout title="Success" showHeader={false}>
+      <Layout title="Success" showHeader={false} showFooter={false}>
         <div className="min-h-[70vh] flex flex-col items-center justify-center text-center space-y-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -114,7 +114,7 @@ function OTPContent() {
   }
 
   return (
-    <Layout title="Verify OTP" showHeader={false} onBack={() => router.back()}>
+    <Layout title="Verify OTP" showHeader={false} showFooter={false} onBack={() => router.back()}>
       <div className="space-y-4">
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">

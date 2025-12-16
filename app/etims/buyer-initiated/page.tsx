@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Layout } from '../_components/Layout';
-import { Clock, CheckCircle, XCircle, FilePlus, Home, LogOut } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, FilePlus } from 'lucide-react';
 
 export default function BuyerInitiatedHome() {
   const router = useRouter();
@@ -77,20 +77,6 @@ export default function BuyerInitiatedHome() {
             {sellerActions.map((action) => (
               <ActionButton key={action.title} action={action} />
             ))}
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="border-t border-gray-200 pt-3">
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => router.push('/etims')}
-              className="flex items-center justify-center gap-1.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-xs">
-              <Home className="w-4 h-4" />Main Menu
-            </button>
-            <button onClick={() => { if (confirm('Logout?')) { sessionStorage.clear(); router.push('/etims'); }}}
-              className="flex items-center justify-center gap-1.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-xs">
-              <LogOut className="w-4 h-4" />Logout
-            </button>
           </div>
         </div>
       </div>
