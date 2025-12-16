@@ -170,7 +170,17 @@ export async function submitInvoice(
       }
     );
 
-    return response.data;
+    console.log('Invoice submission response:', JSON.stringify(response.data, null, 2));
+
+    // API returns code 8 for success
+    // Transform to match our InvoiceSubmissionResult interface
+    return {
+      success: response.data.code === 8,
+      invoice_id: response.data.invoice_no,
+      message: response.data.message,
+      transaction_reference: response.data.invoice_no,
+      error: response.data.code !== 8 ? response.data.message : undefined
+    };
   } catch (error) {
     handleApiError(error);
     throw error;
