@@ -16,7 +16,7 @@ function BuyerSuccessContent() {
   };
 
   const handleViewPending = () => {
-    router.push('/etims/buyer-initiated/buyer/pending');
+    router.push('/etims/buyer-initiated/seller/pending');
   };
 
   return (

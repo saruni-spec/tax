@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
-import { getCreditNote, CreditNoteData } from '../../_lib/store';
+import { getCreditNote, CreditNoteData, getUserSession } from '../../_lib/store';
+import { Loader2 } from 'lucide-react';
+import { submitPartialCreditNote, sendWhatsAppDocument } from '../../../actions/etims';
+import { CreditNoteReason } from '../../_lib/definitions';
 
 const reasonLabels: Record<string, string> = {
   missing_quantity: 'Missing Quantity',
@@ -18,6 +21,8 @@ export default function CreditNoteFull() {
   const router = useRouter();
   const [creditNote, setCreditNote] = useState<CreditNoteData | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -29,8 +34,48 @@ export default function CreditNoteFull() {
     setCreditNote(saved);
   }, [router]);
 
-  const handleReview = () => {
-    router.push('/etims/credit-note/review');
+  const handleSubmit = async () => {
+    if (!creditNote?.invoice || !creditNote.msisdn || !creditNote.reason) return;
+    setIsProcessing(true);
+    setError('');
+    
+    try {
+      // Prepare items for full credit note
+      const items = creditNote.invoice.items.map(item => ({ 
+        item_id: item.id, 
+        return_quantity: item.quantity 
+      }));
+
+      const result = await submitPartialCreditNote({
+        msisdn: creditNote.msisdn,
+        invoice_no: creditNote.invoice.invoiceNumber,
+        credit_note_type: 'full',
+        reason: creditNote.reason as CreditNoteReason,
+        items
+      });
+
+      if (result.success) {
+        // Send credit note PDF to user via WhatsApp
+        if (result.credit_note_pdf_url && creditNote.msisdn) {
+          const session = getUserSession();
+          const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+          await sendWhatsAppDocument({
+            recipientPhone: creditNote.msisdn,
+            documentUrl: result.credit_note_pdf_url,
+            caption: `Dear ${session?.name || 'Valued Customer'},\n\nYour credit note (${result.credit_note_ref || result.credit_note_id}) of KES ${creditNote.invoice.total.toLocaleString()} was issued on ${today}.\n\nThe credit note PDF is attached for your records.`,
+            filename: `eTIMS_Credit_Note_${result.credit_note_ref || today}.pdf`
+          });
+        }
+        router.push(`/etims/credit-note/success?creditNote=${encodeURIComponent(result.credit_note_ref || result.credit_note_id || '')}`);
+      } else {
+        setError(result.error || result.message || 'Failed to submit credit note');
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error submitting credit note');
+      setIsProcessing(false);
+    }
   };
 
   if (!mounted || !creditNote?.invoice) {
@@ -40,41 +85,53 @@ export default function CreditNoteFull() {
   return (
     <Layout 
       title="Full Credit Note" 
-      step="Step 3 of 5"
-      onBack={() => router.push('/etims/credit-note/found')}
+      step="Step 3 of 4"
+      onBack={() => router.push('/etims/credit-note/search')}
     >
-      <div className="space-y-4">
-        <Card>
-          <h3 className="text-gray-900 font-medium mb-3">Invoice Details</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Invoice Number:</span>
-              <span className="text-gray-900 font-medium">{creditNote.invoice.invoiceNumber}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total Amount:</span>
-              <span className="text-gray-900 font-medium">
-                KES {creditNote.invoice.total.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Reason:</span>
-              <span className="text-gray-900 font-medium">
-                {creditNote.reason ? (reasonLabels[creditNote.reason] || creditNote.reason) : 'N/A'}
-              </span>
-            </div>
+      <div className="space-y-3">
+        {/* Invoice Summary - Compact */}
+        <Card className="!p-3">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <div><span className="text-gray-500">Invoice:</span> <span className="font-medium">{creditNote.invoice.invoiceNumber}</span></div>
+            <div><span className="text-gray-500">Amount:</span> <span className="font-medium">KES {creditNote.invoice.total.toLocaleString()}</span></div>
           </div>
         </Card>
 
-        <Card className="bg-yellow-50 border-yellow-200">
+        {/* Reason - Compact */}
+        <Card className="!p-2">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500">Reason:</span>
+            <span className="font-medium text-gray-900">{reasonLabels[creditNote.reason!] || creditNote.reason}</span>
+          </div>
+        </Card>
+
+        {/* Full Credit Note Notice */}
+        <Card className="bg-yellow-50 border-yellow-200 !p-3">
           <p className="text-sm text-yellow-900">
-            <strong>Full Credit Note:</strong> This will credit the entire invoice amount of KES {creditNote.invoice.total.toLocaleString()}.
+            <strong>Full Credit Note:</strong> This will credit the entire invoice amount of <strong>KES {creditNote.invoice.total.toLocaleString()}</strong>.
           </p>
         </Card>
 
-        <Button onClick={handleReview}>
-          Review Credit Note
-        </Button>
+        {/* Error */}
+        {error && (
+          <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        {isProcessing ? (
+          <Card className="bg-blue-50 border-blue-200 !p-2">
+            <div className="flex items-center justify-center gap-2 py-2">
+              <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+              <p className="text-sm text-blue-900 font-medium">Processing...</p>
+            </div>
+          </Card>
+        ) : (
+          <Button onClick={handleSubmit}>
+            Submit Credit Note
+          </Button>
+        )}
       </div>
     </Layout>
   );

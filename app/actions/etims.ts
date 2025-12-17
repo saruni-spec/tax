@@ -441,15 +441,21 @@ export async function submitPartialCreditNote(
     cleanNumber = '254' + cleanNumber;
   }
 
-  console.log('Submitting partial credit note:', JSON.stringify({
+  console.log('Submitting credit note:', JSON.stringify({
     ...request,
     msisdn: cleanNumber
   }, null, 2));
 
   try {
-    // Try the real API first
+    // Use different endpoints for full vs partial credit notes
+    const endpoint = request.credit_note_type === 'full' 
+      ? `${BASE_URL}/submit/credit-note`
+      : `${BASE_URL}/submit/partial-credit-note`;
+
+    console.log('Using endpoint:', endpoint);
+
     const response = await axios.post(
-      `${BASE_URL}/submit/credit-note`,
+      endpoint,
       {
         msisdn: cleanNumber,
         invoice_no: request.invoice_no,
