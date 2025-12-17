@@ -21,8 +21,8 @@ import {
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
-// Helper to handle API errors - logs detailed error on server, returns friendly message
-const handleApiError = (error: any, context: string = 'API') => {
+// Helper to handle API errors - logs detailed error on server, returns friendly message string
+const getApiErrorMessage = (error: any, context: string = 'API'): string => {
   // Log detailed error for debugging (server-side only)
   console.error(`[${context}] API Error:`, {
     status: error.response?.status,
@@ -31,19 +31,29 @@ const handleApiError = (error: any, context: string = 'API') => {
     url: error.config?.url,
   });
   
-  // Return user-friendly error message
+  // Try to extract specific error message from API response
+  const apiMessage = error.response?.data?.message || error.response?.data?.error;
+  if (apiMessage && typeof apiMessage === 'string') {
+    return apiMessage;
+  }
+  
+  // Return user-friendly error message based on status
   const status = error.response?.status;
   
   if (status === 401 || status === 403) {
-    throw new Error('Session expired. Please try again.');
+    return 'Session expired. Please login again.';
   } else if (status === 404) {
-    throw new Error('Service not found. Please try again later.');
+    return 'Record not found. Please check your details and try again.';
+  } else if (status === 400) {
+    return 'Invalid request. Please check your input and try again.';
   } else if (status === 500 || status === 502 || status === 503) {
-    throw new Error('Service temporarily unavailable. Please try again later.');
+    return 'Service temporarily unavailable. Please try again later.';
   } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-    throw new Error('Request timed out. Please check your connection and try again.');
+    return 'Request timed out. Please check your connection and try again.';
+  } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+    return 'Cannot connect to server. Please try again later.';
   } else {
-    throw new Error('Something went wrong. Please try again.');
+    return 'Unable to complete request. Please try again.';
   }
 };
 
@@ -52,12 +62,12 @@ const handleApiError = (error: any, context: string = 'API') => {
  */
 export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupResult> {
   if (!pinOrId || pinOrId.trim() === '') {
-    throw new Error('Please enter a PIN or ID number');
+    return { success: false, error: 'Please enter a PIN or ID number' };
   }
 
   // Validate PIN/ID format (should be alphanumeric)
   if (!/^[A-Za-z0-9]+$/.test(pinOrId.trim())) {
-    throw new Error('Please enter a valid PIN or ID number');
+    return { success: false, error: 'Please enter a valid PIN or ID number' };
   }
 
   console.log('Looking up customer:', pinOrId);
@@ -131,27 +141,27 @@ export async function submitInvoice(
 ): Promise<InvoiceSubmissionResult> {
   // Validate request
   if (!request.msisdn) {
-    throw new Error('Customer phone number is required');
+    return { success: false, error: 'Customer phone number is required' };
   }
 
   if (!request.items || request.items.length === 0) {
-    throw new Error('Please add at least one item to the invoice');
+    return { success: false, error: 'Please add at least one item to the invoice' };
   }
 
   if (request.total_amount <= 0) {
-    throw new Error('Total amount must be greater than 0');
+    return { success: false, error: 'Total amount must be greater than 0' };
   }
 
   // Validate each item
   for (const item of request.items) {
     if (!item.item_name || item.item_name.trim() === '') {
-      throw new Error('Item name is required for all items');
+      return { success: false, error: 'Item name is required for all items' };
     }
     if (item.taxable_amount <= 0) {
-      throw new Error('Price must be greater than 0 for all items');
+      return { success: false, error: 'Price must be greater than 0 for all items' };
     }
     if (item.quantity <= 0 || !Number.isInteger(item.quantity)) {
-      throw new Error('Quantity must be a positive whole number for all items');
+      return { success: false, error: 'Quantity must be a positive whole number for all items' };
     }
   }
 
@@ -159,18 +169,15 @@ export async function submitInvoice(
 
   try {
     const response = await axios.post(
-      `${BASE_URL}/post-sale`,
+      `${BASE_URL}/invoice`,
       request,
       {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
-        },
-        timeout: 30000
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 60000, // 60 second timeout for invoice submission
       }
     );
 
-    console.log('Invoice submission response:', JSON.stringify(response.data, null, 2));
+    console.log('Invoice API Response:', JSON.stringify(response.data, null, 2));
 
     // API returns code 8 for success
     // Transform to match our InvoiceSubmissionResult interface
@@ -183,9 +190,9 @@ export async function submitInvoice(
       invoice_preview_url: response.data.invoice_preview_url,
       error: response.data.code !== 8 ? response.data.message : undefined
     };
-  } catch (error) {
-    handleApiError(error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage = getApiErrorMessage(error, 'Invoice Submission');
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -194,7 +201,7 @@ export async function submitInvoice(
  */
 export async function fetchInvoices(phoneNumber: string, buyerName?: string): Promise<FetchInvoicesResult> {
   if (!phoneNumber || phoneNumber.trim() === '') {
-    throw new Error('Phone number is required');
+    return { success: false, invoices: [], error: 'Phone number is required' };
   }
 
   // Clean phone number - remove any non-numeric characters except leading +
@@ -283,11 +290,8 @@ export async function fetchInvoices(phoneNumber: string, buyerName?: string): Pr
         invoices: []
       };
     }
-    throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      'Failed to fetch invoices'
-    );
+    const errorMessage = getApiErrorMessage(error, 'Fetch Invoices');
+    return { success: false, invoices: [], error: errorMessage };
   }
 }
 
@@ -299,11 +303,11 @@ export async function searchCreditNoteInvoice(
   invoiceNo: string
 ): Promise<SearchCreditNoteResult> {
   if (!msisdn || msisdn.trim() === '') {
-    throw new Error('Phone number is required');
+    return { success: false, error: 'Phone number is required' };
   }
 
   if (!invoiceNo || invoiceNo.trim() === '') {
-    throw new Error('Invoice number is required');
+    return { success: false, error: 'Invoice number is required' };
   }
 
   // Clean phone number
@@ -405,21 +409,21 @@ export async function submitPartialCreditNote(
 ): Promise<SubmitCreditNoteResult> {
   // Validate request
   if (!request.msisdn) {
-    throw new Error('Phone number is required');
+    return { success: false, error: 'Phone number is required' };
   }
 
   if (!request.invoice_no) {
-    throw new Error('Invoice number is required');
+    return { success: false, error: 'Invoice number is required' };
   }
 
   if (!request.items || request.items.length === 0) {
-    throw new Error('Please select at least one item');
+    return { success: false, error: 'Please select at least one item' };
   }
 
   // Validate each item
   for (const item of request.items) {
     if (item.return_quantity <= 0) {
-      throw new Error('Return quantity must be greater than 0');
+      return { success: false, error: 'Return quantity must be greater than 0' };
     }
   }
 
@@ -480,11 +484,8 @@ export async function submitPartialCreditNote(
       };
     }
     
-    throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      'Failed to submit credit note'
-    );
+    const errorMessage = getApiErrorMessage(error, 'Submit Credit Note');
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -496,8 +497,8 @@ export async function processBuyerInvoice(
   invoiceRef: string,
   action: 'accept' | 'reject'
 ): Promise<{ success: boolean; message?: string; error?: string }> {
-  if (!msisdn) throw new Error('Phone number is required');
-  if (!invoiceRef) throw new Error('Invoice reference is required');
+  if (!msisdn) return { success: false, error: 'Phone number is required' };
+  if (!invoiceRef) return { success: false, error: 'Invoice reference is required' };
 
   let cleanNumber = msisdn.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
@@ -529,12 +530,8 @@ export async function processBuyerInvoice(
       message: response.data.message || 'Action submitted successfully'
     };
   } catch (error: any) {
-    console.error('Process invoice error:', error.response?.data || error.message);
-    throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      'Failed to process invoice'
-    );
+    const errorMessage = getApiErrorMessage(error, 'Process Invoice');
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -545,9 +542,9 @@ export async function submitBuyerInitiatedInvoice(
   request: SubmitBuyerInitiatedInvoiceRequest
 ): Promise<SubmitBuyerInitiatedInvoiceResult> {
   // Validate request
-  if (!request.msisdn) throw new Error('Buyer phone number is required');
-  if (!request.seller_pin) throw new Error('Seller PIN is required');
-  if (!request.items || request.items.length === 0) throw new Error('At least one item is required');
+  if (!request.msisdn) return { success: false, error: 'Buyer phone number is required' };
+  if (!request.seller_pin) return { success: false, error: 'Seller PIN is required' };
+  if (!request.items || request.items.length === 0) return { success: false, error: 'At least one item is required' };
 
   let cleanNumber = request.msisdn.trim().replace(/[^\d]/g, '');
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
@@ -588,12 +585,8 @@ export async function submitBuyerInitiatedInvoice(
       message: response.data.message || 'Invoice submitted to buyer successfully'
     };
   } catch (error: any) {
-    console.error('Submit buyer initiated invoice error:', error.response?.data || error.message);
-    throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      'Failed to submit invoice to buyer'
-    );
+    const errorMessage = getApiErrorMessage(error, 'Submit Buyer Initiated Invoice');
+    return { success: false, error: errorMessage };
   }
 }
 
