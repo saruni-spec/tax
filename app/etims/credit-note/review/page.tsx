@@ -68,7 +68,7 @@ export default function CreditNoteReview() {
              filename: `eTIMS_Credit_Note_${result.credit_note_ref || today}.pdf`
            });
          }
-         router.push('/etims/credit-note/success');
+         router.push(`/etims/credit-note/success?creditNote=${encodeURIComponent(result.credit_note_ref || result.credit_note_id || '')}`);
       } else {
          alert('Failed to submit credit note: ' + (result.error || result.message || 'Unknown error'));
          setIsProcessing(false);

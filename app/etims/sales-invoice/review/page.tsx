@@ -75,7 +75,7 @@ export default function SalesInvoiceReview() {
             filename: `eTIMS_Invoice_${result.invoice_id || today}.pdf`
           });
         }
-        router.push('/etims/sales-invoice/success');
+        router.push(`/etims/sales-invoice/success?invoice=${encodeURIComponent(result.invoice_id || '')}`);
       } else {
         // Show friendly error message
         setError(result.error || 'Could not submit invoice. Please check your details and try again.');

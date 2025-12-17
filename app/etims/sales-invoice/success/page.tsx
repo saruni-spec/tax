@@ -1,13 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { QuickMenu, WhatsAppButton } from '../../_components/QuickMenu';
 import { CheckCircle } from 'lucide-react';
 import { clearSalesInvoice } from '../../_lib/store';
 
-export default function SalesInvoiceSuccess() {
+function SalesInvoiceSuccessContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invoiceNo = searchParams.get('invoice') || '';
 
   const handleCreateAnother = () => {
     clearSalesInvoice();
@@ -25,8 +28,11 @@ export default function SalesInvoiceSuccess() {
             </div>
             <div>
               <h2 className="text-green-900 text-lg font-medium mb-1">Sales Invoice Generated</h2>
+             
               <p className="text-xs text-green-700">
-               Your sales invoice has been created. We have delivered the invoice acknowledgement as a PDF to your WhatsApp and sent an SMS with a link to access the invoice.
+                Your sales invoice  {invoiceNo && (
+                <p className="text-sm font-semibold text-green-800 mb-2">[{invoiceNo}]</p>
+              )} has been created. We have delivered the invoice acknowledgement as a PDF to your WhatsApp and sent an SMS with a link to access the invoice.
               </p>
             </div>
           </div>
@@ -47,5 +53,13 @@ export default function SalesInvoiceSuccess() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function SalesInvoiceSuccess() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <SalesInvoiceSuccessContent />
+    </Suspense>
   );
 }
