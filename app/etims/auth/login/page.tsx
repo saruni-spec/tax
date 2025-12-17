@@ -7,7 +7,7 @@ import { generateOTP, verifyOTP } from '../../../actions/etims';
 import { saveUserSession } from '../../_lib/store';
 import { Loader2, MessageSquare, Shield } from 'lucide-react';
 
-const whatsappNumber = '254708427694';
+
 
 function LoginContent() {
   const router = useRouter();
@@ -62,7 +62,7 @@ function LoginContent() {
       if (result.success) {
         // Save session and go to dashboard
         saveUserSession({ msisdn: phoneNumber, name: userName, pin: userPin });
-        router.push(`/etims?number=${encodeURIComponent(phoneNumber)}`);
+        router.push('/etims');
       } else {
         setError(result.error || 'Invalid OTP');
       }
@@ -159,29 +159,7 @@ function LoginContent() {
           {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Verifying...</> : 'Log In'}
         </Button>
 
-        {/* Additional Actions */}
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          <button 
-            onClick={() => {
-              
-              const message = encodeURIComponent('Main menu');
-              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-            }}
-            className="flex flex-col items-center justify-center gap-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-xs"
-          >
-            Go Main Menu
-          </button>
-          <button 
-            onClick={() => {
-             
-              const message = encodeURIComponent('Connect to agent');
-              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-            }}
-            className="flex flex-col items-center justify-center gap-1 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 font-medium text-xs"
-          >
-            Connect to an Agent
-          </button>
-        </div>
+        
       </div>
     </Layout>
   );

@@ -1,38 +1,12 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FileText, FileMinus, UserCheck, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { FileText, FileMinus, UserCheck } from 'lucide-react';
 import { Layout, Card } from './_components/Layout';
-import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated, saveUserSession, getUserSession } from './_lib/store';
+import { clearSalesInvoice, clearCreditNote, clearBuyerInitiated } from './_lib/store';
 
-function EtimsHomeContent() {
+export default function EtimsHome() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const number = searchParams.get('number');
-
-  useEffect(() => {
-    if (number) {
-      // Preserve existing session data (including name) if it exists
-      const existingSession = getUserSession();
-      if (existingSession && existingSession.msisdn === number) {
-        // Session already exists for this number, don't overwrite
-        return;
-      }
-      // Only save if no existing session or different number
-      saveUserSession({ msisdn: number, name: existingSession?.name });
-    }
-  }, [number]);
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      clearSalesInvoice();
-      clearCreditNote();
-      clearBuyerInitiated();
-      // clearUserSession(); // Should we clear phone number on logout? Probably yes.
-      alert('Logged out successfully');
-    }
-  };
 
   const actionCards = [
     {
@@ -132,13 +106,5 @@ function EtimsHomeContent() {
        
       </div>
     </Layout>
-  );
-}
-
-export default function EtimsHome() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <EtimsHomeContent />
-    </Suspense>
   );
 }

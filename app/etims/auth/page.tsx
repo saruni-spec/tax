@@ -7,6 +7,8 @@ import { checkUserStatus } from '../../actions/etims';
 import { saveUserSession } from '../_lib/store';
 import { Loader2, Phone } from 'lucide-react';
 
+const whatsappNumber = '254708427694';
+
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -14,8 +16,6 @@ function AuthContent() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Pre-fill from URL but don't auto-check - let user confirm or change
 
   const handleCheckStatus = async (msisdn: string) => {
     setLoading(true);
@@ -30,7 +30,7 @@ function AuthContent() {
         return;
       }
 
-      // Save session
+      // Save session with the phone number
       saveUserSession({ msisdn, name: result.name });
 
       if (result.isRegistered) {
@@ -43,7 +43,6 @@ function AuthContent() {
         router.push(`/etims/auth/login?${params.toString()}`);
       } else {
         // User not registered - check if they are eligible for eTIMS
-        // Business rule: Users with VAT registration are NOT eligible for eTIMS
         if (result.hasVat) {
           setError('You are not eligible for eTIMS registration. VAT-registered taxpayers cannot use the eTIMS USSD service.');
           setLoading(false);
@@ -62,7 +61,7 @@ function AuthContent() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneNumber.trim()) {
-      setError('Please enter your phone number');
+      setError('Phone number is missing from URL');
       return;
     }
     handleCheckStatus(phoneNumber);
@@ -80,9 +79,16 @@ function AuthContent() {
           <p className="text-sm text-gray-500">Kenya Revenue Authority</p>
         </div>
 
-        {/* Phone Input */}
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Show the phone number */}
+            {/* {phoneNumber && (
+              <div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-800">{phoneNumber}</span>
+              </div>
+            )} */}
+
             {error && (
               <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-xs text-red-600">{error}</p>
@@ -98,6 +104,29 @@ function AuthContent() {
             </Button>
           </form>
         </Card>
+        {/* Additional Actions */}
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          <button 
+            onClick={() => {
+              
+              const message = encodeURIComponent('Main menu');
+              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-xs"
+          >
+            Go Main Menu
+          </button>
+          <button 
+            onClick={() => {
+             
+              const message = encodeURIComponent('Connect to agent');
+              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 font-medium text-xs"
+          >
+            Connect to an Agent
+          </button>
+        </div>
 
         {/* Info */}
         <p className="text-center text-xs text-gray-400">
