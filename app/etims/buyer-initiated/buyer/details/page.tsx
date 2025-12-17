@@ -54,7 +54,7 @@ export default function BuyerInitiatedDetails() {
     } else {
       setItems([...items, newItem]);
     }
-    setItemName(''); setDescription(''); setUnitPrice(''); setQuantity('1'); setItemType('product');
+    setItemName(''); setDescription(''); setUnitPrice(''); setQuantity('0'); setItemType('product');
   };
 
   const handleEditItem = (item: InvoiceItem) => {
@@ -65,7 +65,7 @@ export default function BuyerInitiatedDetails() {
   const handleRemoveItem = (id: string) => {
     if (confirm('Remove item?')) {
       setItems(items.filter(item => item.id !== id));
-      if (editingId === id) { setEditingId(null); setItemName(''); setDescription(''); setUnitPrice(''); setQuantity('1'); }
+      if (editingId === id) { setEditingId(null); setItemName(''); setDescription(''); setUnitPrice(''); setQuantity('0'); }
     }
   };
 

@@ -81,7 +81,7 @@ export default function SalesInvoiceDetails() {
     setItemName('');
     setDescription('');
     setUnitPrice('');
-    setQuantity('1');
+    setQuantity('0');
     setItemType('product');
   };
 
@@ -103,7 +103,7 @@ export default function SalesInvoiceDetails() {
         setItemName('');
         setDescription('');
         setUnitPrice('');
-        setQuantity('1');
+        setQuantity('0');
       }
     }
   };
