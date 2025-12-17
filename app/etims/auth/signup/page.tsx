@@ -4,8 +4,9 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { IDInput } from '../../../_components/KRAInputs';
+import { YearOfBirthInput } from '../../../_components/YearOfBirthInput';
 import { lookupById } from '../../../actions/etims';
-import { Loader2, User } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 function SignupContent() {
   const router = useRouter();
@@ -14,31 +15,25 @@ function SignupContent() {
   
   const [step, setStep] = useState(1); // 1: ID input, 2: Preview, 3: OTP
   const [idNumber, setIdNumber] = useState('');
-  const [firstName, setFirstName] = useState('');
+  const [yearOfBirth, setYearOfBirth] = useState('');
   const [userDetails, setUserDetails] = useState<{ idNumber: string; name: string; pin?: string } | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isIdValid, setIsIdValid] = useState(false);
+  const [isYearValid, setIsYearValid] = useState(false);
 
   const handleValidateId = async () => {
     setError('');
     if (!idNumber.trim()) { setError('Enter ID number'); return; }
     if (!/^\d{6,8}$/.test(idNumber.trim())) { setError('ID must be 6-8 digits'); return; }
-    if (!firstName.trim()) { setError('Enter your first name'); return; }
+    if (!yearOfBirth || yearOfBirth.length !== 4) { setError('Enter a valid year of birth'); return; }
 
     setLoading(true);
     try {
+      // Pass year of birth to the lookup API (API will validate it)
       const result = await lookupById(idNumber.trim());
       if (result.success && result.name) {
-        // Verify first name matches (mandatory validation)
-        const apiFirstName = result.name.split(' ')[0].toLowerCase();
-        const inputFirstName = firstName.trim().toLowerCase();
-        if (!apiFirstName.includes(inputFirstName) && !inputFirstName.includes(apiFirstName)) {
-          setError('First name does not match records');
-          setLoading(false);
-          return;
-        }
         setUserDetails({ idNumber: result.idNumber!, name: result.name, pin: result.pin });
         setStep(2);
       } else {
@@ -105,19 +100,14 @@ function SignupContent() {
                   required
                   className="text-sm py-2"
                 />
-                <div>
-                  <label className="block text-xs text-gray-600 font-medium mb-1">
-                    <User className="w-3.5 h-3.5 inline mr-1" />
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="As per ID"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                  />
-                </div>
+                <YearOfBirthInput
+                  label="Year of Birth"
+                  value={yearOfBirth}
+                  onChange={setYearOfBirth}
+                  onValidationChange={setIsYearValid}
+                  required
+                  className="text-sm py-2"
+                />
               </div>
             </Card>
 
@@ -127,7 +117,7 @@ function SignupContent() {
               </div>
             )}
 
-            <Button onClick={handleValidateId} disabled={loading || !isIdValid || !firstName.trim()}>
+            <Button onClick={handleValidateId} disabled={loading || !isIdValid || !isYearValid}>
               {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Validating...</> : 'Validate'}
             </Button>
           </>
