@@ -64,11 +64,11 @@ export default function EtimsHome() {
       <div className="space-y-4">
         {/* Logo */}
         <div className="flex justify-center">
-          <img src="/kra_logo.png" alt="KRA Logo" className="h-12 w-auto" />
+          <img src="/kra_logo.png" alt="KRA Logo" className="h-14 w-auto" />
         </div>
 
-        {/* Action Cards */}
-        <div className="grid gap-2 grid-cols-3">
+        {/* Action Cards - Vertical on mobile, horizontal on larger screens */}
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
           {actionCards.map((card) => {
             const Icon = card.icon;
             const colors = colorClasses[card.color];
@@ -77,16 +77,16 @@ export default function EtimsHome() {
               <button
                 key={card.title}
                 onClick={card.onClick}
-                className="text-left transition-transform hover:scale-105"
+                className="text-left transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Card className={`h-full ${colors.card} !p-2`}>
-                  <div className="flex flex-col items-center text-center space-y-1.5">
-                    <div className={`p-2 rounded-full ${colors.icon}`}>
-                      <Icon className={`w-5 h-5 ${colors.text}`} />
+                <Card className={`h-full ${colors.card} !p-3`}>
+                  <div className="flex items-center gap-3 sm:flex-col sm:text-center">
+                    <div className={`p-3 rounded-full ${colors.icon} flex-shrink-0`}>
+                      <Icon className={`w-6 h-6 ${colors.text}`} />
                     </div>
                     <div>
-                      <h3 className="text-xs text-gray-900 font-medium leading-tight">{card.title}</h3>
-                      <p className="text-[10px] text-gray-500 leading-tight hidden sm:block">{card.description}</p>
+                      <h3 className="text-sm text-gray-900 font-medium">{card.title}</h3>
+                      <p className="text-xs text-gray-500">{card.description}</p>
                     </div>
                   </div>
                 </Card>
@@ -96,9 +96,9 @@ export default function EtimsHome() {
         </div>
 
         {/* Guides & Help */}
-        <Card className="bg-gray-50 border-gray-300 !p-2">
-          <h3 className="text-xs text-gray-900 font-medium mb-1">Guides & Help</h3>
-          <p className="text-[10px] text-gray-600">
+        <Card className="bg-gray-50 border-gray-300 !p-3">
+          <h3 className="text-sm text-gray-900 font-medium mb-1">Guides & Help</h3>
+          <p className="text-xs text-gray-600">
             Need assistance? Contact support for help with eTIMS features.
           </p>
         </Card>
