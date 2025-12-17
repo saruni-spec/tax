@@ -169,7 +169,7 @@ export async function submitInvoice(
 
   try {
     const response = await axios.post(
-      `${BASE_URL}/invoice`,
+      `${BASE_URL}/post-sale`,
       request,
       {
         headers: { 'Content-Type': 'application/json' },
