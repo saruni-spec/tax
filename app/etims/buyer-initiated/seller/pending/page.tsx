@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { fetchInvoices, processBuyerInvoiceBulk, sendWhatsAppDocument } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
-import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare } from 'lucide-react';
+import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare, ArrowLeft } from 'lucide-react';
 import { getUserSession } from '../../../_lib/store';
 
 function SellerPendingContent() {
@@ -174,6 +174,11 @@ function SellerPendingContent() {
   return (
     <Layout title={`${getPageTitle()} Invoices`} onBack={() => router.push('/etims/buyer-initiated')}>
       <div className="space-y-3">
+        {/* Helper Back Button */}
+        <button onClick={() => router.push('/etims/buyer-initiated')} className="text-[var(--kra-red)] text-xs font-medium flex items-center gap-1 mb-2">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </button>
+
         {!isPhoneSet ? (
           <Card>
             <div className="flex items-center gap-2 mb-3">

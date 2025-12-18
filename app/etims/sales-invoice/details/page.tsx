@@ -246,13 +246,13 @@ export default function SalesInvoiceDetails() {
                     <tr key={item.id} className="border-b border-gray-100 last:border-0">
                       <td className="py-2 text-gray-900 font-medium text-xs">{item.name}</td>
                       <td className="text-right py-2 text-xs text-gray-700">
-                        {item.unitPrice.toLocaleString()}
+                        {item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="text-center py-2 text-xs text-gray-700">
                         {item.quantity}
                       </td>
                       <td className="text-right py-2 text-xs text-gray-900 font-medium">
-                        {(item.unitPrice * item.quantity).toLocaleString()}
+                        {(item.unitPrice * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="text-right py-2">
                         <div className="flex justify-end gap-1">

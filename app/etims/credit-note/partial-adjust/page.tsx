@@ -59,9 +59,9 @@ export default function CreditNotePartialAdjust() {
             <div className="flex justify-between items-start mb-2">
               <div>
                 <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                <p className="text-xs text-gray-500">KES {item.unitPrice.toLocaleString()} × {quantity}</p>
+                <p className="text-xs text-gray-500">KES {item.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} × {quantity}</p>
               </div>
-              <p className="text-sm font-bold text-[var(--kra-red)]">KES {(item.unitPrice * quantity).toLocaleString()}</p>
+              <p className="text-sm font-bold text-[var(--kra-red)]">KES {(item.unitPrice * quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-gray-400">Max: {maxQty}</span>
@@ -85,7 +85,7 @@ export default function CreditNotePartialAdjust() {
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <div className="flex justify-between items-center">
             <span className="text-gray-400 text-sm">Total Credit</span>
-            <span className="text-xl font-bold">KES {totalCredit.toLocaleString()}</span>
+            <span className="text-xl font-bold">KES {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
         </div>
 

@@ -165,7 +165,7 @@ export default function BuyerInitiatedDetails() {
                   <tr key={item.id} className="border-b last:border-0">
                     <td className="py-1.5 px-1 text-gray-800">{item.name}</td>
                     <td className="py-1.5 px-1 text-center text-gray-600">{item.quantity}</td>
-                    <td className="py-1.5 px-1 text-right font-medium">{(item.unitPrice * item.quantity).toLocaleString()}</td>
+                    <td className="py-1.5 px-1 text-right font-medium">{(item.unitPrice * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="py-1.5 px-1 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => handleEditItem(item)} className="p-1 text-blue-600"><Edit2 className="w-3.5 h-3.5" /></button>
@@ -178,7 +178,7 @@ export default function BuyerInitiatedDetails() {
               <tfoot className="bg-[var(--kra-black)] text-white">
                 <tr>
                   <td colSpan={2} className="py-2 px-1 font-medium">Total</td>
-                  <td colSpan={2} className="py-2 px-1 text-right font-bold">KES {totals.total.toLocaleString()}</td>
+                  <td colSpan={2} className="py-2 px-1 text-right font-bold">KES {totals.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
               </tfoot>
             </table>
