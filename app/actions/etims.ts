@@ -156,8 +156,8 @@ export async function submitInvoice(
     if (item.taxable_amount <= 0) {
       return { success: false, error: 'Price must be greater than 0 for all items' };
     }
-    if (item.quantity <= 0 || !Number.isInteger(item.quantity)) {
-      return { success: false, error: 'Quantity must be a positive whole number for all items' };
+    if (item.quantity <= 0) {
+      return { success: false, error: 'Quantity must be a positive number for all items' };
     }
   }
 
