@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { QuickMenu } from '@/app/etims/_components/QuickMenu';
 
 function BuyerSuccessContent() {
   const router = useRouter();
@@ -51,6 +52,11 @@ function BuyerSuccessContent() {
           <Button variant="secondary" onClick={handleGoHome}>
             Go to Buyer Initiated Menu
           </Button>
+            {/* Quick Menu */}
+                    <div className="pt-2">
+                      <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>
+                      <QuickMenu />
+                    </div>
         </div>
       </div>
     </Layout>
