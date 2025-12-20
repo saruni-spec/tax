@@ -74,7 +74,7 @@ export default function BuyerInitiatedReview() {
             filename: `eTIMS_Buyer_Invoice_${result.reference || today}.pdf`
           });
         }
-        router.push('/etims/buyer-initiated/buyer/success');
+        router.push(`/etims/buyer-initiated/buyer/success?invoice=${result.reference || result.invoice_id || ''}`);
       }
       else setError(result.error || 'Submission failed');
     } catch (err: any) {

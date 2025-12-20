@@ -10,6 +10,8 @@ function BuyerSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const action = searchParams.get('action') || 'accepted';
+  const invoiceNo = searchParams.get('invoice');
+  const buyerName = searchParams.get('buyer');
   const isAccepted = action === 'accepted' || action === 'approve';
 
   const handleGoHome = () => {
@@ -19,6 +21,8 @@ function BuyerSuccessContent() {
   const handleViewPending = () => {
     router.push('/etims/buyer-initiated/seller/pending');
   };
+
+
 
   return (
     <Layout title="Success" showMenu={false}>
@@ -37,9 +41,11 @@ function BuyerSuccessContent() {
                 Invoice {isAccepted ? 'Accepted' : 'Rejected'} Successfully!
               </h2>
               <p className={`text-sm ${isAccepted ? 'text-green-700' : 'text-red-700'}`}>
+                Invoice {invoiceNo ? <strong>{invoiceNo}</strong> : ''} from {buyerName ? <strong>{buyerName}</strong> : 'the buyer'} has been {isAccepted ? 'accepted' : 'rejected'}.
+                <br/>
                 {isAccepted 
-                  ? 'The buyer has been notified of your acceptance'
-                  : 'The buyer has been notified of your rejection'}
+                  ? 'The buyer has been notified of your acceptance.'
+                  : 'The buyer has been notified of your rejection.'}
               </p>
             </div>
           </div>
@@ -47,11 +53,12 @@ function BuyerSuccessContent() {
 
         <div className="space-y-3">
           <Button onClick={handleViewPending}>
-            View Pending Invoices
+            Approve or Reject Pending Invoices
           </Button>
           <Button variant="secondary" onClick={handleGoHome}>
             Go to Buyer Initiated Menu
           </Button>
+          
           {/* Quick Menu */}
           <div className="pt-2">
             <p className="text-xs text-gray-500 mb-2 text-center">Quick Actions</p>

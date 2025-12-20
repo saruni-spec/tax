@@ -89,7 +89,7 @@ function SellerPendingContent() {
       const result = await sendWhatsAppDocument({
         recipientPhone: phoneNumber,
         documentUrl: invoice.invoice_pdf_url,
-        caption: `Invoice Order *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*\nAmount: KES *${(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\nBuyer: *${invoice.buyer_name || 'N/A'}*`,
+        caption: `Invoice Order *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*\nAmount: KES *${Number(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\nBuyer: *${invoice.buyer_name || 'N/A'}*`,
         filename: `Invoice_${invoice.invoice_number || invoice.reference || invoice.invoice_id || 'document'}.pdf`
       });
 
@@ -245,7 +245,7 @@ function SellerPendingContent() {
                               <span className="font-medium text-gray-800">{invoice.invoice_number || invoice.reference || 'N/A'}</span>
                               <span className="block text-[10px] text-gray-400">{invoice.buyer_name || 'Unknown'}</span>
                             </td>
-                            <td className="py-2 px-1 text-right font-medium">{(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td className="py-2 px-1 text-right font-medium">{Number(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td className="py-2 px-1">
                               <div className="flex items-center justify-center gap-1">
                                   {statusFilter !== 'rejected' && (

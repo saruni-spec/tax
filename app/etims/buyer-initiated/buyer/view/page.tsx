@@ -124,7 +124,7 @@ function BuyerViewContent() {
             <tfoot className="bg-[var(--kra-black)] text-white">
               <tr>
                 <td colSpan={3} className="py-2 px-1 font-medium">Total</td>
-                <td className="py-2 px-1 text-right font-bold">KES {invoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td className="py-2 px-1 text-right font-bold">KES {Number(invoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               </tr>
             </tfoot>
           </table>
@@ -144,7 +144,7 @@ function BuyerViewContent() {
                 const result = await sendWhatsAppDocument({
                   recipientPhone: phone || '',
                   documentUrl: invoice.invoice_pdf_url,
-                  caption: `Purchase Order *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*\nAmount: KES *${(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\nSeller: *${invoice.seller_name || 'N/A'}*`,
+                  caption: `Purchase Order *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*\nAmount: KES *${Number(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\nSeller: *${invoice.seller_name || 'N/A'}*`,
                   filename: `Invoice_${invoice.invoice_number || invoice.reference || invoice.invoice_id || 'document'}.pdf`
                 });
                 if (result.success) {
