@@ -26,11 +26,11 @@ function BuyerInitiatedSuccessContent() {
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <div>
-              <h2 className="text-green-900 text-lg font-medium mb-1">Invoice Sent to Buyer</h2>
+              <h2 className="text-green-900 text-lg font-medium mb-1">Invoice Sent to Seller</h2>
               <p className="text-xs text-green-700">
                 Your invoice {invoiceNo && (
                 <span className="font-semibold text-green-800">[{invoiceNo}]</span>
-              )} has been created and sent to the buyer. We have delivered the invoice acknowledgement as a PDF to your WhatsApp.
+              )} has been created and sent to the seller. We have delivered the invoice acknowledgement as a PDF to your WhatsApp.
               </p>
             </div>
           </div>
