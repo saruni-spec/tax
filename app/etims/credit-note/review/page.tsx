@@ -70,7 +70,7 @@ export default function CreditNoteReview() {
            await sendWhatsAppDocument({
              recipientPhone: creditNote.msisdn,
              documentUrl: result.credit_note_pdf_url,
-             caption: `Dear ${session?.name || 'Valued Customer'},\n\nYour credit note (${result.credit_note_ref || result.credit_note_id}) of KES ${creditAmount.toLocaleString()} was issued on ${today}.\n\nThe credit note PDF is attached for your records.`,
+             caption: `Dear *${session?.name || 'Valued Customer'}*,\n\nYour credit note *(${result.credit_note_ref || result.credit_note_id})* of KES *${creditAmount.toLocaleString()}* was issued on *${today}*\n\nThe credit note PDF is attached for your records.`,
              filename: `eTIMS_Credit_Note_${result.credit_note_ref || today}.pdf`
            });
          }
