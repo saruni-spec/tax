@@ -791,7 +791,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
     console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
 
     // Check if we got a valid response with data
-    if (response.data && response.data.name && response.data.pin) {
+    if (response.data && response.data.name && response.data.yob) {
       
       // Validate Year of Birth
       const returnedYob = response.data.yob ? response.data.yob.toString() : '';
