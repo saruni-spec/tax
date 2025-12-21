@@ -767,38 +767,58 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB:', yearOfBirth);
+  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
 
   try {
     const response = await axios.post(
-      'https://etims.1automations.com/buyer_lookup',
+      'https://kratest.pesaflow.com/api/ussd/id-lookup',
       { 
-        pin: idNumber.trim(), // API expects ID in 'pin' field
-        waba: cleanNumber,
-        yob: yearOfBirth
+        id_number: idNumber.trim(),
+        msisdn: cleanNumber
       },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-source-for': 'whatsapp'
+        }, 
+        timeout: 30000 
+      }
     );
 
     console.log('ID lookup response:', JSON.stringify(response.data, null, 2));
 
-    // API returns { success: true, data: { name: "...", id_number: "...", yob: "..." } }
-    if (response.data.success && response.data.data) {
+    // Response validation
+    // Example: {"code":3,"id_number":"25865669","message":"Valid ID Number","name":"STANSLAUS JONAH WEPUNDI","pin":"A005655394M","yob":"1988"}
+    
+    // Check if we got a valid response with data
+    if (response.data && response.data.name && response.data.pin) {
+      
+      // Validate Year of Birth
+      const returnedYob = response.data.yob ? response.data.yob.toString() : '';
+      
+      // Strict comparison or loose? "1988" vs "1988"
+      if (returnedYob !== yearOfBirth.trim()) {
+        return {
+          success: false,
+          error: `Year of birth mismatch. Entered: ${yearOfBirth}, Record: ${returnedYob}`
+        };
+      }
+
       return {
         success: true,
-        idNumber: response.data.data.id_number || idNumber.trim(),
-        name: response.data.data.name,
-        pin: response.data.data.pin, // May or may not be present/needed depending on next steps
+        idNumber: response.data.id_number || idNumber.trim(),
+        name: response.data.name,
+        pin: response.data.pin,
       };
     } else {
       return { 
         success: false, 
-        error: response.data.messsage || response.data.data?.message || 'Information Mismatch' 
+        error: response.data.message || 'ID lookup failed or invalid response' 
       };
     }
   } catch (error: any) {
     console.error('ID lookup error:', error.response?.data || error.message);
-    return { success: false, error: error.response?.data?.data?.message || error.response?.data?.message || 'ID lookup failed' };
+    return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
   }
 }
 
