@@ -850,6 +850,14 @@ export async function registerTaxpayer(idNumber: string, msisdn: string): Promis
     // code 5 = registration successful
     if (response.data.code === 5) {
       return { success: true, message: response.data.message || 'Registration successful' };
+    } else if (response.data.code === 22) {
+      // Send WhatsApp notification
+      await sendWhatsAppMessage({
+        recipientPhone: cleanNumber,
+        message: "Dear Customer, eTIMS registration via USSD/App is only available for non-VAT registered taxpayers. Please contact KRA for assistance."
+      });
+      
+      return { success: false, error: 'Registration is only allowed for people without VAT' };
     } else {
       return { success: false, error: response.data.message || 'Registration failed' };
     }
