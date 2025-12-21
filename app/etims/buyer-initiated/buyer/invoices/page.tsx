@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { fetchInvoices, sendWhatsAppDocument } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
-import { Download, Eye, Loader2, Phone, FileText, ArrowLeft } from 'lucide-react';
+import { Download, Eye, Loader2, Phone, FileText, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getUserSession } from '../../../_lib/store';
 
 function BuyerInvoicesContent() {
@@ -21,6 +21,8 @@ function BuyerInvoicesContent() {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState('');
   const [sendingPdf, setSendingPdf] = useState<string | null>(null); // Track which invoice is sending
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const getPageTitle = () => {
     switch (statusFilter) {
@@ -56,6 +58,7 @@ function BuyerInvoicesContent() {
       const result = await fetchInvoices(phone, name || userName, apiStatus, 'buyer');
       if (result.success && result.invoices) {
         setInvoices(result.invoices);
+        setCurrentPage(1); // Reset to first page on fetch
       } else {
         setError(result.error || 'No invoices found');
         if (result.success) setInvoices([]);
@@ -108,6 +111,16 @@ function BuyerInvoicesContent() {
     }
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
+  const paginatedInvoices = invoices.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   if (initializing) return <Layout title={getPageTitle()} onBack={() => router.push('/etims/buyer-initiated')}><div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div></Layout>;
 
   return (
@@ -151,8 +164,8 @@ function BuyerInvoicesContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((invoice, idx) => {
-                      const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference || String(idx);
+                    {paginatedInvoices.map((invoice, idx) => {
+                      const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference || String((currentPage - 1) * ITEMS_PER_PAGE + idx);
                       return (
                         <tr key={invoiceId} className="border-b last:border-0 hover:bg-gray-50">
                           <td className="py-2 px-1">
@@ -186,6 +199,31 @@ function BuyerInvoicesContent() {
                     })}
                   </tbody>
                 </table>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="border-t border-gray-100 px-4 py-3 flex items-center justify-between">
+                    <div className="text-xs text-gray-500">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                       <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
           </>

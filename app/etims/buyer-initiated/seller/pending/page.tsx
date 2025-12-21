@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { fetchInvoices, processBuyerInvoiceBulk, sendWhatsAppDocument } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
-import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare, ArrowLeft } from 'lucide-react';
+import { Download, Eye, Loader2, Phone, FileText, Square, CheckSquare, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getUserSession } from '../../../_lib/store';
 
 function SellerPendingContent() {
@@ -23,6 +23,8 @@ function SellerPendingContent() {
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
   const [confirmingBulkAction, setConfirmingBulkAction] = useState<'accept' | 'reject' | null>(null);
   const [sendingPdf, setSendingPdf] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const getPageTitle = () => {
     switch (statusFilter) {
@@ -58,6 +60,7 @@ function SellerPendingContent() {
       const result = await fetchInvoices(phone, name || userName, apiStatus, 'supplier');
       if (result.success && result.invoices) {
         setInvoices(result.invoices);
+        setCurrentPage(1); // Reset to first page on new fetch
       } else {
         setError(result.error || 'No invoices found');
         if (result.success) setInvoices([]);
@@ -139,14 +142,15 @@ function SellerPendingContent() {
     setLoading(true);
     try {
       // Map selected IDs back to invoice details for the API
-      const invoiceDetails: { ref: string; buyerPhone: string; buyerName: string }[] = [];
+      const invoiceDetails: { ref: string; buyerPhone: string; buyerName: string; totalAmount: number | string }[] = [];
       selectedInvoices.forEach(id => {
          const inv = invoices.find(i => (i.uuid || i.invoice_number || i.invoice_id || i.reference || String(invoices.indexOf(i))) === id);
          if (inv) {
              invoiceDetails.push({
                ref: inv.invoice_number || inv.reference || inv.invoice_id || '',
                buyerPhone: inv.buyer_msisdn || '',
-               buyerName: inv.buyer_name || 'Customer'
+               buyerName: inv.buyer_name || 'Customer',
+               totalAmount: inv.total_amount || '0',
              });
          }
       });
@@ -183,6 +187,16 @@ function SellerPendingContent() {
   };
 
   const allSelected = invoices.length > 0 && selectedInvoices.size === invoices.length;
+
+  // Pagination logic
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
+  const paginatedInvoices = invoices.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   if (initializing) return <Layout title={getPageTitle()} onBack={() => router.push('/etims/buyer-initiated')}><div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div></Layout>;
 
@@ -257,8 +271,10 @@ function SellerPendingContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {invoices.map((invoice, idx) => {
-                        const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference || String(idx);
+                      {paginatedInvoices.map((invoice, idx) => {
+                        // idx is relative to the page, so we need the absolute index for consistent keys if relying on index (though uuid is better)
+                        // but logic below handles uuid correctly
+                        const invoiceId = invoice.uuid || invoice.invoice_number || invoice.invoice_id || invoice.reference || String((currentPage - 1) * ITEMS_PER_PAGE + idx);
                         const isSelected = selectedInvoices.has(invoiceId);
                         return (
                           <tr key={invoiceId} className="border-b last:border-0 hover:bg-gray-50">
@@ -298,6 +314,31 @@ function SellerPendingContent() {
                       })}
                     </tbody>
                   </table>
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="border-t border-gray-100 px-4 py-3 flex items-center justify-between">
+                      <div className="text-xs text-gray-500">
+                        Page {currentPage} of {totalPages}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               </>
             )}
