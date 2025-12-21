@@ -51,9 +51,9 @@ function BuyerSuccessContent() {
         </Card>
 
         <div className="space-y-3">
-          {isAccepted && (
+        
             <WhatsAppButton label="Open in WhatsApp" />
-          )}
+         
           <Button onClick={handleViewPending}>
             Approve or Reject Pending Invoices
           </Button>
