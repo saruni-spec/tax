@@ -1,6 +1,7 @@
 'use server';
 
 import axios from 'axios';
+import { cookies } from 'next/headers';
 import {
   CustomerLookupResult,
   InvoiceSubmissionRequest,
@@ -16,6 +17,15 @@ import {
 } from '../etims/_lib/definitions';
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+
+const getAuthHeaders = async () => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('etims_auth_token')?.value;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
 
 // Helper to handle API errors - logs detailed error on server, returns friendly message string
 const getApiErrorMessage = (error: any, context: string = 'API'): string => {
@@ -75,9 +85,7 @@ export async function lookupCustomer(pinOrId: string): Promise<CustomerLookupRes
         pin_or_id: pinOrId.trim()
       },
       {
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: await getAuthHeaders(),
         timeout: 30000
       }
     );
@@ -171,10 +179,10 @@ export async function submitInvoice(
       request,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
-        timeout: 60000, // 60 second timeout for invoice submission
+        timeout: 60000, 
       }
     );
 
@@ -239,8 +247,8 @@ export async function fetchInvoices(
       url,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
         timeout: 30000
       }
@@ -353,8 +361,8 @@ export async function searchCreditNoteInvoice(
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
         timeout: 30000
       }
@@ -520,8 +528,8 @@ export async function submitCreditNote(
       payload,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
         timeout: 30000
       }
@@ -584,8 +592,8 @@ export async function processBuyerInvoice(
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
         timeout: 30000
       }
@@ -595,12 +603,7 @@ export async function processBuyerInvoice(
 
     // If accepted, poll for the approved invoice to get the PDF URL
     if (action === 'accept' && (response.data.success !== false)) {
-      // Don't await the polling to avoid blocking the UI response? 
-      // User said "then when we get it", implying it's a background or subsequent action.
-      // However, server actions usually complete before returning. The user might experience a delay.
-      // But user said "so user seletc approve,we approce ,then we try and fetch...".
-      // If we await here, the UI spinner will spin for 2-6 seconds. This is probably acceptable for "Processing...".
-      // Let's await it.
+    
 
       (async () => {
         try {
@@ -769,8 +772,8 @@ export async function submitBuyerInitiatedInvoice(
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-forwarded-for': 'triple_2_ussd'
+          ...(await getAuthHeaders()),
+          'x-source-for': 'whatsapp'
         },
         timeout: 30000
       }
@@ -819,7 +822,10 @@ export async function checkUserStatus(msisdn: string): Promise<CheckUserStatusRe
     const response = await axios.post(
       `${BASE_URL}/init`,
       { msisdn: cleanNumber },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+      {
+        headers: await getAuthHeaders(),
+        timeout: 30000
+      }
     );
 
     console.log('Init response:', JSON.stringify(response.data, null, 2));
@@ -887,7 +893,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       },
       { 
         headers: { 
-          'Content-Type': 'application/json',
+          ...(await getAuthHeaders()),
           'x-source-for': 'whatsapp'
         }, 
         timeout: 30000 
@@ -948,7 +954,10 @@ export async function registerTaxpayer(idNumber: string, msisdn: string): Promis
     const response = await axios.post(
       `${BASE_URL}/register-tax-payer`,
       { id_number: idNumber.trim(), msisdn: cleanNumber },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+      {
+        headers: await getAuthHeaders(),
+        timeout: 30000
+      }
     );
 
     console.log('Register response:', JSON.stringify(response.data, null, 2));
@@ -993,7 +1002,10 @@ export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
     const response = await axios.post(
       `${BASE_URL}/otp`,
       { msisdn: cleanNumber },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+      {
+        headers: await getAuthHeaders(),
+        timeout: 30000
+      }
     );
 
     console.log('Generate OTP response:', JSON.stringify(response.data, null, 2));
@@ -1039,6 +1051,16 @@ export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPR
     // Check for success (varies by API)
     if (response.data.code === 0 || response.data.success === false) {
       return { success: false, error: response.data.message || 'Invalid OTP' };
+    }
+
+    // Store token in HTTP-only cookie
+    if (response.data.token) {
+      (await cookies()).set('etims_auth_token', response.data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        path: '/'
+      });
     }
 
     return {
