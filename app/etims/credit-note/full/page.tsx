@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, CreditNoteData, getUserSession } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
-import { submitCreditNote, sendWhatsAppDocument } from '../../../actions/etims';
+import { submitCreditNote,sendInvoiceCreditDocTemplate } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
 
 const reasonLabels: Record<string, string> = {
@@ -61,12 +61,14 @@ export default function CreditNoteFull() {
           const session = getUserSession();
           const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-          await sendWhatsAppDocument({
-            recipientPhone: creditNote.msisdn,
-            documentUrl: result.credit_note_pdf_url,
-            caption: `Dear *${session?.name || 'Valued Customer'}*,\n\nYour credit note *${result.credit_note_ref || result.credit_note_id}* of KES *${creditNote.invoice.total.toLocaleString()}* was issued on *${today}*\n\nThe credit note PDF is attached for your records.`,
-            filename: `eTIMS_Credit_Note_${result.credit_note_ref || today}.pdf`
-          });
+          await sendInvoiceCreditDocTemplate(
+            creditNote.msisdn,
+            session?.name || 'Valued Customer',
+            `credit note *${result.credit_note_ref || result.credit_note_id}*`,
+            creditNote.invoice.total.toLocaleString(),
+            today,
+            result.credit_note_pdf_url
+          );
         }
         router.push(`/etims/credit-note/success?creditNote=${encodeURIComponent(result.credit_note_ref || result.credit_note_id || '')}`);
       } else {

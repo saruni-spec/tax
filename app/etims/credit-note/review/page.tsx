@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Layout, Card, Button } from '../../_components/Layout';
 import { getCreditNote, CreditNoteData, calculateTotals, getUserSession } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
-import { submitCreditNote, sendWhatsAppDocument } from '../../../actions/etims';
+import { submitCreditNote, sendInvoiceCreditDocTemplate } from '../../../actions/etims';
 import { CreditNoteReason } from '../../_lib/definitions';
 
 const reasonLabels: Record<string, string> = {
@@ -70,12 +70,14 @@ export default function CreditNoteReview() {
  
 // Your credit note KRASRN000006245/464 for KES 39,000 was issued on 17 Dec 2025. 
 // The credit note PDF is attached for your records.
-           await sendWhatsAppDocument({
-             recipientPhone: creditNote.msisdn,
-             documentUrl: result.credit_note_pdf_url,
-             caption: `Dear *${recipientName}*,\n\nYour credit note *${reference}* of KES *${creditAmount.toLocaleString()}* was issued on *${today}*\n\nThe credit note PDF is attached for your records.`,
-             filename: `eTIMS_Credit_Note_${reference || today}.pdf`
-           });
+           await sendInvoiceCreditDocTemplate(
+             creditNote.msisdn,
+             recipientName,
+             `credit note *${reference}*`,
+             creditAmount.toLocaleString(),
+             today,
+             result.credit_note_pdf_url
+           );
          }
          router.push(`/etims/credit-note/success?creditNote=${encodeURIComponent(result.credit_note_ref || result.credit_note_id || '')}`);
       } else {

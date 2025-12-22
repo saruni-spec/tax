@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
-import { fetchInvoices, sendWhatsAppDocument } from '../../../../actions/etims';
+import { fetchInvoices, sendDownloadInvoiceTemplate } from '../../../../actions/etims';
 import { FetchedInvoice } from '../../../_lib/definitions';
 import { Download, Eye, Loader2, Phone, FileText, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getUserSession } from '../../../_lib/store';
@@ -92,12 +92,13 @@ function BuyerInvoicesContent() {
       const isInvoice = invoice.status === 'accepted' || invoice.status === 'approved';
       const docType = isInvoice ? 'Invoice Order' : 'Purchase Order';
 
-      const result = await sendWhatsAppDocument({
-        recipientPhone: phoneNumber,
-        documentUrl: invoice.invoice_pdf_url,
-        caption: `${docType} *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*\nAmount: KES *${Number(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\nSeller: *${invoice.seller_name || 'N/A'}*`,
-        filename: `${docType.replace(' ', '_')}_${invoice.invoice_number || invoice.reference || invoice.invoice_id || 'document'}.pdf`
-      });
+      const result = await sendDownloadInvoiceTemplate(
+        phoneNumber,
+        `${docType} *${invoice.invoice_number || invoice.reference || invoice.invoice_id}*`,
+        `${Number(invoice.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        `Seller: *${invoice.seller_name || 'N/A'}*`,
+        invoice.invoice_pdf_url
+      );
       
       if (result.success) {
         alert(`${docType} ${invoice.invoice_number || invoice.reference || invoice.invoice_id} sent to WhatsApp number ${phoneNumber}`);

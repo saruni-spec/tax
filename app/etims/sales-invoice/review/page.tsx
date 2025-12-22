@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Card, Button, IdentityStrip } from '../../_components/Layout';
+import { Layout, Card, Button } from '../../_components/Layout';
 import { getSalesInvoice, Invoice, getUserSession } from '../../_lib/store';
-import { submitInvoice, sendWhatsAppDocument } from '../../../actions/etims';
+import { submitInvoice, sendInvoiceCreditDocTemplate } from '../../../actions/etims';
 import { Loader2 } from 'lucide-react';
 
 export default function SalesInvoiceReview() {
@@ -78,12 +78,14 @@ export default function SalesInvoiceReview() {
 // The Sales Invoice  PDF is attached for your records.
         if (result.invoice_pdf_url && session.msisdn) {
           const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-          await sendWhatsAppDocument({
-            recipientPhone: session.msisdn,
-            documentUrl: result.invoice_pdf_url,
-            caption: `Dear *${session.name || 'Valued Customer'}*,\n\nYour sales invoice *${result.invoice_id}* of KES *${calculatedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}* was issued on *${today}*\n\nThe Sales Invoice PDF is attached for your records.`,
-            filename: `eTIMS_Invoice_${result.invoice_id || today}.pdf`
-          });
+          await sendInvoiceCreditDocTemplate(
+            session.msisdn,
+            session.name || 'Valued Customer',
+            `sales invoice *${result.invoice_id}*`,
+            calculatedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            today,
+            result.invoice_pdf_url
+          );
         }
         router.push(`/etims/sales-invoice/success?invoice=${encodeURIComponent(result.invoice_id || '')}`);
       } else {
