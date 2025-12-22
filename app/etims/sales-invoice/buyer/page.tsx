@@ -92,7 +92,16 @@ export default function SalesInvoiceBuyer() {
   };
 
   const handleSkip = () => {
-    saveSalesInvoice({ buyer: undefined });
+    if (buyerName.trim()) {
+      saveSalesInvoice({ 
+        buyer: {
+          name: buyerName.trim(),
+          pin: '' // Empty PIN for unverified buyer
+        }
+      });
+    } else {
+      saveSalesInvoice({ buyer: undefined });
+    }
     router.push('/etims/sales-invoice/details');
   };
 
