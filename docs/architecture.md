@@ -1,76 +1,41 @@
-# Application Architecture
+# System Architecture: WhatsApp WebView Integration
 
-## Overview
-ChatNation is a compliance platform designed to be consumed primarily through **WhatsApp WebViews**. The application provides a suite of services (Tax Filing, eTIMS Invoicing, Customs Declarations) that users access directly from their WhatsApp interface.
+This document outlines the technical architecture for the KRA WhatsApp platform. The system shifts from native WhatsApp modules to a **Webview-based architecture**, allowing for complex tax filing workflows.
 
-## Core Design Principles
+---
 
-### 1. WhatsApp-First Delivery
-The application is built to be served within the constrained environment of a mobile WebView inside WhatsApp.
-- **Context Injection**: Users are identified by their phone number, which is passed as a query parameter in the URL (e.g., `?phone=2547XXXXXXXX`).
-- **Session Continuity**: The application extracts this phone number on entry and persists it (via cookies or local state) to maintain the session across different pages without requiring traditional login screens.
+## 1. Architectural Overview
 
-### 2. Entry Points
+The application follows a **Backend-for-Frontend (BFF)** pattern. It is a stateless Next.js application. The primary objective is to provide a rich user interface within WhatsApp while ensuring that all sensitive logic, API keys, and data integrations happen securely on the server side.
 
-The application is structured with multiple entry points to serve different user intents.
+### 2. Infrastructure Diagram
 
-#### General Entry Point (`app/page.tsx`)
-**Route**: `/`
-- Acts as the main landing page or "App Store" for the platform.
-- Displays the full catalog of available services (PIN Services, Return Filing, eTIMS Invoicing, etc.).
-- **Function**: Routing. When a user selects a service, this page constructs the correct URL for the specific module, appending the user's phone number to ensure context is passed along.
+![alt text](<mermaid-diagram-AGaLmLVbGmYd3wTNGIpsg-low(2).png>)
 
-#### eTIMS Module (`app/etims/page.tsx`)
-**Route**: `/etims`
-- Dedicated entry point for Electronic Tax Invoice Management System (eTIMS) workflows.
-- Handles tasks like Sales Invoices, Credit Notes, and Buyer-Initiated Invoices.
-- Uses `app/etims/_lib/useSession.ts` to enforce authentication, ensuring a phone number is present or redirecting to an auth flow if missing.
+## 3. Component Descriptions
 
-#### Tax Return Module (`app/nil-mri-tot/page.tsx`)
-**Route**: `/nil-mri-tot`
-- Dedicated entry point for tax return filing (NIL, MRI, TOT).
-- Immediately checks for the `phone` or `msisdn` query parameter to initialize the filing session.
+### A. Public Internet Layer
 
-## Authentication & Session Management
-- **Mechanism**: The phone number acts as the primary user identifier.
-- **Flow**:
-    1. **Inbound**: Link is clicked in WhatsApp -> `https://app-url.com/some-path?phone=2547...`
-    2. **Extraction**: The page component or `useSession` hook extracts `searchParams.get('phone')`.
-    3. **Persistence**: The phone number is stored in the application state (e.g., `taxpayerStore` or cookies).
-    4. **Guard**: Protected routes check for this stored phone number. If missing, they redirect to an "Auth" page (often just a prompt to re-enter the number or a "Session Expired" message).
-- **Public Paths**: Certain paths (like `*/auth`, `*/otp`, and root `/`) are whitelisted to allow entry without an active session.
+- **WhatsApp Mobile App**: The entry point for the taxpayer. The application is loaded via a swhatsapp webviews.
 
-## Data Flow
-- **Frontend**: Next.js (App Router) with React Server Components and Client Components.
-- **State Management**: Zustand stores (e.g., `taxpayerStore`) for managing multi-step form data (like tax filing wizards).
-- **Backend Integration**: Server Actions are used for data mutation and fetching, keeping the client lightweight and secure.
+### B. DMZ / Edge Layer
 
-## Key Directories
-- `app/`: Main application routes.
-- `app/_components/`: Shared UI components (Layout, etc.).
-- `app/etims/`: eTIMS specific logic and components.
-- `app/nil-mri-tot/`: Tax return filing logic.
-- `app/actions/`: Server actions for backend logic.
+- **Load Balancer (KRA Subdomain)**: KRA provides a dedicated subdomain (e.g., `whatsapp.kra.go.ke`). This layer handles SSL termination and ensures that only secure HTTPS traffic (Port 443) reaches the application server.
 
-## Backend Architecture
+### C. Application Layer (The Service)
 
-The application employs a **Backend for Frontend (BFF)** pattern using Next.js Server Actions. It does not maintain a local database for business data but instead acts as a secure proxy to external APIs.
+- **Next.js Server (Dockerized)**
+- **Frontend UI**: Served to the WhatsApp WebView.
+- **BFF (Server Actions)**: Acts as a secure proxy. When a user submits a tax return or invoice, the request is sent to a Server Action. This action injects the necessary **KRA API Keys** and **Bearer Tokens** before forwarding the request to KRA services.
 
-### 1. Server Actions as API Proxies
-- **Location**: `app/actions/*.ts` (e.g., `etims.ts`)
-- **Role**: Validates inputs, handles session context (cookies), and forwards requests to the upstream API.
-- **Security**: 
-    - API keys and base URLs are kept on the server side.
-    - Sensitive headers (Authorization tokens) are injected in the Server Action, preventing exposure to the client.
+### D. Core Services Layer
 
-### 2. External API Integration
-- **Upstream Service**: The app connects to the `kratest.pesaflow.com` API (e.g., `/api/ussd`).
-- **Communication**: Uses `axios` for HTTP requests.
-- **Headers**:
-    - `Authorization`: `Bearer <token>` (retrieved from HTTP-only cookies).
-    - `x-source-for`: `whatsapp` (identifies the traffic source/channel).
+- **Upstream APIs (eTIMS / PesaFlow)**: The core systems that process tax data. The application remains stateless; it fetches and pushes data to these endpoints in real-time.
+- **Auth Service**: Used by the BFF to verify taxpayer sessions and manage authentication tokens.
 
-### 3. Data Persistence
-- **No Local Database**: The Next.js app is stateless regarding business data (invoices, returns, customer profiles). All such data is fetched in real-time from the upstream API.
-- **Session Store**: `cookies()` are used to store authentication tokens (`etims_auth_token`), creating a stateless session mechanism compatible with the distributed nature of serverless deployments.
+---
 
+## 4. Key Security Features
+
+- **Credential Isolation**: No API keys, secret tokens, or upstream URLs are ever exposed to the client (WebView). All sensitive communication happens server-to-server within the VPC.
+- **Statelessness**: The application does not maintain a local database of taxpayer records.

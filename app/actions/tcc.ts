@@ -1,7 +1,6 @@
 'use server';
 
 import axios from 'axios';
-import { cookies } from 'next/headers';
 import { 
   getAuthHeaders, 
   generateOTP as sharedGenerateOTP, 
@@ -9,12 +8,9 @@ import {
   checkServerSession as sharedCheckSession,
   logout as sharedLogout,
   getStoredPhoneServer,
-  sendWhatsAppMessage as sharedSendWhatsAppMessage,
-  SendWhatsAppMessageParams,
-  SendWhatsAppMessageResult
+  OTPResult
 } from './auth';
 import { cleanPhoneNumber } from '../_lib/utils';
-
 
 const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
 
@@ -77,61 +73,49 @@ export interface VerifyOTPResult {
 
 // ============= Helpers =============
 
-// Using shared getAuthHeaders
+// Using shared getAuthHeaders from auth.ts
 async function getApiHeaders(requiresAuth: boolean = true) {
-    if (!requiresAuth) {
-        return {
-            'Content-Type': 'application/json',
-            'x-source-for': 'whatsapp',
-        };
-    }
-    return getAuthHeaders();
+  if (!requiresAuth) {
+    return {
+      'Content-Type': 'application/json',
+      'x-source-for': 'whatsapp',
+    };
+  }
+  return getAuthHeaders();
 }
 
-
 // ============= OTP & Session =============
-
-/**
- * Generate and send OTP to user's phone
- */
-// OTP Actions delegated to shared auth
+// Delegated to shared auth.ts
 
 export async function generateOTP(msisdn: string): Promise<GenerateOTPResult> {
-    const result = await sharedGenerateOTP(msisdn);
-    return {
-        success: result.success,
-        message: result.message,
-        error: result.error
-    };
+  const result = await sharedGenerateOTP(msisdn);
+  return {
+    success: result.success,
+    message: result.message,
+    error: result.error
+  };
 }
 
 export async function verifyOTP(msisdn: string, otp: string): Promise<VerifyOTPResult> {
-    const result = await sharedValidateOTP(msisdn, otp);
-    return {
-        success: result.success,
-        message: result.message,
-        error: result.error
-    };
+  const result = await sharedValidateOTP(msisdn, otp);
+  return {
+    success: result.success,
+    message: result.message,
+    error: result.error
+  };
 }
 
-
-/**
- * Check if user has a valid session and slide expiration
- */
-// Session helpers delegated
-
 export async function checkSession(): Promise<boolean> {
-    return sharedCheckSession();
+  return sharedCheckSession();
 }
 
 export async function logout(): Promise<void> {
-    return sharedLogout();
+  return sharedLogout();
 }
 
 export async function getStoredPhone(): Promise<string | null> {
-    return getStoredPhoneServer();
+  return getStoredPhoneServer();
 }
-
 
 // ============= Lookup & Obligations =============
 
@@ -150,7 +134,9 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   }
 
   // Clean phone number
-  const cleanNumber = cleanPhoneNumber(phoneNumber);
+  let cleanNumber = phoneNumber.trim().replace(/[^\d]/g, '');
+  if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
+  else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
   console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
 
@@ -198,6 +184,134 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   } catch (error: any) {
     console.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+  }
+}
+
+// ============= TCC Application =============
+
+// Note: TCC_REASONS and TccReasonKey are in app/_lib/tcc-constants.ts
+// (Cannot export non-async values from 'use server' files)
+
+export interface GuiLookupResult {
+  success: boolean;
+  error?: string;
+  name?: string;
+  pin?: string;
+}
+
+export interface TccApplicationResult {
+  success: boolean;
+  error?: string;
+  message?: string;
+  tccNumber?: string;
+  status?: string;
+  taxpayerName?: string;
+}
+
+/**
+ * GUI Lookup - Verify taxpayer before TCC application
+ * GET https://kratest.pesaflow.com/api/itax/gui-lookup
+ */
+export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
+  if (!idNumber || idNumber.trim().length < 6) {
+    return { success: false, error: 'ID number must be at least 6 characters' };
+  }
+
+  console.log('GUI Lookup for ID:', idNumber);
+
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      'https://kratest.pesaflow.com/api/itax/gui-lookup',
+      {
+        params: {
+          gui: idNumber.trim(),
+          id: idNumber.trim(),
+          tax_payer_type: 'KE',
+        },
+        headers,
+        timeout: 30000,
+      }
+    );
+
+    console.log('GUI Lookup response:', JSON.stringify(response.data, null, 2));
+
+    // Check for success - API returns ResponseCode "30000" and Status "OK"
+    if (response.data && (response.data.Status === 'OK' || response.data.ResponseCode === '30000')) {
+      return {
+        success: true,
+        name: response.data.TaxpayerName || response.data.name,
+        pin: response.data.PIN || response.data.pin,
+      };
+    } else {
+      return {
+        success: false,
+        error: response.data.Message || response.data.message || 'GUI lookup failed',
+      };
+    }
+  } catch (error: any) {
+    console.error('GUI Lookup error:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'GUI lookup failed',
+    };
+  }
+}
+
+/**
+ * Submit TCC Application
+ * POST https://kratest.pesaflow.com/api/ussd/tcc-application
+ */
+export async function submitTccApplication(
+  taxPayerPin: string,
+  reasonForTcc: string
+): Promise<TccApplicationResult> {
+  if (!taxPayerPin) {
+    return { success: false, error: 'Taxpayer PIN is required' };
+  }
+  if (!reasonForTcc) {
+    return { success: false, error: 'Reason for TCC is required' };
+  }
+
+  console.log('Submitting TCC Application:', { taxPayerPin, reasonForTcc });
+
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.post(
+      'https://kratest.pesaflow.com/api/ussd/tcc-application',
+      {
+        tax_payer_pin: taxPayerPin,
+        reason_for_tcc: reasonForTcc,
+      },
+      {
+        headers,
+        timeout: 30000,
+      }
+    );
+
+    console.log('TCC Application response:', JSON.stringify(response.data, null, 2));
+
+    // Check for success response - API returns Status "OK" for success
+    if (response.data && (response.data.Status === 'OK' || response.data.TCCNumber || response.data.tcc_number || response.data.success)) {
+      return {
+        success: true,
+        message: response.data.Message || response.data.message || 'TCC Application submitted successfully',
+        tccNumber: response.data.TCCNumber || response.data.tcc_number,
+        status: response.data.Status || response.data.status,
+        taxpayerName: response.data.TaxpayerName || response.data.name || response.data.taxpayer_name,
+      };
+    } else {
+      return {
+        success: false,
+        error: response.data.Message || response.data.message || 'TCC Application failed',
+      };
+    }
+  } catch (error: any) {
+    console.error('TCC Application error:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.Message || error.response?.data?.message || 'TCC Application failed',
+    };
   }
 }
 

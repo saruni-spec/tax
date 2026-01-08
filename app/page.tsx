@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 // Service URL mappings - maps service names to their external URLs
@@ -17,20 +17,20 @@ const SERVICE_URLS: Record<string, string> = {
   "TOT": "/nil-mri-tot/tot/validation?phone={{phone}}",
   
   // PIN Services
-  "PIN Registration": "https://pin-registration.vercel.app?phone={{phone}}",
+  "PIN Registration": "/pin-registration?phone={{phone}}",
   
   // Customs Services
   "F88 Declaration": "https://f88-web.vercel.app?phone={{phone}}",
-  "eSlip": "https://payments-rho-seven.vercel.app/eslip/payment?phone={{phone}}",
-  "NITA": "https://payments-rho-seven.vercel.app/nita/payment?phone={{phone}}",
-  "AHL": "https://payments-rho-seven.vercel.app/ahl/payment?phone={{phone}}",
-  "TCC Application": "https://tcc-seven-psi.vercel.app?phone={{phone}}",
-  "PIN Check": "https://verification-lilac.vercel.app/pin-checker?phone={{phone}}",
-  "Invoice Check": "https://verification-lilac.vercel.app/invoice-checker?phone={{phone}}",
-  "TCC Check": "https://verification-lilac.vercel.app/tcc-checker?phone={{phone}}",
-  "Staff Check": "https://verification-lilac.vercel.app/staff-checker?phone={{phone}}",
-  "Station": "https://verification-lilac.vercel.app/know-your-station?phone={{phone}}",
-  "Import Check": "https://verification-lilac.vercel.app/import-certificate?phone={{phone}}",
+  "eSlip": "/payments/eslip/payment?phone={{phone}}",
+  "NITA": "/payments/nita/payment?phone={{phone}}",
+  "AHL": "/payments/ahl/payment?phone={{phone}}",
+  "TCC Application": "/tcc/?phone={{phone}}",
+  "PIN Check": "/checkers/pin-checker?phone={{phone}}",
+  "Invoice Check": "/checkers/invoice-checker?phone={{phone}}",
+  "TCC Check": "/checkers/tcc-checker?phone={{phone}}",
+  "Staff Check": "/checkers/staff-checker?phone={{phone}}",
+  "Station": "/checkers/know-your-station?phone={{phone}}",
+  "Import Check": "/checkers/import-certificate?phone={{phone}}",
 };
 
 // Service categories with clearer labels

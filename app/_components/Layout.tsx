@@ -1,10 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Menu, Home, LogOut, Headphones } from 'lucide-react';
-import { useSessionManager } from '../etims/_lib/useSession';
-import { clearUserSession, getKnownPhone } from '../etims/_lib/store';
+import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle } from 'lucide-react';
+
+import { useSessionManager } from '../_lib/useSession';
+import { clearUserSession, getKnownPhone } from '../_lib/session-store';
+
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,6 +16,11 @@ interface LayoutProps {
   showMenu?: boolean;
   showHeader?: boolean;
   showFooter?: boolean;
+}
+
+function SessionController() {
+  useSessionManager();
+  return null;
 }
 
 
@@ -27,7 +34,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   }, []);
   
   // Session management - auto-refresh and timeout handling
-  useSessionManager();
+  // usage moved to SessionController wrapped in Suspense
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
 
@@ -42,7 +49,8 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     if (confirm('Are you sure you want to logout?')) {
       // Get msisdn before clearing so user can easily re-login
       const session = typeof window !== 'undefined' ? sessionStorage.getItem('etims_user_session') : null;
-      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || phone;
+      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || phone || getKnownPhone();
+
       
       clearUserSession();
       sessionStorage.clear();
@@ -68,6 +76,9 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Suspense fallback={null}>
+        <SessionController />
+      </Suspense>
       {/* Header - KRA Dark Theme */}
       {showHeader && (
         <div className="bg-[var(--kra-black)] text-white sticky top-0 z-10 shadow-md">
@@ -191,6 +202,10 @@ export function Input({
   disabled = false,
   step,
   min,
+  inputMode,
+  maxLength,
+  error,
+  helperText,
 }: {
   label: string;
   value: string | number;
@@ -201,6 +216,10 @@ export function Input({
   disabled?: boolean;
   step?: string;
   min?: string;
+  inputMode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  maxLength?: number;
+  error?: string;
+  helperText?: string;
 }) {
   return (
     <div>
@@ -216,11 +235,23 @@ export function Input({
         disabled={disabled}
         step={step}
         min={min}
-        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+        inputMode={inputMode}
+        maxLength={maxLength}
+        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-[var(--kra-red)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
+          error ? 'border-red-500 bg-red-50' : 'border-gray-300'
+        }`}
       />
+      {error && (
+        <p className="mt-1 text-xs text-red-600 font-medium">{error}</p>
+      )}
+      {helperText && !error && (
+        <p className="mt-1 text-xs text-gray-500">{helperText}</p>
+      )}
     </div>
   );
 }
+
+
 
 export function Select({
   label,
@@ -298,3 +329,70 @@ export function IdentityStrip({ label, value }: { label: string; value: string }
     </div>
   );
 }
+
+export function MaskedDataCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-600">{label}</span>
+        <span className="text-gray-900 font-mono font-medium">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+
+export function DeclarationCheckbox({
+  label,
+  legalNote,
+  checked,
+  onChange,
+  disabled
+}: {
+  label: string;
+  legalNote?: string;
+  checked: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-3">
+      <label className={`flex gap-3 items-start p-3 rounded-lg border cursor-pointer transition-colors ${
+        checked ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 hover:bg-gray-50'
+      } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          disabled={disabled}
+          className="mt-0.5 w-4 h-4 text-[var(--kra-red)] border-gray-300 rounded focus:ring-[var(--kra-red)]"
+        />
+        <span className="text-sm text-gray-700 font-medium leading-relaxed select-none">
+          {label}
+        </span>
+      </label>
+      
+      {legalNote && (
+         <p className="text-xs text-gray-500 px-1">
+           {legalNote}
+         </p>
+      )}
+    </div>
+  );
+}
+
+export function SuccessState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+        <CheckCircle className="w-8 h-8 text-green-600" />
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 text-center px-4 leading-tight">
+        {message}
+      </h2>
+    </div>
+  );
+}
+
+
+
