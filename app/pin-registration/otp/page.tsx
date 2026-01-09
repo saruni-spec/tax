@@ -1,194 +1,212 @@
 'use client';
 
-import { useState, useRef, KeyboardEvent, ClipboardEvent, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Layout, Button } from '../../_components/Layout';
-import { savePhoneNumber, getPhoneNumber } from '../_lib/store';
+import { Loader2, MessageSquare } from 'lucide-react';
 import { generateOTP, validateOTP } from '../../actions/pin-registration';
-import { Loader2 } from 'lucide-react';
-import { Suspense } from 'react';
+import { Button, Card, Layout } from '../../_components/Layout';
+import { savePhoneNumber, getPhoneNumber } from '../_lib/store';
 
-function OTPVerificationContent() {
+function OTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const phoneFromUrl = searchParams.get('phone');
+  const phoneNumber = searchParams.get('phone') || searchParams.get('number') || getPhoneNumber() || '';
   
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [timer, setTimer] = useState(60);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  /* retrieve redirect param */
+  const redirectPath = searchParams.get('redirect') || '/pin-registration/select-type';
+
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
-  const [phone, setPhone] = useState('');
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Auto-send OTP on mount if phone is present in params
   useEffect(() => {
-    // Get phone from URL or session
-    const storedPhone = phoneFromUrl || getPhoneNumber() || '';
-    setPhone(storedPhone);
+    if (phoneNumber && !otpSent) {
+      handleSendOTP(phoneNumber);
+    } else if (!phoneNumber) {
+      setError('Phone number is missing. Please restart the validation process.');
+    }
+  }, [phoneNumber]);
+
+  const handleSendOTP = async (numberOverride?: string) => {
+    const numberToSend = numberOverride || phoneNumber;
+    if (!numberToSend) { setError('Phone number is missing'); return; }
     
-    // Auto-send OTP on load if we have a phone number
-    if (storedPhone) {
-      handleSendOTP(storedPhone);
-    }
-  }, [phoneFromUrl]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => setTimer(t => t - 1), 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timer]);
-
-  const handleSendOTP = async (phoneNumber: string) => {
-    if (!phoneNumber) return;
-    setIsSendingOtp(true);
+    setSending(true);
     setError('');
     
     try {
-      const result = await generateOTP(phoneNumber);
-      if (!result.success) {
-        setError(result.message);
+      const result = await generateOTP(numberToSend);
+      if (result.success) {
+        setOtpSent(true);
+      } else {
+        setError(result.message || 'Failed to send OTP');
       }
-      setTimer(60);
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
     } finally {
-      setIsSendingOtp(false);
+      setSending(false);
     }
   };
 
-  const handleChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
-    setOtp(newOtp);
+  const handleVerifyOTP = async () => {
     setError('');
+    if (!phoneNumber) { setError('Phone number required'); return; }
+    if (!otp || otp.length < 4) { setError('Enter valid OTP'); return; }
 
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    if (!/^\d+$/.test(pastedData)) return;
-
-    const newOtp = [...otp];
-    for (let i = 0; i < pastedData.length; i++) {
-      newOtp[i] = pastedData[i];
-    }
-    setOtp(newOtp);
-  };
-
-  const handleVerify = async () => {
-    if (!otp.every(digit => digit !== '')) return;
+    setLoading(true);
     
-    setIsLoading(true);
-    setError('');
-
     try {
-      const otpCode = otp.join('');
-      const result = await validateOTP(phone || '254712345678', otpCode);
+      // Verify OTP
+      const otpResult = await validateOTP(phoneNumber, otp);
       
-      if (result.success) {
-        savePhoneNumber(phone || '+254 712 345 678');
-        router.push('/pin-registration/select-type');
-      } else {
-        setError(result.message);
+      if (!otpResult.success) {
+        setError(otpResult.message || 'Invalid OTP');
+        setLoading(false);
+        return;
       }
+      
+      // Save phone to localStorage for persistence
+      try {
+        localStorage.setItem('phone_Number', phoneNumber);
+        savePhoneNumber(phoneNumber);
+      } catch (e) {
+        console.error('Failed to save phone to local storage', e);
+      }
+
+      // Redirect to the destination
+      let finalPath = redirectPath;
+      if (finalPath.includes('?')) {
+        finalPath += `&phone=${encodeURIComponent(phoneNumber)}`;
+      } else {
+        finalPath += `?phone=${encodeURIComponent(phoneNumber)}`;
+      }
+      
+      router.push(finalPath);
+      
     } catch (err: any) {
       setError(err.message || 'Verification failed');
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResend = () => {
-    if (timer === 0 && phone) {
-      handleSendOTP(phone);
+      setLoading(false);
     }
   };
 
   return (
-    <Layout title="Verify Your Phone Number" onBack={() => router.back()}>
-      <p className="text-gray-600 mb-6">
-        Enter the 6-digit code sent to your phone number
-      </p>
-
-
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-          <p className="text-sm text-red-600">{error}</p>
+    <Layout title="Verify OTP" showHeader={false} showFooter={false} onBack={() => router.back()}>
+      <div className="space-y-4">
+        {/* Logo */}
+        <div className="flex justify-center py-2">
+          <img src="/kra_logo.png" alt="KRA Logo" className="h-12 w-auto" />
         </div>
-      )}
 
-      <div className="flex gap-2 mb-6 justify-center">
-        {otp.map((digit, index) => (
-          <input
-            key={index}
-            ref={el => { inputRefs.current[index] = el; }}
-            type="text"
-            inputMode="numeric"
-            maxLength={1}
-            value={digit}
-            onChange={e => handleChange(index, e.target.value)}
-            onKeyDown={e => handleKeyDown(index, e)}
-            onPaste={index === 0 ? handlePaste : undefined}
-            disabled={isLoading}
-            className="w-12 h-14 text-center text-xl font-semibold border-2 border-gray-300 rounded-lg focus:border-green-600 focus:outline-none disabled:bg-gray-100"
-          />
-        ))}
-      </div>
+        {/* Header */}
+        <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
+          <h1 className="text-base font-semibold">OTP Verification</h1>
+          <p className="text-gray-400 text-xs">Verify phone number</p>
+        </div>
 
-      <div className="text-center mb-8">
-        {isSendingOtp ? (
-          <p className="text-gray-600 flex items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Sending OTP...
-          </p>
-        ) : timer > 0 ? (
-          <p className="text-gray-600">Resend code in {timer}s</p>
-        ) : (
-          <button 
-            onClick={handleResend}
-            className="text-green-600 underline font-medium"
-          >
-            Resend Code
-          </button>
+        {/* Error State if No Phone */}
+        {!phoneNumber && (
+           <Card className="bg-red-50 border-red-200">
+             <div className="flex items-start gap-2">
+               <MessageSquare className="w-5 h-5 text-red-600 flex-shrink-0" />
+               <div className="text-xs text-red-800">
+                 <p className="font-medium">Missing Information</p>
+                 <p className="text-red-700">Phone number is missing from the request. We cannot verify your identity.</p>
+                 <Button onClick={() => router.push('/pin-registration')} className="mt-2 text-xs bg-red-600 hover:bg-red-700 w-auto text-white">
+                   Return Home
+                 </Button>
+               </div>
+             </div>
+           </Card>
+        )}
+
+        {/* OTP Sent Info */}
+        {phoneNumber && otpSent && (
+          <Card className="bg-blue-50 border-blue-200">
+            <div className="flex items-start gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <div className="text-xs text-blue-800">
+                <p className="font-medium">OTP sent to {phoneNumber}</p>
+                <p className="text-blue-600">Check your SMS for the verification code</p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Sending State / Initial Load */}
+        {phoneNumber && !otpSent && (
+            <Card className="py-8 text-center">
+                 {sending ? (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                       <Loader2 className="w-6 h-6 animate-spin text-[var(--kra-red)]" />
+                       <p className="text-sm text-gray-500">Sending OTP...</p>
+                    </div>
+                 ) : (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                         <p className="text-sm text-gray-600 mb-2">Ready to send OTP to {phoneNumber}</p>
+                         <Button onClick={() => handleSendOTP()} className="w-auto">
+                           Send Code
+                         </Button>
+                    </div>
+                 )}
+            </Card>
+        )}
+
+        {/* OTP Input - Only show if OTP sent */}
+        {otpSent && (
+          <Card>
+            <label className="block text-xs text-gray-600 font-medium mb-2">Enter OTP <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase())}
+              placeholder="Enter code"
+              className="w-full px-3 py-2.5 text-center text-lg tracking-widest border border-gray-300 rounded-lg"
+              maxLength={6}
+            />
+            
+            <div className="flex justify-end mt-3">
+              <button
+                onClick={() => handleSendOTP()}
+                disabled={sending}
+                className="text-xs text-[var(--kra-red)] font-medium disabled:text-gray-400"
+              >
+                {sending ? 'Sending...' : 'Resend OTP'}
+              </button>
+            </div>
+          
+            {error && (
+              <div className="p-2 bg-red-50 border border-red-200 rounded-lg mt-3">
+                <p className="text-xs text-red-600">{error}</p>
+              </div>
+            )}
+
+            <div className="mt-4">
+               <Button onClick={handleVerifyOTP} disabled={loading || !otp}>
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Verifying...</> : 'Verify'}
+              </Button>
+            </div>
+          </Card>
+        )}
+        
+        {/* Error for sending step if exists and not inside OTP Card */}
+        {error && !otpSent && (
+            <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-xs text-red-600">{error}</p>
+            </div>
         )}
       </div>
-
-      <Button 
-        onClick={handleVerify}
-        disabled={!otp.every(digit => digit !== '') || isLoading}
-      >
-        {isLoading ? (
-          <span className="flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Verifying...
-          </span>
-        ) : (
-          'Verify OTP'
-        )}
-      </Button>
     </Layout>
   );
 }
 
-export default function OTPVerification() {
+export default function OTPPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
-      <OTPVerificationContent />
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <OTPContent />
     </Suspense>
   );
 }

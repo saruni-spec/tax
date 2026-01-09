@@ -9,7 +9,7 @@ import { Button, Card, Layout } from '../../_components/Layout';
 function OTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const phoneNumber = searchParams.get('number') || '';
+  const phoneNumber = searchParams.get('phone') || searchParams.get('number') || '';
   
   /* retrieve redirect param */
   const redirectPath = searchParams.get('redirect') || '/nil-mri-tot/nil/validation';
