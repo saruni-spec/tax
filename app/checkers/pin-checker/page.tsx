@@ -59,15 +59,15 @@ function PinCheckerContent() {
         const hasSession = await checkSession();
         if (!hasSession) {
           // Redirect to OTP with phone if available
-          let redirectUrl = `/checkers/otp?redirect=${encodeURIComponent(pathname)}`;
+          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
           if (currentPhone) {
-            redirectUrl += `&number=${encodeURIComponent(currentPhone)}`;
+            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
           }
           router.push(redirectUrl);
         } else {
           if (!currentPhone) {
             // No phone anywhere, must go to OTP
-            router.push(`/checkers/otp?redirect=${encodeURIComponent(pathname)}`);
+            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
           } else {
             setCheckingSession(false);
           }

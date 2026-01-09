@@ -46,12 +46,12 @@ function InvoiceCheckerContent() {
         
         const hasSession = await checkSession();
         if (!hasSession) {
-          let redirectUrl = `/checkers/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) redirectUrl += `&number=${encodeURIComponent(currentPhone)}`;
+          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
+          if (currentPhone) redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
           router.push(redirectUrl);
         } else {
           if (!currentPhone) {
-            router.push(`/checkers/otp?redirect=${encodeURIComponent(pathname)}`);
+            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
           } else {
             setCheckingSession(false);
           }

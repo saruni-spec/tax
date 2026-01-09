@@ -1,17 +1,95 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout } from '../../_components/Layout';
-import { Globe, Flag } from 'lucide-react';
+import { Globe, Flag, Loader2 } from 'lucide-react';
+import { checkSession, getStoredPhone } from '@/app/actions/pin-registration';
 
-export default function SelectResidencyType() {
+function SelectResidencyTypeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const urlPhone = searchParams.get('phone') || '';
+  
+  const [phone, setPhone] = useState(urlPhone);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // Check session on mount
+  useEffect(() => {
+    const performSessionCheck = async () => {
+      try {
+        // First, try to get phone from various sources if not in URL
+        let currentPhone = urlPhone;
+        
+        if (!currentPhone) {
+          // Try localStorage first
+          try {
+            const localPhone = localStorage.getItem('phone_Number');
+            if (localPhone) {
+              currentPhone = localPhone;
+            }
+          } catch (e) {
+            console.error('Error accessing localStorage', e);
+          }
+        }
+        
+        if (!currentPhone) {
+          // Try server-side cookie
+          const storedPhone = await getStoredPhone();
+          if (storedPhone) {
+            currentPhone = storedPhone;
+          }
+        }
+        
+        // If we found a phone, update state and URL
+        if (currentPhone && currentPhone !== urlPhone) {
+          setPhone(currentPhone);
+          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
+          return; // Let the effect re-run with new URL
+        } else if (currentPhone) {
+          setPhone(currentPhone);
+        }
+        
+        // Now check session
+        const hasSession = await checkSession();
+        if (!hasSession) {
+          // Redirect to OTP with phone if available
+          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
+          if (currentPhone) {
+            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
+          }
+          router.push(redirectUrl);
+        } else {
+          if (!currentPhone) {
+            // No phone anywhere, must go to OTP
+            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
+          } else {
+            setCheckingSession(false);
+          }
+        }
+      } catch (err) {
+        console.error('Session check failed', err);
+        setCheckingSession(false);
+      }
+    };
+    
+    performSessionCheck();
+  }, [pathname, urlPhone, router]);
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" />
+      </div>
+    );
+  }
 
   return (
     <Layout title="Select Registration Type" onBack={() => router.back()}>
       <div className="space-y-4">
         <button
-          onClick={() => router.push('/pin-registration/kenyan/identity')}
+          onClick={() => router.push(`/pin-registration/kenyan/identity?phone=${encodeURIComponent(phone)}`)}
           className="w-full bg-white border-2 border-gray-300 rounded-xl p-6 hover:border-green-600 hover:bg-green-50 transition-all"
         >
           <div className="flex items-center gap-4">
@@ -28,7 +106,7 @@ export default function SelectResidencyType() {
         </button>
 
         <button
-          onClick={() => router.push('/pin-registration/non-kenyan/identity')}
+          onClick={() => router.push(`/pin-registration/non-kenyan/identity?phone=${encodeURIComponent(phone)}`)}
           className="w-full bg-white border-2 border-gray-300 rounded-xl p-6 hover:border-green-600 hover:bg-green-50 transition-all"
         >
           <div className="flex items-center gap-4">
@@ -45,5 +123,13 @@ export default function SelectResidencyType() {
         </button>
       </div>
     </Layout>
+  );
+}
+
+export default function SelectResidencyType() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--kra-red)]" /></div>}>
+      <SelectResidencyTypeContent />
+    </Suspense>
   );
 }

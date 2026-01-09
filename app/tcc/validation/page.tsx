@@ -29,9 +29,9 @@ function TccValidationContent() {
         const hasSession = await checkSession();
         if (!hasSession) {
           // Redirect to OTP with current phone if available, or just path
-            const redirectUrl = `/tcc/otp?redirect=${encodeURIComponent(pathname)}`;
+            const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
             if (phone) {
-               router.push(`${redirectUrl}&number=${encodeURIComponent(phone)}`);
+               router.replace(`${redirectUrl}&phone=${encodeURIComponent(phone)}`);
             } else {
                router.push(redirectUrl);
             }
@@ -56,7 +56,7 @@ function TccValidationContent() {
                }
                
                // No phone found anywhere, redirect to OTP
-               router.push(`/tcc/otp?redirect=${encodeURIComponent(pathname)}`);
+               router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
             }
           } else {
             setCheckingSession(false);

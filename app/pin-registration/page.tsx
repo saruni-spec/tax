@@ -23,7 +23,7 @@ function PinRegistrationContent() {
     if (phoneNumber) {
       router.push('/pin-registration/select-type');
     } else {
-      router.push('/pin-registration/otp');
+      router.push('/otp');
     }
   };
 

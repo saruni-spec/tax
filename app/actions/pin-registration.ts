@@ -6,6 +6,8 @@ import {
   getAuthHeaders, 
   generateOTP as sharedGenerateOTP, 
   validateOTP as sharedValidateOTP,
+  checkServerSession as sharedCheckSession,
+  getStoredPhoneServer,
   OTPResult,
 } from './auth';
 import { cleanPhoneNumber } from '../_lib/utils';
@@ -65,6 +67,20 @@ export async function generateOTP(msisdn: string): Promise<OTPResult> {
  */
 export async function validateOTP(msisdn: string, otp: string): Promise<OTPResult> {
     return sharedValidateOTP(msisdn, otp);
+}
+
+/**
+ * Check if user has a valid session
+ */
+export async function checkSession(): Promise<boolean> {
+    return sharedCheckSession();
+}
+
+/**
+ * Get stored phone number from server cookie
+ */
+export async function getStoredPhone(): Promise<string | null> {
+    return getStoredPhoneServer();
 }
 
 

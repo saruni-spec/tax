@@ -2,24 +2,24 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, MessageSquare, CheckCircle } from 'lucide-react';
-import { generateOTP, verifyOTP } from '../../actions/payments';
-import { Button, Card, Layout } from '../../_components/Layout';
+import { Loader2, MessageSquare } from 'lucide-react';
+import { generateOTP, validateOTP } from '../actions/auth';
+import { Button, Card, Layout } from '../_components/Layout';
+import { saveUserSession } from '../_lib/session-store';
 
 function OTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const phoneNumber = searchParams.get('number') || '';
+  const phoneNumber = searchParams.get('phone') || searchParams.get('number') || '';
   
-  /* retrieve redirect param */
-  const redirectPath = searchParams.get('redirect') || '/nil/validation';
+  /* retrieve redirect param - default to home */
+  const redirectPath = searchParams.get('redirect') || '/';
 
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   // Auto-send OTP on mount if phone is present in params
   useEffect(() => {
@@ -42,7 +42,7 @@ function OTPContent() {
       if (result.success) {
         setOtpSent(true);
       } else {
-        setError(result.error || 'Failed to send OTP');
+        setError(result.error || result.message || 'Failed to send OTP');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
@@ -59,14 +59,18 @@ function OTPContent() {
     setLoading(true);
     
     try {
-      // First verify OTP
-      const otpResult = await verifyOTP(phoneNumber, otp);
+      // Verify OTP - this also sets the session cookie
+      const otpResult = await validateOTP(phoneNumber, otp);
       
       if (!otpResult.success) {
-        setError(otpResult.error || 'Invalid OTP');
+        setError(otpResult.error || otpResult.message || 'Invalid OTP');
         setLoading(false);
         return;
       }
+      
+      // Save client-side session to sync with server session
+      // This prevents useSessionManager hook from redirecting away
+      saveUserSession({ msisdn: phoneNumber });
       
       // Save phone to localStorage for persistence
       try {
@@ -114,7 +118,7 @@ function OTPContent() {
                <div className="text-xs text-red-800">
                  <p className="font-medium">Missing Information</p>
                  <p className="text-red-700">Phone number is missing from the request. We cannot verify your identity.</p>
-                 <Button onClick={() => router.push(redirectPath)} className="mt-2 text-xs bg-red-600 hover:bg-red-700 w-auto text-white">
+                 <Button onClick={() => router.push('/')} className="mt-2 text-xs bg-red-600 hover:bg-red-700 w-auto text-white">
                    Return Home
                  </Button>
                </div>

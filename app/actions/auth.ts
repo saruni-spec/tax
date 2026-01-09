@@ -187,6 +187,7 @@ export async function checkServerSession(): Promise<boolean> {
     const token = cookieStore.get('etims_auth_token') || cookieStore.get('auth_token');
     
     if (token) {
+      console.log('Token found:', token.value);
       // Sliding expiration: refresh cookies
       const options = {
         httpOnly: true,
@@ -217,7 +218,9 @@ export async function logout(): Promise<void> {
  * Get the stored phone number from session (server-side)
  */
 export async function getStoredPhoneServer(): Promise<string | null> {
+  console.log('getStoredPhoneServer');
     const cookieStore = await cookies();
+    console.log('Stored phone number:', cookieStore.get('phone_Number')?.value );
     return cookieStore.get('phone_Number')?.value || null;
 }
 

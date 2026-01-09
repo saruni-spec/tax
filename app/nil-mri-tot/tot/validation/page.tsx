@@ -26,47 +26,48 @@ function TotValidationContent() {
   useEffect(() => {
     const performSessionCheck = async () => {
       try {
+        // First, try to get phone from various sources if not in URL
+        let currentPhone = phone;
+        
+        if (!currentPhone) {
+          // Try localStorage first
+          try {
+            const localPhone = localStorage.getItem('phone_Number');
+            if (localPhone) {
+              currentPhone = localPhone;
+            }
+          } catch (e) {
+            console.error('Error accessing localStorage', e);
+          }
+        }
+        
+        if (!currentPhone) {
+          // Try server-side cookie
+          const storedPhone = await getStoredPhone();
+          if (storedPhone) {
+            currentPhone = storedPhone;
+          }
+        }
+        
+        // If we found a phone, update URL if needed
+        if (currentPhone && currentPhone !== phone) {
+          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
+          return; // Let the effect re-run with new URL
+        }
+        
+        // Now check session
         const hasSession = await checkSession();
         if (!hasSession) {
           // Redirect to OTP with phone if available
-          const redirectUrl = `/nil-mri-tot/otp?redirect=${encodeURIComponent(pathname)}`;
-          // Try to get phone from multiple sources
-          let phoneToUse = phone;
-          if (!phoneToUse) {
-            try {
-              phoneToUse = localStorage.getItem('phone_Number') || '';
-            } catch (e) {
-              console.error('Error accessing local storage', e);
-            }
+          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
+          if (currentPhone) {
+            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
           }
-          if (phoneToUse) {
-             router.push(`${redirectUrl}&number=${encodeURIComponent(phoneToUse)}`);
-          } else {
-             router.push(redirectUrl);
-          }
+          router.push(redirectUrl);
         } else {
-          // Session exists, check for phone
-          if (!phone) {
-            const storedPhone = await getStoredPhone();
-            if (storedPhone) {
-               const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
-               router.replace(redirectUrl);
-            } else {
-               // Priority 2: Check client-side local storage
-               try {
-                 const localPhone = localStorage.getItem('phone_Number');
-                 if (localPhone) {
-                    const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
-                    router.replace(redirectUrl);
-                    return;
-                 }
-               } catch (e) {
-                 console.error('Error accessing local storage', e);
-               }
-               
-               // No phone found anywhere, redirect to OTP (without number param)
-               router.push(`/nil-mri-tot/otp?redirect=${encodeURIComponent(pathname)}`);
-            }
+          if (!currentPhone) {
+            // No phone anywhere, must go to OTP
+            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
           } else {
             setCheckingSession(false);
           }

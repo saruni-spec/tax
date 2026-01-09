@@ -36,9 +36,9 @@ function NitaPaymentContent() {
       try {
         const hasSession = await checkSession();
         if (!hasSession) {
-          const redirectUrl = `/payments/otp?redirect=${encodeURIComponent(pathname)}`;
+          const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
           if (phoneFromUrl) {
-            router.push(`${redirectUrl}&number=${encodeURIComponent(phoneFromUrl)}`);
+            router.replace(`${redirectUrl}&phone=${encodeURIComponent(phoneFromUrl)}`);
           } else {
             router.push(redirectUrl);
           }

@@ -58,26 +58,14 @@ export function useSessionManager() {
          finalQuery = queryPrefix ? `${queryPrefix}&number=${msisdn}` : `?number=${msisdn}`;
       }
 
-      // Context-Aware Redirection
-      if (pathname?.startsWith('/pin-registration')) {
-         // Redirect to PIN Registration OTP
-         router.push(`/pin-registration/otp${finalQuery}`);
-      } else if (pathname?.startsWith('/nil-mri-tot')) {
-          // Redirect to NIL/MRI/TOT OTP
-          router.push(`/nil-mri-tot/otp${finalQuery}`);
-      } else if (pathname?.startsWith('/payments')) {
-          // Redirect to Payments OTP
-          router.push(`/payments/otp${finalQuery}`); 
-      } else if (pathname?.startsWith('/checkers')) {
-          // Redirect to Checkers OTP
-          router.push(`/checkers/otp${finalQuery}`); 
-      } else if (pathname?.startsWith('/tcc')) {
-          // Redirect to TCC OTP
-          router.push(`/tcc/otp${finalQuery}`); 
-      } else {
-          // Default eTIMS Auth
-          router.push(`/etims/auth${finalQuery}`);
-      }
+      // Context-Aware Redirection - All redirect to shared OTP page
+      // Build the redirect URL with the current path as redirect target
+      const redirectParam = pathname ? `redirect=${encodeURIComponent(pathname)}` : '';
+      const phoneParam = msisdn ? `phone=${encodeURIComponent(msisdn)}` : '';
+      const queryParts = [redirectParam, phoneParam].filter(Boolean);
+      const otpQuery = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+      
+      router.push(`/otp${otpQuery}`);
       return false;
     }
 

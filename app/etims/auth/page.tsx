@@ -12,7 +12,7 @@ const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const phoneNumber = searchParams.get('number') || '';
+  const phoneNumber = searchParams.get('phone') || searchParams.get('number') || '';
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -49,7 +49,7 @@ function AuthContent() {
           return;
         }
         // User is eligible - go to signup
-        router.push(`/etims/auth/signup?number=${encodeURIComponent(msisdn)}`);
+        router.push(`/etims/auth/signup?phone=${encodeURIComponent(msisdn)}`);
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');

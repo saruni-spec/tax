@@ -25,9 +25,9 @@ function EslipPaymentContent() {
       try {
         const hasSession = await checkSession();
         if (!hasSession) {
-          const redirectUrl = `/payments/otp?redirect=${encodeURIComponent(pathname)}`;
+          const redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
           if (phone) {
-            router.push(`${redirectUrl}&number=${encodeURIComponent(phone)}`);
+            router.replace(`${redirectUrl}&phone=${encodeURIComponent(phone)}`);
           } else {
             router.push(redirectUrl);
           }
@@ -48,7 +48,7 @@ function EslipPaymentContent() {
               } catch (e) {
                 console.error('Error accessing local storage', e);
               }
-              router.push(`/payments/otp?redirect=${encodeURIComponent(pathname)}`);
+              router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
             }
           } else {
             setCheckingSession(false);

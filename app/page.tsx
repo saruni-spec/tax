@@ -7,9 +7,9 @@ import { useSearchParams } from "next/navigation";
 // {{phone}} will be replaced with the actual phone number
 const SERVICE_URLS: Record<string, string> = {
   // eTIMS Invoicing
-  "Sales Invoice": "/etims/auth?number={{phone}}",
-  "Credit Note": "/etims/auth?number={{phone}}",
-  "Buyer-Initiated Invoices": "/etims/auth?number={{phone}}",
+  "Sales Invoice": "/etims/auth?phone={{phone}}",
+  "Credit Note": "/etims/auth?phone={{phone}}",
+  "Buyer-Initiated Invoices": "/etims/auth?phone={{phone}}",
   
   // Return Filing
   "NIL Filing": "/nil-mri-tot/nil/validation?phone={{phone}}",
