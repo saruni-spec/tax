@@ -131,7 +131,7 @@ function TotVerifyContent() {
         filingPeriod,
         Number(grandTotal),
         filingMode,
-        action
+       
       );
 
       if (!result.success) {

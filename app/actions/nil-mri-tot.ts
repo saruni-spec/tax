@@ -434,7 +434,7 @@ export async function fileTotReturn(
   returnPeriod: string,
   grossSales: number,
   filingMode: 'Daily' | 'Monthly' | 'daily' | 'monthly',
-  paymentAction: 'file_and_pay' | 'file_only' | 'pay_only'
+ 
 ): Promise<FileReturnResult> {
   try {
     const headers = await getApiHeaders(true);

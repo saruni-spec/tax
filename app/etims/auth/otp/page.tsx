@@ -168,7 +168,7 @@ function OTPContent() {
         )}
 
         <Button onClick={handleVerifyOTP} disabled={loading || !otp}>
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Verifying...</> : 'Verify & Complete'}
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Verifying...</> : 'Continue'}
         </Button>
       </div>
     </Layout>
