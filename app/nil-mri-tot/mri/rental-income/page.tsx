@@ -125,7 +125,7 @@ function MriRentalIncomeContent() {
   // Loading state
   if (checkingObligation) {
     return (
-      <Layout title="MRI Returns" onBack={handleBack}>
+      <Layout title="MRI Returns" onBack={handleBack} showMenu>
         <div className="flex flex-col items-center justify-center p-8 space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-[var(--kra-red)]" />
           <p className="text-gray-600">Checking obligations...</p>
@@ -162,7 +162,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
     };
 
     return (
-      <Layout title="Monthly Rental Income" onBack={handleBack}>
+      <Layout title="Monthly Rental Income" onBack={handleBack} showMenu>
         <div className="space-y-6">
           {/* Info Card */}
           <Card className="p-6 bg-blue-50 border border-blue-200">
@@ -288,7 +288,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
   };
 
   return (
-    <Layout title="MRI Returns" step="Step 2: Rental Income" onBack={handleBack}>
+    <Layout title="MRI Returns" step="Step 2: Rental Income" onBack={handleBack} showMenu>
       <div className="space-y-6">
         {/* Taxpayer Details */}
         <Card className="p-4 space-y-4">

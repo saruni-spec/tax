@@ -88,7 +88,7 @@ export default function KenyanIdentityInput() {
   };
 
   return (
-    <Layout title="Verify Your Identity" onBack={() => router.back()}>
+    <Layout title="Verify Your Identity" onBack={() => router.back()} showMenu>
 
 
       {apiError && (

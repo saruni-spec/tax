@@ -196,7 +196,7 @@ No action is required at this time.`;
   };
 
   return (
-    <Layout title="Back to Taxpayer Validation" onBack={handleBack}>
+    <Layout title="Back to Taxpayer Validation" onBack={handleBack} showMenu>
       <div className="space-y-6">
          {/* Introduction */}
          <div>

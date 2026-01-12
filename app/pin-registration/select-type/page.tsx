@@ -86,7 +86,7 @@ function SelectResidencyTypeContent() {
   }
 
   return (
-    <Layout title="Select Registration Type" onBack={() => router.back()}>
+    <Layout title="Select Registration Type" onBack={() => router.back()} showMenu>
       <div className="space-y-4">
         <button
           onClick={() => router.push(`/pin-registration/kenyan/identity?phone=${encodeURIComponent(phone)}`)}

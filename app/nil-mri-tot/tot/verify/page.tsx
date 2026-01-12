@@ -209,7 +209,7 @@ function TotVerifyContent() {
 
   if (checkingObligation) {
     return (
-      <Layout title="Verify & File TOT" onBack={handleBack}>
+      <Layout title="Verify & File TOT" onBack={handleBack} showMenu>
         <div className="flex flex-col items-center justify-center p-8 space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-[var(--kra-red)]" />
           <p className="text-gray-600">Checking obligations...</p>
@@ -245,7 +245,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
     };
 
     return (
-      <Layout title="Turnover Tax" onBack={handleBack}>
+      <Layout title="Turnover Tax" onBack={handleBack} showMenu>
         <div className="space-y-6">
           {/* Info Card */}
           <Card className="p-6 bg-blue-50 border border-blue-200">
@@ -275,7 +275,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
   }
 
   return (
-    <Layout title="Verify & File TOT" onBack={handleBack}>
+    <Layout title="Verify & File TOT" onBack={handleBack} showMenu>
       <div className="space-y-6">
          {/* Combined Identity & Details Card */}
          <Card className="p-4 space-y-4">

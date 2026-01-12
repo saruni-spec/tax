@@ -119,7 +119,7 @@ function PinCheckerContent() {
   };
 
   return (
-    <Layout title="PIN Checker" onBack={() => router.push('/')}>
+    <Layout title="PIN Checker" onBack={() => router.push('/')} showMenu>
       <div className="space-y-4">
         {/* Header Card */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">

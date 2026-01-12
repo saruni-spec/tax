@@ -87,7 +87,7 @@ export default function NonKenyanIdentityInput() {
   };
 
   return (
-    <Layout title="Verify Your Identity" onBack={() => router.back()}>
+    <Layout title="Verify Your Identity" onBack={() => router.back()} showMenu>
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
         <p className="text-xs text-blue-900">
           <strong>Test Data:</strong> Alien ID: A1234567 | Year: 1988 | Email: test@test.com

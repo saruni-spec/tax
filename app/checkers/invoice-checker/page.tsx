@@ -98,7 +98,7 @@ function InvoiceCheckerContent() {
   };
 
   return (
-    <Layout title="Invoice Number Checker" onBack={() => router.push('/')}>
+    <Layout title="Invoice Number Checker" onBack={() => router.push('/')} showMenu>
       <div className="space-y-4">
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
           <div className="flex items-center gap-3">

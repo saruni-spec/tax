@@ -112,7 +112,7 @@ Complete your registration to receive your PIN certificate.`;
   // If user already has a PIN - show special UI
   if (displayData.existingPin) {
     return (
-      <Layout title="PIN Registration" onBack={() => router.back()}>
+      <Layout title="PIN Registration" onBack={() => router.back()} showMenu>
         <div className="space-y-6">
           {/* Status Card */}
           <Card className="p-6 bg-blue-50 border border-blue-200">
@@ -159,7 +159,7 @@ Complete your registration to receive your PIN certificate.`;
 
   // User is NOT registered - show registration flow
   return (
-    <Layout title="Confirm Your Details" onBack={() => router.back()}>
+    <Layout title="Confirm Your Details" onBack={() => router.back()} showMenu>
       <p className="text-gray-600 mb-6">
         Please verify that the information below is correct
       </p>
