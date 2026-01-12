@@ -253,6 +253,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details</h2>
                <div className="space-y-1">
                  <IdentityStrip label="Name" value={taxpayerInfo?.fullName || 'Unknown'} />
+                 <IdentityStrip label="ID Number" value={taxpayerInfo?.idNumber || 'Unknown'} />
                  <IdentityStrip label="PIN" value={taxpayerInfo?.pin || 'Unknown'} />
                </div>
                <button 
@@ -300,6 +301,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
               <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details Preview</h2>
               <div className="space-y-1">
                 <IdentityStrip label="Name" value={taxpayerInfo.fullName} />
+                <IdentityStrip label="ID Number" value={taxpayerInfo.idNumber} />
                 <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
               </div>
                <button 

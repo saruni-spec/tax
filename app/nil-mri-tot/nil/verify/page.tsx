@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { Layout, Button, Select, Card } from '../../../_components/Layout';
+import { Layout, Button, Select, Card, IdentityStrip } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
@@ -208,18 +208,9 @@ No action is required at this time.`;
             <div>
               <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details Preview</h2>
               <div className="space-y-1">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-medium">Full Name:</span>
-                  <span className="text-gray-900 font-semibold">{taxpayerInfo.fullName}</span>
-                </div>
-                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-medium">ID Number:</span>
-                  <span className="text-gray-900 font-semibold">{taxpayerInfo.idNumber}</span>
-                </div>
-                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-medium">PIN:</span>
-                  <span className="text-gray-900 font-semibold">{taxpayerInfo.pin}</span>
-                </div>
+                <IdentityStrip label="Name" value={taxpayerInfo.fullName} />
+                <IdentityStrip label="ID Number" value={taxpayerInfo.idNumber} />
+                <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
               </div>
 
                <button 
