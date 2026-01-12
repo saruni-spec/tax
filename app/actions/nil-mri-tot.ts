@@ -370,7 +370,7 @@ export async function fileMriReturn(
   taxPayerPin: string,
   returnPeriod: string,
   rentalIncome: number,
-  totalProperties: number = 1
+  totalProperties: number
 ): Promise<FileReturnResult> {
   try {
     const headers = await getApiHeaders(true);
@@ -418,10 +418,14 @@ export async function fileMriReturn(
   } catch (error: any) {
     console.error('File MRI Return Error:', error.response?.data || error.message);
     
+    const errorData = error.response?.data;
+    // API returns ErrorCode with the user-friendly message
+    const errorMessage = errorData?.ErrorCode || errorData?.Message || errorData?.message || errorData?.errors?.detail || 'Failed to file MRI return. Please try again or contact support.';
+    
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file MRI return. Please try again or contact support.',
+      message: errorMessage,
     };
   }
 }
@@ -481,10 +485,14 @@ export async function fileTotReturn(
   } catch (error: any) {
     console.error('File TOT Return Error:', error.response?.data || error.message);
     
+    const errorData = error.response?.data;
+    // API returns ErrorCode with the user-friendly message
+    const errorMessage = errorData?.ErrorCode || errorData?.Message || errorData?.message || errorData?.errors?.detail || 'Failed to file TOT return. Please try again or contact support.';
+    
     return {
       success: false,
       code: error.response?.status || 500,
-      message: error.response?.data?.message || error.response?.data?.errors?.detail || 'Failed to file TOT return. Please try again or contact support.',
+      message: errorMessage,
     };
   }
 }

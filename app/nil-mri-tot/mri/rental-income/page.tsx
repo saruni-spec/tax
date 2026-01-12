@@ -224,11 +224,13 @@ If you have rental income in the future, please contact *KRA* to update your tax
     setPrn('');
     
     try {
+      const no_of_properties = properties.length;
       // 1. File Return
       const result = await fileMriReturn(
         taxpayerInfo.pin,
         filingPeriod,
-        Number(rentalIncome)
+        Number(rentalIncome),
+        Number(no_of_properties)
       );
 
       if (!result.success) {
