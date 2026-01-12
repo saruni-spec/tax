@@ -194,7 +194,7 @@ function NilVerifyContent() {
                 onClick={() => router.push('/nil-mri-tot/nil/validation')}
                 className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
               >
-                Not your details? Go back to validation
+                Not your details? Edit
               </button>
             </div>
          </Card>
