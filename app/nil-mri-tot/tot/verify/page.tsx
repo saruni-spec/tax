@@ -262,12 +262,12 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
             </div>
           </Card>
 
-          {/* Close Button */}
+          {/* Finish Button */}
           <Button 
             onClick={handleClose}
             className="w-full bg-[var(--kra-red)] hover:bg-red-700"
           >
-            Close
+            Finish
           </Button>
         </div>
       </Layout>

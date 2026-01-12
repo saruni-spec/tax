@@ -179,12 +179,12 @@ If you have rental income in the future, please contact *KRA* to update your tax
             </div>
           </Card>
 
-          {/* Close Button */}
+          {/* Finish Button */}
           <Button 
             onClick={handleClose}
             className="w-full bg-[var(--kra-red)] hover:bg-red-700"
           >
-            Close
+            Finish
           </Button>
         </div>
       </Layout>
