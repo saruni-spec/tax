@@ -7,6 +7,7 @@ import { taxpayerStore } from '../_lib/store';
 import { TCC_REASONS, TccReasonKey } from '../_lib/tcc-constants';
 import { guiLookup, submitTccApplication } from '@/app/actions/tcc';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/tcc';
 
 export default function TccVerifyPage() {
   const router = useRouter();
@@ -64,7 +65,25 @@ export default function TccVerifyPage() {
         
         router.push('/tcc/result');
       } else {
-        setError(result.error || 'Failed to submit TCC application');
+        const errorMessage = result.error || 'Failed to submit TCC application';
+        setError(errorMessage);
+        
+        // Send WhatsApp notification about the error
+        
+        const storedPhone = await getStoredPhone();
+        
+        if (storedPhone && taxpayerInfo) {
+          const whatsappMessage = `*TCC Application Status*
+
+Dear *${taxpayerInfo.fullName}*,
+
+${errorMessage}`;
+          
+          await sendWhatsAppMessage({
+            recipientPhone: storedPhone,
+            message: whatsappMessage
+          });
+        }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during submission');

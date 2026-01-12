@@ -8,7 +8,10 @@ import {
   checkServerSession as sharedCheckSession,
   logout as sharedLogout,
   getStoredPhoneServer,
-  OTPResult
+  OTPResult,
+  sendWhatsAppMessage as sharedSendWhatsAppMessage,
+  SendWhatsAppMessageParams,
+  SendWhatsAppMessageResult,
 } from './auth';
 import { cleanPhoneNumber } from '../_lib/utils';
 
@@ -115,6 +118,12 @@ export async function logout(): Promise<void> {
 
 export async function getStoredPhone(): Promise<string | null> {
   return getStoredPhoneServer();
+}
+
+export async function sendWhatsAppMessage(
+  params: SendWhatsAppMessageParams
+): Promise<SendWhatsAppMessageResult> {
+  return sharedSendWhatsAppMessage(params);
 }
 
 // ============= Lookup & Obligations =============
