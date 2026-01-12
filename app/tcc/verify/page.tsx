@@ -118,7 +118,7 @@ ${errorMessage}`;
          {/* Identity & Details Card */}
          <Card className="p-4 space-y-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details</h2>
+              <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details Preview</h2>
               <div className="space-y-1">
                 <IdentityStrip label="Name" value={taxpayerInfo.fullName} />
                 <IdentityStrip label="ID Number" value={taxpayerInfo.idNumber} />

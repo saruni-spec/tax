@@ -174,7 +174,7 @@ function NilVerifyContent() {
          {/* Combined Card */}
          <Card className="p-4 space-y-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details</h2>
+              <h2 className="text-sm font-semibold text-gray-800 mb-2">Taxpayer Details Preview</h2>
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500 font-medium">Full Name:</span>
