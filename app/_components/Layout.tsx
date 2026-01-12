@@ -304,7 +304,7 @@ export function Select({
 }
 
 
-export function TotalsCard({ subtotal, tax, total }: { subtotal: number; tax: number; total: number }) {
+export function TotalsCard({ subtotal, tax, total, taxLabel = 'VAT (16%)' }: { subtotal: number; tax: number; total: number; taxLabel?: string }) {
   const formatCurrency = (amount: number) => `KES ${amount.toLocaleString()}`;
   
   return (
@@ -316,7 +316,7 @@ export function TotalsCard({ subtotal, tax, total }: { subtotal: number; tax: nu
         </div>
         {tax > 0 && (
           <div className="flex justify-between text-xs">
-            <span className="text-gray-600">VAT (16%)</span>
+            <span className="text-gray-600">{taxLabel}</span>
             <span className="text-gray-900">{formatCurrency(tax)}</span>
           </div>
         )}

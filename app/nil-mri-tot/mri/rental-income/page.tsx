@@ -394,6 +394,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
                       subtotal={Number(rentalIncome)}
                       tax={mriTax}
                       total={mriTax}
+                      taxLabel="MRI Tax (10%)"
                    />
                  )}
               </div>
