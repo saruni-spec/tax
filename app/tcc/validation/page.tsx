@@ -132,6 +132,7 @@ function TccValidationContent() {
             />
             
             <YearOfBirthInput 
+            label='Year of Birth'
               value={yob}
               onChange={setYob}
             />
