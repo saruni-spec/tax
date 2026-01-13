@@ -1193,8 +1193,9 @@ const Declarations = () => {
         const items: any[] = [];
         
         // Helper function to map common item structure (keys in snake_case, except hscode)
-        const mapItem = (item: any, itemType: string) => ({
+        const mapItem = (item: any, itemType: string, classificationCode: string) => ({
             type: itemType,
+            classification_code: classificationCode,
             hscode: item.hsCode,
             description: item.description,
             quantity: Number(item.packages) || 0,
@@ -1202,35 +1203,36 @@ const Declarations = () => {
             currency: item.currency
         });
 
-        // Restricted Items
+        // Restricted Items (Code 2)
         if (formData.restrictedItemsList?.length > 0) {
-            items.push(...formData.restrictedItemsList.map((i: any) => mapItem(i, "Restricted Items")));
+            items.push(...formData.restrictedItemsList.map((i: any) => mapItem(i, "restricted_items", "2")));
         }
 
-        // Duty Free Exceeding
+        // Duty Free Exceeding (Code 3)
         if (formData.dutyFreeExceedingList?.length > 0) {
-            items.push(...formData.dutyFreeExceedingList.map((i: any) => mapItem(i, "Duty Free Exceeding")));
+            items.push(...formData.dutyFreeExceedingList.map((i: any) => mapItem(i, "items_exceeding_duty", "3")));
         }
 
-        // Commercial Goods
+        // Commercial Goods (Code 4)
         if (formData.commercialGoodsList?.length > 0) {
-            items.push(...formData.commercialGoodsList.map((i: any) => mapItem(i, "Commercial Goods")));
+            items.push(...formData.commercialGoodsList.map((i: any) => mapItem(i, "commercial_goods", "4")));
         }
 
-        // Dutiable Goods
+        // Dutiable Goods (Code 5)
         if (formData.dutiableGoodsList?.length > 0) {
-            items.push(...formData.dutiableGoodsList.map((i: any) => mapItem(i, "Dutiable Goods")));
+            items.push(...formData.dutiableGoodsList.map((i: any) => mapItem(i, "dutiable_goods", "5")));
         }
 
-        // Gifts
+        // Gifts (Code 6)
         if (formData.giftsList?.length > 0) {
-            items.push(...formData.giftsList.map((i: any) => mapItem(i, "Gifts")));
+            items.push(...formData.giftsList.map((i: any) => mapItem(i, "gifts", "6")));
         }
 
-        // Exceeding $10,000 (currency declaration - different structure)
+        // Exceeding $10,000 (Code 7)
         if (formData.exceeding10000List?.length > 0) {
             items.push(...formData.exceeding10000List.map((i: any) => ({
-                type: "Currency Exceeding $10,000",
+                type: "exceeding_10k",
+                classification_code: "7",
                 currency: i.currency,
                 value_of_fund: Number(i.valueOfFund) || 0,
                 source_of_fund: i.sourceOfFund,
@@ -1238,15 +1240,16 @@ const Declarations = () => {
             })));
         }
 
-        // Exceeding $2,000
+        // Exceeding $2,000 (Code 8)
         if (formData.exceeding2000List?.length > 0) {
-            items.push(...formData.exceeding2000List.map((i: any) => mapItem(i, "Currency Exceeding $2,000")));
+            items.push(...formData.exceeding2000List.map((i: any) => mapItem(i, "exceeding_2k", "8")));
         }
 
-        // Mobile Devices (includes make, model, imei)
+        // Mobile Devices (Code 9)
         if (formData.mobileDevicesList?.length > 0) {
             items.push(...formData.mobileDevicesList.map((i: any) => ({
-                type: "Mobile Devices",
+                type: "mobile_devices",
+                classification_code: "9",
                 hscode: i.hsCode,
                 description: i.description,
                 quantity: Number(i.packages) || 0,
@@ -1258,25 +1261,27 @@ const Declarations = () => {
             })));
         }
 
-        // Filming Equipment
+        // Filming Equipment (Code 10)
         if (formData.filmingEquipmentList?.length > 0) {
-            items.push(...formData.filmingEquipmentList.map((i: any) => mapItem(i, "Filming Equipment")));
+            items.push(...formData.filmingEquipmentList.map((i: any) => mapItem(i, "filming_equipment", "10")));
         }
 
-        // Re-Importation Goods
+        // Re-Importation Goods (Code 11)
         if (formData.reImportationGoodsList?.length > 0) {
             items.push(...formData.reImportationGoodsList.map((i: any) => ({
-                type: "Re-Importation Goods",
+                type: "reimportation_goods",
+                classification_code: "11",
                 certificate_no: i.certificateNo
             })));
         }
 
         console.log("Items to submit:", items);
         
-        if (items.length > 0) {
+        if (items.length > 0 || formData.prohibitedItems === 'Yes') {
             const payload = {
                 ref_no: refNo,
                 items: items,
+                has_prohibited_items: formData.prohibitedItems === 'Yes',
                 compute_assessments: true
             };
             console.log(payload);

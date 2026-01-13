@@ -7,7 +7,7 @@ const BASE_URL = 'https://kratest.pesaflow.com';
 // Helper to handle API errors
 const handleApiError = (error: any) => {
   console.error('API Error:', error.response?.data || error.message);
-  throw new Error(error.response?.data?.message || 'An error occurred while communicating with the server');
+  throw new Error(error.response?.data?.message || error.message || 'An error occurred while communicating with the server');
 };
 
 export async function submitPassengerInfo(data: any) {
@@ -37,6 +37,12 @@ export async function submitDeclarationItems(data: any) {
     const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration`, data);
 
     console.log(response.data);
+    
+    // Check for error in response body explicitly
+    if (response.data && (response.data.errorCode || response.data.errorMessage)) {
+        throw new Error(response.data.errorMessage || `API Error ${response.data.errorCode}`);
+    }
+    
     return response.data;
   } catch (error) {
     handleApiError(error);
