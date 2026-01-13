@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { Layout, IdentityStrip, Button, Input, Card, TotalsCard } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
-import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage, calculateTax } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 function TotVerifyContent() {
@@ -26,6 +26,10 @@ function TotVerifyContent() {
   const [filingPeriod, setFilingPeriod] = useState<string>('');
   const [loadingPeriod, setLoadingPeriod] = useState(false);
   const [periodError, setPeriodError] = useState<string>('');
+  
+  // New state for dynamic calculation
+  const [calculatedTax, setCalculatedTax] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const [hasTotObligation, setHasTotObligation] = useState<boolean | null>(null);
   const [checkingObligation, setCheckingObligation] = useState(true);
@@ -38,6 +42,40 @@ function TotVerifyContent() {
     const year = today.getFullYear();
     return `${day}/${month}/${year}`;
   };
+
+  useEffect(() => {
+    // Debounce calculation
+    const timer = setTimeout(async () => {
+      if (grandTotal && Number(grandTotal) > 0 && filingPeriod && taxpayerInfo?.pin) {
+         setIsCalculating(true);
+         try {
+          console.log('Calculating Tax');
+             // Extract start date from period if hyphenated
+             const result = await calculateTax(
+                 taxpayerInfo.pin,
+                 '8', // TOT Obligation ID
+                 filingMode === 'Daily' ? getTodayDate() : filingPeriod,
+                 Number(grandTotal),
+                 filingMode === 'Daily' ? 'D' : 'M'
+             );
+             
+             if (result.success && result.tax !== undefined) {
+                 setCalculatedTax(result.tax);
+             } else {
+                 setCalculatedTax(0); 
+             }
+         } catch (e) {
+             console.error('Tax calc error', e);
+         } finally {
+             setIsCalculating(false);
+         }
+      } else {
+          setCalculatedTax(0);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [grandTotal, filingPeriod, taxpayerInfo, filingMode]);
 
   // Initialize and Check Obligations
   useEffect(() => {
@@ -381,16 +419,18 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                   type="number"
                   placeholder="Enter amount"
                   required
+                  disabled={!filingPeriod}
                 />
 
                 {Number(grandTotal) > 0 && (
                   <TotalsCard
                     subtotal={Number(grandTotal)}
-                    tax={Number(grandTotal) * 0.03}
-                    total={Number(grandTotal) * 0.03}
-                    taxLabel="TOT Tax (3%)"
+                    tax={calculatedTax}
+                    total={calculatedTax}
+                    taxLabel="TOT Tax"
                   />
                 )}
+                {isCalculating && <p className="text-xs text-blue-600 mt-1">Calculating tax...</p>}
              </div>
           </Card>
 

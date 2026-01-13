@@ -497,6 +497,105 @@ export async function fileTotReturn(
   }
 }
 
+// ============= Tax Calculation =============
+
+export interface CalculateTaxResult {
+  success: boolean;
+  tax?: number;
+  code?: number;
+  message?: string;
+}
+
+/**
+ * Calculate tax amount using the API (calc_only=true)
+ */
+export async function calculateTax(
+  taxPayerPin: string,
+  obligationId: string,
+  returnPeriod: string,
+  amount: number,
+  filingCycle: string = 'M'
+): Promise<CalculateTaxResult> {
+  try {
+    const headers = await getApiHeaders(true);
+    
+    // Parse return period "DD/MM/YYYY - DD/MM/YYYY"
+    let startDate = returnPeriod;
+    let endDate = returnPeriod;
+
+    if (returnPeriod.includes('-')) {
+      const parts = returnPeriod.split('-').map(p => p.trim());
+      if (parts.length >= 2) {
+        startDate = parts[0];
+        endDate = parts[1];
+      }
+    }
+
+    const payload = {
+        tax_payer_pin: taxPayerPin,
+        kra_obligation_id: obligationId,
+        obligation_code: obligationId,
+        start_date: startDate,
+        end_date: endDate,
+        filingCycle: filingCycle,
+        taxable_amount: `${amount}`,
+        calc_only: "true"
+    };
+
+    console.log('Calculating Tax Payload:', payload);
+
+    const response = await axios.post(
+      `${BASE_URL}/file-return`,
+      payload,
+      {
+        headers
+      }
+    );
+
+    const data = response.data;
+    console.log('Calculate Tax Response:', data);
+
+    // Assuming the API returns the calculated tax in a specific field, 
+    // or we might need to inspect the response structure for "calc_only" requests.
+    // Based on typical flows, it might return the tax amount in 'total_tax' or similar.
+    // Let's assume it returns 'tax_due' or check the 'data' object.
+    
+    // ADJUSTMENT: If the user didn't specify WHERE the tax is returned, I'll log it and try to find a reasonable field.
+    // However, usually detailed tax info comes back.
+    // For now, I will assume `data.data.total_tax` or `data.total_tax`.
+    // Let's try to find a 'tax_due' or 'total_tax' in the response.
+    
+    // If the response is success (code 1 or 200) OR if it simply contains the calculation result (tax_due)
+    // The calc_only response doesn't always strictly follow the standard wrapper format.
+    if (
+      data.code === 1 || 
+      data.code === 200 || 
+      data.success === true || 
+      (data.calc_only === 'true' && data.tax_due)
+    ) {
+         const tax = data.tax_due || data.total_tax || data.total_amount || 0;
+         
+         return {
+             success: true,
+             tax: Number(tax),
+             message: data.message || 'Tax calculated successfully'
+         };
+    }
+
+    return {
+      success: false,
+      message: data.message || 'Failed to calculate tax'
+    };
+
+  } catch (error: any) {
+    console.error('Calculate Tax Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to calculate tax'
+    };
+  }
+}
+
 // ============= Properties =============
 
 export interface Property {

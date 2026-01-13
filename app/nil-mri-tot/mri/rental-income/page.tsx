@@ -13,7 +13,8 @@ import {
   generatePrn, 
   makePayment, 
   getStoredPhone,
-  sendWhatsAppMessage
+  sendWhatsAppMessage,
+  calculateTax
 } from '@/app/actions/nil-mri-tot';
 import { Layout, Card, IdentityStrip, Input, Button, TotalsCard } from '@/app/_components/Layout';
 
@@ -39,6 +40,10 @@ function MriRentalIncomeContent() {
   const [loadingPeriod, setLoadingPeriod] = useState(false);
   const [periodError, setPeriodError] = useState<string>('');
 
+  // New state for dynamic calculation
+  const [calculatedTax, setCalculatedTax] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
+
   // Obligation Check state
   const [hasMriObligation, setHasMriObligation] = useState<boolean | null>(null);
   const [checkingObligation, setCheckingObligation] = useState(true);
@@ -52,6 +57,39 @@ function MriRentalIncomeContent() {
       router.push('/nil-mri-tot/mri/validation');
     }
   }, [router]);
+
+  useEffect(() => {
+    // Debounce calculation
+    const timer = setTimeout(async () => {
+      if (rentalIncome && Number(rentalIncome) > 0 && filingPeriod && taxpayerInfo?.pin) {
+         setIsCalculating(true);
+         try {
+             // Extract start date from period if hyphenated
+             const result = await calculateTax(
+                 taxpayerInfo.pin,
+                 '33', // MRI Obligation ID
+                 filingPeriod,
+                 Number(rentalIncome),
+                 'M'
+             );
+             
+             if (result.success && result.tax !== undefined) {
+                 setCalculatedTax(result.tax);
+             } else {
+                 setCalculatedTax(0); 
+             }
+         } catch (e) {
+             console.error('Tax calc error', e);
+         } finally {
+             setIsCalculating(false);
+         }
+      } else {
+          setCalculatedTax(0);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [rentalIncome, filingPeriod, taxpayerInfo]);
 
   // Check Obligation & Fetch Data
   useEffect(() => {
@@ -395,16 +433,18 @@ If you have rental income in the future, please contact *KRA* to update your tax
                     type="number"
                     placeholder="e.g 50000"
                     required
+                    disabled={!filingPeriod}
                  />
 
                  {Number(rentalIncome) > 0 && (
-                   <TotalsCard
+                  <TotalsCard
                       subtotal={Number(rentalIncome)}
-                      tax={mriTax}
-                      total={mriTax}
-                      taxLabel="MRI Tax (10%)"
+                      tax={calculatedTax}
+                      total={calculatedTax}
+                      taxLabel="MRI Tax"
                    />
                  )}
+                 {isCalculating && <p className="text-xs text-blue-600 mt-1">Calculating tax...</p>}
               </div>
             )}
 
