@@ -7,6 +7,7 @@ import { lookupById, checkSession, getStoredPhone } from '@/app/actions/nil-mri-
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
 import { IDInput } from '@/app/_components/KRAInputs';
+import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
 function MriValidationContent() {
   const router = useRouter();
@@ -144,12 +145,12 @@ function MriValidationContent() {
                 helperText="Enter 6-8 digit National ID"
               />
 
-               <Input 
+               <YearOfBirthInput
                 label="Year of Birth"
                 value={yob}
                 onChange={(val) => setYob(val.replace(/\D/g, '').slice(0, 4))}
-                placeholder="e.g., 1990"
-                type="tel"
+              
+          
               />
 
               {error && (
