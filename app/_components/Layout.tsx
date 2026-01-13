@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { ArrowLeft, Menu, Home, LogOut, Headphones, CheckCircle } from 'lucide-react';
 
 import { useSessionManager } from '../_lib/useSession';
-import { clearUserSession, getKnownPhone } from '../_lib/session-store';
+import { clearUserSession, getKnownPhone, isSessionValid } from '../_lib/session-store';
 
 
 interface LayoutProps {
@@ -30,9 +30,11 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   const router = useRouter();
   const pathname = usePathname();
   const [internalPhone, setInternalPhone] = useState<string | null>(null);
+  const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
    setInternalPhone(getKnownPhone());
+   setHasSession(isSessionValid());
   }, []);
   
   // Session management - auto-refresh and timeout handling
@@ -50,6 +52,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
     if (pathname.startsWith('/pin-registration')) return '/pin-registration';
     if (pathname.startsWith('/tcc')) return '/tcc';
     if (pathname.startsWith('/etims')) return '/etims';
+    if (pathname.startsWith('/f88')) return '/f88';
     return '/'; // Default to home
   };
 
@@ -153,13 +156,15 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
                 <Headphones className="w-4 h-4" />
                 Connect Agent
               </button>
-              <button 
-                onClick={handleLogout}
-                className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-red-700 font-medium text-[10px]"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+              {hasSession && (
+                <button 
+                  onClick={handleLogout}
+                  className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-red-700 font-medium text-[10px]"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>

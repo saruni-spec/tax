@@ -236,7 +236,7 @@ No action is required at this time.`;
             {loadingObligations ? (
               <div className="flex items-center text-gray-500 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Fetching obligations...</span>
+               
               </div>
             ) : obligations.length === 0 ? (
               <>
@@ -273,7 +273,7 @@ No action is required at this time.`;
                 {loadingPeriod ? (
                   <div className="flex items-center text-gray-500 gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Fetching filing period...</span>
+                  
                   </div>
                 ) : filingPeriod ? (
                   <div className="flex flex-col">
