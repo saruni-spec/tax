@@ -20,65 +20,36 @@ function PinCheckerContent() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
 
-  // Check session on mount
+  // Load phone on mount (no session check required)
   useEffect(() => {
-    const performSessionCheck = async () => {
+    const loadPhone = async () => {
       try {
-        // First, try to get phone from various sources if not in URL
         let currentPhone = urlPhone;
         
         if (!currentPhone) {
-          // Try localStorage first
           try {
             const localPhone = localStorage.getItem('phone_Number');
-            if (localPhone) {
-              currentPhone = localPhone;
-            }
-          } catch (e) {
-            console.error('Error accessing localStorage', e);
-          }
+            if (localPhone) currentPhone = localPhone;
+          } catch (e) {}
         }
         
         if (!currentPhone) {
-          // Try server-side cookie
           const storedPhone = await getStoredPhone();
-          if (storedPhone) {
-            currentPhone = storedPhone;
-          }
+          if (storedPhone) currentPhone = storedPhone;
         }
         
-        // If we found a phone, update state and URL
-        if (currentPhone && currentPhone !== urlPhone) {
+        if (currentPhone) {
           setPhone(currentPhone);
-          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-        } else if (currentPhone) {
-          setPhone(currentPhone);
-        }
-        
-        // Now check session
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          // Redirect to OTP with phone if available
-          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) {
-            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
-          }
-          router.push(redirectUrl);
-        } else {
-          if (!currentPhone) {
-            // No phone anywhere, must go to OTP
-            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-          } else {
-            setCheckingSession(false);
+          if (currentPhone !== urlPhone) {
+            router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
           }
         }
-      } catch (err) {
-        console.error('Session check failed', err);
+      } finally {
         setCheckingSession(false);
       }
     };
     
-    performSessionCheck();
+    loadPhone();
   }, [pathname, urlPhone, router]);
 
   if (checkingSession) {

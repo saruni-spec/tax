@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { Layout, IdentityStrip, Button, Input, Card } from '../../../_components/Layout';
+import { Layout, IdentityStrip, Button, Input, Card, TotalsCard } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -382,6 +382,15 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                   placeholder="Enter amount"
                   required
                 />
+
+                {Number(grandTotal) > 0 && (
+                  <TotalsCard
+                    subtotal={Number(grandTotal)}
+                    tax={Number(grandTotal) * 0.03}
+                    total={Number(grandTotal) * 0.03}
+                    taxLabel="TOT Tax (3%)"
+                  />
+                )}
              </div>
           </Card>
 
@@ -401,6 +410,26 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
 
           {/* Action Buttons - Conditional based on filing mode */}
           <div className="space-y-3 pt-2">
+             {/* Finish button for Monthly mode with no filing period */}
+             {filingMode === 'Monthly' && !loadingPeriod && !filingPeriod && (
+               <Button 
+                  onClick={async () => {
+                    const storedPhone = await getStoredPhone();
+                    if (storedPhone && taxpayerInfo) {
+                      const message = `*Turnover Tax Status*\n\nDear *${taxpayerInfo.fullName}*,\nYour PIN: *${taxpayerInfo.pin}* currently has no available filing period for Turnover Tax (TOT).\n\n${periodError || 'No filing is required at this time.'}\n\nPlease try again later or contact KRA for assistance.`;
+                      await sendWhatsAppMessage({
+                        recipientPhone: storedPhone,
+                        message: message
+                      });
+                    }
+                    router.push('/');
+                  }}
+                  className="w-full bg-[var(--kra-red)] hover:bg-red-700"
+               >
+                  Finish
+               </Button>
+             )}
+
              {filingMode === 'Daily' ? (
                 // Daily: Pay Now only
                 <Button 
@@ -411,8 +440,8 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                    Pay Now
                 </Button>
-             ) : (
-                // Monthly: File & Pay + File Only
+             ) : filingPeriod ? (
+                // Monthly with valid period: File & Pay + File Only
                 <>
                   <Button 
                     onClick={() => handleFileReturn('file_and_pay')}
@@ -431,7 +460,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                      File Only
                   </Button>
                 </>
-             )}
+             ) : null}
           </div>
       </div>
     </Layout>

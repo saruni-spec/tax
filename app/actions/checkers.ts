@@ -147,7 +147,7 @@ export async function initSession(msisdn: string): Promise<{ success: boolean; e
   const cleanNumber = cleanPhoneNumber(msisdn);
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     await axios.post(
       `${BASE_URL}/ussd/init`,
       { msisdn: cleanNumber },
@@ -174,7 +174,7 @@ export async function checkPin(pinNumber: string): Promise<PinCheckerResult> {
   }
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     const response = await axios.get(
       `${BASE_URL}/taxpayer/pin-checker`,
       { 
@@ -221,7 +221,7 @@ export async function checkStaff(nationalId: string): Promise<StaffCheckerResult
   }
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     const response = await axios.get(
       `${BASE_URL}/taxpayer/staff-checker`,
       { 
@@ -274,7 +274,7 @@ export async function checkTcc(kraPin: string, tccNumber: string): Promise<TccCh
   }
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     const response = await axios.get(
       `${BASE_URL}/itax/validate-tcc`,
       { 
@@ -324,7 +324,7 @@ export async function checkImportCertificate(certificateNo: string): Promise<Imp
   }
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     const response = await axios.get(
       `${BASE_URL}/taxpayer/import-certificate`,
       { 
@@ -372,7 +372,7 @@ export async function checkInvoice(invoiceNumber: string): Promise<InvoiceChecke
   }
 
   try {
-    const headers = await getApiHeaders(true);
+    const headers = await getApiHeaders(false);
     const response = await axios.get(
       `${BASE_URL}/invoice-number-checker`,
       { 

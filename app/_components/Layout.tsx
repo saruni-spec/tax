@@ -16,6 +16,7 @@ interface LayoutProps {
   showMenu?: boolean;
   showHeader?: boolean;
   showFooter?: boolean;
+  phone?: string;
 }
 
 function SessionController() {
@@ -25,19 +26,21 @@ function SessionController() {
 
 
 
-export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true }: LayoutProps) {
+export function Layout({ children, title, step, onBack, showMenu = false, showHeader = true, showFooter = true, phone }: LayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [phone, setPhone] = useState<string | null>(null);
+  const [internalPhone, setInternalPhone] = useState<string | null>(null);
 
   useEffect(() => {
-   setPhone(getKnownPhone());
+   setInternalPhone(getKnownPhone());
   }, []);
   
   // Session management - auto-refresh and timeout handling
   // usage moved to SessionController wrapped in Suspense
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const isF88 = pathname?.startsWith('/f88');
+  const activePhone = phone || internalPhone;
 
   // Get the base page for the current route
   const getBasePage = (): string => {
@@ -51,22 +54,27 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
   };
 
   const handleMenuClick = () => {
+   
     const basePage = getBasePage();
     router.push(basePage);
   };
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to logout?')) {
+    const message = isF88 ? 'Are you sure you want to go back to main menu?' : 'Are you sure you want to logout?';
+    if (confirm(message)) {
+      if (isF88) {
+         handleMenuClick();
+         return;
+      }
+
       // Get msisdn before clearing so user can easily re-login
       const session = typeof window !== 'undefined' ? sessionStorage.getItem('etims_user_session') : null;
-      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || phone || getKnownPhone();
+      const msisdn = (session ? JSON.parse(session)?.msisdn : null) || internalPhone || getKnownPhone();
 
       
       clearUserSession();
       sessionStorage.clear();
       
-     
-     
       const message = encodeURIComponent('Main menu');
       // Open WhatsApp with pre-filled message
       window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
@@ -136,7 +144,7 @@ export function Layout({ children, title, step, onBack, showMenu = false, showHe
                 className="flex flex-col items-center justify-center gap-0.5 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium text-[10px]"
               >
                 <Home className="w-4 h-4" />
-                Main Menu
+                {isF88 ? 'Home' : 'Main Menu'}
               </button>
               <button 
                 onClick={handleConnectAgent}

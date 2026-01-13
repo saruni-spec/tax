@@ -20,7 +20,7 @@ const SERVICE_URLS: Record<string, string> = {
   "PIN Registration": "/pin-registration?phone={{phone}}",
   
   // Customs Services
-  "F88 Declaration": "https://f88-web.vercel.app?phone={{phone}}",
+  "F88 Declaration": "/f88?phone={{phone}}",
   "eSlip": "/payments/eslip/payment?phone={{phone}}",
   "NITA": "/payments/nita/payment?phone={{phone}}",
   "AHL": "/payments/ahl/payment?phone={{phone}}",

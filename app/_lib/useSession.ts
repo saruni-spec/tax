@@ -13,7 +13,11 @@ const PUBLIC_PATHS = [
     '*/auth/signup', 
     '*/auth/otp',
     '*/otp',
+    '*/otp',
     '/',
+    '/f88',
+    '*/checkers',
+    '*/checkers/*',
     // We do NOT include '*/pin-registration' here so checkSession runs and handles redirection
 ];
 

@@ -20,8 +20,9 @@ function KnowYourStationContent() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
 
+  // Load phone on mount (no session check required)
   useEffect(() => {
-    const performSessionCheck = async () => {
+    const loadPhone = async () => {
       try {
         let currentPhone = urlPhone;
         
@@ -29,9 +30,7 @@ function KnowYourStationContent() {
           try {
             const localPhone = localStorage.getItem('phone_Number');
             if (localPhone) currentPhone = localPhone;
-          } catch (e) {
-            console.error('Error accessing localStorage', e);
-          }
+          } catch (e) {}
         }
         
         if (!currentPhone) {
@@ -39,32 +38,18 @@ function KnowYourStationContent() {
           if (storedPhone) currentPhone = storedPhone;
         }
         
-        if (currentPhone && currentPhone !== urlPhone) {
+        if (currentPhone) {
           setPhone(currentPhone);
-          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-        } else if (currentPhone) {
-          setPhone(currentPhone);
-        }
-        
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
-          router.push(redirectUrl);
-        } else {
-          if (!currentPhone) {
-            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-          } else {
-            setCheckingSession(false);
+          if (currentPhone !== urlPhone) {
+            router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
           }
         }
-      } catch (err) {
-        console.error('Session check failed', err);
+      } finally {
         setCheckingSession(false);
       }
     };
     
-    performSessionCheck();
+    loadPhone();
   }, [pathname, urlPhone, router]);
 
   if (checkingSession) {

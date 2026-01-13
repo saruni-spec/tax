@@ -309,17 +309,19 @@ No action is required at this time.`;
               </div>
             )}
 
-            <Button 
-              onClick={handleFileReturn}
-              disabled={!selectedObligation || !filingPeriod || loading}
-              className="mt-2"
-            >
-              {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin inline mr-1" /> Filing...</>
-              ) : (
-                'File NIL Return'
-              )}
-            </Button>
+            {obligations.length > 0 && (
+              <Button 
+                onClick={handleFileReturn}
+                disabled={!selectedObligation || !filingPeriod || loading}
+                className="mt-2"
+              >
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin inline mr-1" /> Filing...</>
+                ) : (
+                  'File NIL Return'
+                )}
+              </Button>
+            )}
          </div>
       </div>
     </Layout>
