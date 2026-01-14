@@ -319,12 +319,6 @@ export function TotalsCard({ subtotal, tax, total, taxLabel = 'VAT (16%)' }: { s
     <Card className="bg-gray-50">
       <div className="space-y-1">
        
-        {tax > 0 && (
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">{taxLabel}</span>
-            <span className="text-gray-900">{formatCurrency(tax)}</span>
-          </div>
-        )}
         <div className="border-t pt-1 flex justify-between font-medium text-sm">
           <span className="text-gray-900">Total Tax Due</span>
           <span className="text-[var(--kra-red)]">{formatCurrency(total)}</span>
