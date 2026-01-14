@@ -53,6 +53,7 @@ export interface FileReturnResult {
   code: number;
   message: string;
   receiptNumber?: string;
+  prn?: string;
 }
 
 export interface LookupByIdResult {
@@ -526,7 +527,20 @@ export async function fileTotReturn(
     );
 
     const data = response.data;
+
+    console.log(data)
     
+    // Check for TOT specific nested response structure
+    if (data.response && (data.response.Status === 'OK' || data.response.ResponseCode === '87000')) {
+        return {
+            success: true,
+            code: 200,
+            message: data.response.Message || 'TOT Return filed successfully',
+            receiptNumber: data.response.AckNumber || data.kra_account_number,
+            prn: data.response.PRN || data.prn
+        };
+    }
+
     return {
       success: data.code === 1 || data.code === 200 || data.success === true,
       code: data.code || 200,

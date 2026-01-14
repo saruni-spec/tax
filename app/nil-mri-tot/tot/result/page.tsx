@@ -87,11 +87,6 @@ export default function TotResultPage() {
           </button>
         </div>
 
-        {/* Quick Menu */}
-        <div className="pt-4 border-t border-gray-100 mt-4">
-          <p className="text-xs text-gray-500 mb-3 text-center">Quick Actions</p>
-          <QuickMenu />
-        </div>
       </div>
     </Layout>
   );

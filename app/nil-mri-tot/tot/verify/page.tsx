@@ -176,6 +176,7 @@ function TotVerifyContent() {
         filingMode,
        
       );
+      console.log('File TOT Return Result', result);
 
       if (!result.success) {
         setError(result.message || 'Failed to file TOT return');
@@ -197,40 +198,52 @@ function TotVerifyContent() {
       if (action === 'file_and_pay' || action === 'pay_only') {
           setPaymentStatus('Generating PRN...');
           
-          const [from, to] = filingPeriod.split(' - ');
-          const taxPayable = (Number(grandTotal) * 0.03).toFixed(2);
-
-          const prnRes = await generatePrn(
-             taxpayerInfo.pin,
-             '8', // TOT Obligation
-             from,
-             to,
-             taxPayable
-          );
-
-          if (!prnRes.success || !prnRes.prn) {
-             setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
-             setLoading(false);
-             return;
+          let prnValue = '';
+          // Check if PRN was returned from filing (only for file_and_pay and if it was a file action)
+          if (action === 'file_and_pay' && 'prn' in result && result.prn) {
+             prnValue = result.prn;
+             console.log('Using PRN from filing:', prnValue);
           }
 
-          setPrn(prnRes.prn);
+          if (!prnValue) {
+              const [from, to] = filingPeriod.split(' - ');
+              const taxPayable = (Number(grandTotal) * 0.03).toFixed(2);
+    
+              const prnRes = await generatePrn(
+                 taxpayerInfo.pin,
+                 '8', // TOT Obligation
+                 from,
+                 to,
+                 taxPayable
+              );
+    
+              console.log(prnRes)
+    
+              if (!prnRes.success || !prnRes.prn) {
+                 setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
+                 setLoading(false);
+                 return;
+              }
+              prnValue = prnRes.prn;
+          }
+
+          setPrn(prnValue);
           setPaymentStatus('Initiating Payment...');
 
           // 3. Make Payment
           const storedPhone = await getStoredPhone();
           if (storedPhone) {
-             const payRes = await makePayment(storedPhone, prnRes.prn);
+             const payRes = await makePayment(storedPhone, prnValue);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
                 setTimeout(() => {
                    router.push('/nil-mri-tot/tot/result');
                 }, 2000);
              } else {
-                setError(`PRN generated (${prnRes.prn}), but payment failed: ${payRes.message}`);
+                setError(`PRN generated (${prnValue}), but payment failed: ${payRes.message}`);
              }
           } else {
-             setError(`PRN generated (${prnRes.prn}), but phone number not found for payment.`);
+             setError(`PRN generated (${prnValue}), but phone number not found for payment.`);
           }
       }
 
