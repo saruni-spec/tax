@@ -176,7 +176,7 @@ function TotVerifyContent() {
         filingMode,
        
       );
-      console.log('File TOT Return Result', result);
+     
 
       if (!result.success) {
         setError(result.message || 'Failed to file TOT return');
@@ -200,7 +200,7 @@ function TotVerifyContent() {
           
           let prnValue = '';
           // Check if PRN was returned from filing (only for file_and_pay and if it was a file action)
-          if (action === 'file_and_pay' && 'prn' in result && result.prn) {
+          if ((action === 'file_and_pay' || action === 'pay_only') && 'prn' in result && result.prn) {
              prnValue = result.prn;
              console.log('Using PRN from filing:', prnValue);
           }
@@ -217,7 +217,7 @@ function TotVerifyContent() {
                  taxPayable
               );
     
-              console.log(prnRes)
+             
     
               if (!prnRes.success || !prnRes.prn) {
                  setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
@@ -232,6 +232,11 @@ function TotVerifyContent() {
 
           // 3. Make Payment
           const storedPhone = await getStoredPhone();
+          
+          // Always set store data before potential redirect
+          taxpayerStore.setPrn(prnValue);
+          if (calculatedTax > 0) taxpayerStore.setTaxAmount(calculatedTax);
+          
           if (storedPhone) {
              const payRes = await makePayment(storedPhone, prnValue);
              if (payRes.success) {
@@ -240,10 +245,20 @@ function TotVerifyContent() {
                    router.push('/nil-mri-tot/tot/result');
                 }, 2000);
              } else {
-                setError(`PRN generated (${prnValue}), but payment failed: ${payRes.message}`);
+                // Payment failed, but PRN is valid. Redirect to result to show PRN.
+                console.warn('Payment initiation failed, redirecting to result with PRN');
+                
+                // Send WhatsApp message with PRN
+                await sendWhatsAppMessage({
+                  recipientPhone: storedPhone,
+                  message: `*TOT Return Filed*\n\nYour Turnover Tax return has been filed.\n\nPRN: *${prnValue}*\nAmount: KES ${calculatedTax}\n\nPlease pay via M-Pesa Paybill 222222, Account: ${prnValue}`
+                });
+
+                router.push('/nil-mri-tot/tot/result');
              }
           } else {
-             setError(`PRN generated (${prnValue}), but phone number not found for payment.`);
+             // No phone found, redirect to result with PRN
+             router.push('/nil-mri-tot/tot/result');
           }
       }
 

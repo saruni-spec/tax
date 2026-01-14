@@ -54,9 +54,20 @@ export default function TotResultPage() {
 
                {/* Tax Amount Display */}
                {taxpayerInfo?.taxAmount > 0 && (
-                <div className="mt-2 bg-white/60 px-4 py-2 rounded-lg inline-block border border-green-200">
+                <div className="mt-2 bg-white/60 px-4 py-2 rounded-lg inline-block border border-green-200 ml-2">
                    <p className="text-xs text-green-600 uppercase font-semibold">Tax Paid</p>
                    <p className="text-lg font-mono text-green-800">KES {taxpayerInfo.taxAmount.toLocaleString()}</p>
+                </div>
+              )}
+
+              {/* PRN Display */}
+              {taxpayerInfo?.prn && (
+                <div className="mt-4 block">
+                    <div className="bg-yellow-50 px-4 py-3 rounded-lg border border-yellow-200">
+                        <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
+                        <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
+                        <p className="text-xs text-yellow-700 mt-2">Use this PRN to pay</p>
+                    </div>
                 </div>
               )}
             </div>

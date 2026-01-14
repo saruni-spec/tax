@@ -541,6 +541,17 @@ export async function fileTotReturn(
         };
     }
 
+    // Check for TOT Daily response format (root level keys)
+    if (data.prn && data.tax_due) {
+        return {
+            success: true,
+            code: 200,
+            message: 'TOT Return filed successfully',
+            receiptNumber: data.receipt_number || `TOT-${Date.now()}`,
+            prn: data.prn
+        };
+    }
+
     return {
       success: data.code === 1 || data.code === 200 || data.success === true,
       code: data.code || 200,

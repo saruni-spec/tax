@@ -14,6 +14,7 @@ class TaxpayerStore {
     paymentType?: 'file-only' | 'file-and-pay' | 'pay-now';
     receiptNumber?: string;
     taxAmount?: number;
+    prn?: string;
   } = {
     msisdn: '',
     idNumber: '',
@@ -60,6 +61,10 @@ class TaxpayerStore {
 
   setReceiptNumber(receiptNumber: string) {
     this.data.receiptNumber = receiptNumber;
+  }
+
+  setPrn(prn: string) {
+    this.data.prn = prn;
   }
 
   setTaxAmount(amount: number) {
