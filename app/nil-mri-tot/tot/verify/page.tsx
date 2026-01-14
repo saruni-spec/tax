@@ -495,7 +495,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                 </Button>
              ) : filingPeriod ? (
                 // Monthly with valid period: File & Pay + File Only
-                <>
+                <div className="grid grid-cols-2 gap-3">
                   <Button 
                     onClick={() => handleFileReturn('file_and_pay')}
                     disabled={loading || !grandTotal || !filingPeriod}
@@ -512,7 +512,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                   >
                      File Only
                   </Button>
-                </>
+               </div>
              ) : null}
           </div>
       </div>
