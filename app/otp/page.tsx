@@ -15,6 +15,25 @@ function OTPContent() {
   /* retrieve redirect param - default to home */
   const redirectPath = searchParams.get('redirect') || '/';
 
+  /**
+   * Get human-readable service name from redirect path
+   */
+  const getServiceName = (path: string): string | null => {
+    const pathLower = path.toLowerCase();
+    
+    if (pathLower.includes('/nil/')) return 'NIL Returns';
+    if (pathLower.includes('/mri/')) return 'Monthly Rental Income';
+    if (pathLower.includes('/tot/')) return 'Turnover Tax';
+    if (pathLower.includes('/tcc/')) return 'Tax Compliance Certificate';
+    if (pathLower.includes('/payroll')) return 'Payroll';
+    if (pathLower.includes('/customs')) return 'Customs';
+    if (pathLower.includes('/invoice')) return 'e-Invoicing';
+    
+    return null;
+  };
+
+  const serviceName = getServiceName(redirectPath);
+
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -106,7 +125,9 @@ function OTPContent() {
 
         {/* Header */}
         <div className="bg-[var(--kra-black)] rounded-xl p-4 text-white">
-          <h1 className="text-base font-semibold">OTP Verification</h1>
+          <h1 className="text-base font-semibold">
+            OTP Verification{serviceName && <span className="text-gray-300"> for {serviceName}</span>}
+          </h1>
           <p className="text-gray-400 text-xs">Verify phone number</p>
         </div>
 

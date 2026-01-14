@@ -57,7 +57,7 @@ export default function KenyanIdentityInput() {
 
     try {
       // Lookup ID to validate and get taxpayer details
-      const result = await lookupById(formData.nationalId, phoneNumber, formData.yearOfBirth);
+      const result = await lookupById(formData.nationalId, phoneNumber, formData.yearOfBirth,formData.firstName);
       
       if (result.success) {
         // Save registration data with validated info

@@ -96,7 +96,7 @@ export async function getStoredPhone(): Promise<string | null> {
 /**
  * Lookup user details by ID number using lookup API
  */
-export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string): Promise<LookupByIdResult> {
+export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string,name?:string): Promise<LookupByIdResult> {
   if (!idNumber || idNumber.trim().length < 6) {
     return { success: false, error: 'ID number must be at least 6 characters' };
   }
@@ -135,8 +135,17 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
       
       // Validate Year of Birth
       const returnedYob = response.data.yob ? response.data.yob.toString() : '';
+      const returnedName = response.data.name
+      const firstName=returnedName.split(' ')[0];
       
       if (returnedYob !== yearOfBirth.trim()) {
+        return {
+          success: false,
+          error: `Some of your information didnt match. Please check your details and try again`
+        };
+      }
+
+      if (name && (firstName.toLowerCase() !== name.toLowerCase())) {
         return {
           success: false,
           error: `Some of your information didnt match. Please check your details and try again`
