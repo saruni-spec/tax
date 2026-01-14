@@ -17,6 +17,7 @@ import {
 } from '../actions/customs';
 import { Layout } from '../_components/Layout';
 import { PINInput } from '../_components/KRAInputs';
+import { DateInput } from '../_components/YearOfBirthInput';
 
 // Form Context
 const FormContext = createContext<any>(null);
@@ -180,104 +181,6 @@ const FormProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 
-
-// Reusable Date Input Component (DD/MM/YYYY format)
-interface DateInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  label: string;
-  required?: boolean;
-  error?: string;
-  minDate?: Date;
-  maxDate?: Date;
-  placeholder?: string;
-}
-
-const DateInput = ({ 
-  value, 
-  onChange, 
-  label, 
-  required = false, 
-  error, 
-  minDate, 
-  maxDate,
-  placeholder = "DD/MM/YYYY" 
-}: DateInputProps) => {
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value;
-    
-    // Remove any non-digit/non-slash characters
-    val = val.replace(/[^\d/]/g, '');
-    
-    // Auto-add slashes for better UX
-    if (val.length === 2 && !val.includes('/')) {
-      val = val + '/';
-    } else if (val.length === 5 && val.split('/').length === 2) {
-      val = val + '/';
-    }
-    
-    // Limit to 10 characters (DD/MM/YYYY)
-    if (val.length <= 10) {
-      onChange(val);
-    }
-  };
-
-  // Validate date is within min/max range
-  const validateDate = (dateStr: string): string | null => {
-    if (!dateStr) return null;
-    
-    // Accept flexible format: D/M/YYYY, DD/M/YYYY, D/MM/YYYY, DD/MM/YYYY
-    const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-    const match = dateStr.match(datePattern);
-    
-    if (!match) return null; // Don't show error while user is still typing
-    
-    const day = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10);
-    const year = parseInt(match[3], 10);
-    
-    // Basic validation
-    if (month < 1 || month > 12) return 'Invalid month';
-    if (day < 1 || day > 31) return 'Invalid day';
-    
-    const date = new Date(year, month - 1, day);
-    
-    // Check if date is valid (handles things like Feb 30)
-    if (isNaN(date.getTime()) || date.getDate() !== day) return 'Invalid date';
-    
-    if (minDate && date < minDate) {
-      return `Date must be after ${minDate.toLocaleDateString('en-GB')}`;
-    }
-    
-    if (maxDate && date > maxDate) {
-      return `Date must be before ${maxDate.toLocaleDateString('en-GB')}`;
-    }
-    
-    return null;
-  };
-
-  const dateError = validateDate(value);
-  const displayError = error || dateError;
-
-  return (
-    <div>
-      <label className="block text-xs font-medium mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        className={`w-full px-3 py-2 border rounded-md ${
-          displayError ? 'border-red-300' : 'border-gray-300'
-        }`}
-      />
-      {displayError && <p className="text-red-500 text-xs mt-1">{displayError}</p>}
-    </div>
-  );
-};
 
 const LandingPage = () => {
   const { startApplication, loading } = useFormContext();
@@ -884,36 +787,16 @@ const PassengerInformation = () => {
 
         {/* DOB and Gender row */}
         <div className="grid grid-cols-2 gap-3">
-          {/* TEMPORARILY REPLACED for testing - original DateInput below */}
-          {/* <DateInput
+          
+          <DateInput
             label="Date of Birth"
             required
             value={formData.dateOfBirth}
             onChange={(val) => updateFormData({ dateOfBirth: val })}
             error={errors.dateOfBirth}
             maxDate={new Date()}
-          /> */}
-          <div>
-            <label className="block text-xs font-medium mb-1">Date of Birth <span className="text-red-500">*</span></label>
-            <input
-              type="date"
-              value={formData.dateOfBirthNative || ''}
-              onChange={(e) => {
-                const dateVal = e.target.value;
-                // Convert YYYY-MM-DD to DD/MM/YYYY for consistency
-                if (dateVal) {
-                  const [year, month, day] = dateVal.split('-');
-                  updateFormData({ 
-                    dateOfBirthNative: dateVal,
-                    dateOfBirth: `${day}/${month}/${year}`
-                  });
-                }
-              }}
-              max={new Date().toISOString().split('T')[0]}
-              className={`w-full px-2 py-1.5 border rounded text-sm ${errors.dateOfBirth ? 'border-red-300' : 'border-gray-300'}`}
-            />
-            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-0.5">{errors.dateOfBirth}</p>}
-          </div>
+          />
+          
           <div>
             <label className="block text-xs font-medium mb-1">Gender <span className="text-red-500">*</span></label>
             <div className="flex gap-2">

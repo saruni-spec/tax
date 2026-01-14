@@ -94,3 +94,110 @@ export const isValidYearOfBirth = (year: string): boolean => {
   const currentYear = new Date().getFullYear();
   return yearNum >= 1900 && yearNum <= currentYear - 10;
 };
+
+
+
+// Reusable Date Input Component (uses native date picker, outputs DD/MM/YYYY format)
+interface DateInputProps {
+  value: string; // DD/MM/YYYY format
+  onChange: (value: string) => void;
+  label: string;
+  required?: boolean;
+  error?: string;
+  minDate?: Date;
+  maxDate?: Date;
+  placeholder?: string;
+}
+
+export const DateInput = ({ 
+  value, 
+  onChange, 
+  label, 
+  required = false, 
+  error, 
+  minDate, 
+  maxDate,
+}: DateInputProps) => {
+  
+  // Convert DD/MM/YYYY to YYYY-MM-DD for native input
+  const toNativeFormat = (ddmmyyyy: string): string => {
+    if (!ddmmyyyy) return '';
+    const parts = ddmmyyyy.split('/');
+    if (parts.length !== 3) return '';
+    const [day, month, year] = parts;
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  // Convert YYYY-MM-DD to DD/MM/YYYY for output
+  const toDisplayFormat = (yyyymmdd: string): string => {
+    if (!yyyymmdd) return '';
+    const [year, month, day] = yyyymmdd.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nativeValue = e.target.value;
+    if (nativeValue) {
+      onChange(toDisplayFormat(nativeValue));
+    } else {
+      onChange('');
+    }
+  };
+
+  // Validate date is within min/max range
+  const validateDate = (dateStr: string): string | null => {
+    if (!dateStr) return null;
+    
+    const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+    const match = dateStr.match(datePattern);
+    
+    if (!match) return null;
+    
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    
+    if (month < 1 || month > 12) return 'Invalid month';
+    if (day < 1 || day > 31) return 'Invalid day';
+    
+    const date = new Date(year, month - 1, day);
+    
+    if (isNaN(date.getTime()) || date.getDate() !== day) return 'Invalid date';
+    
+    if (minDate && date < minDate) {
+      return `Date must be after ${minDate.toLocaleDateString('en-GB')}`;
+    }
+    
+    if (maxDate && date > maxDate) {
+      return `Date must be before ${maxDate.toLocaleDateString('en-GB')}`;
+    }
+    
+    return null;
+  };
+
+  const dateError = validateDate(value);
+  const displayError = error || dateError;
+  
+  // Convert min/max dates to native format
+  const minValue = minDate ? minDate.toISOString().split('T')[0] : undefined;
+  const maxValue = maxDate ? maxDate.toISOString().split('T')[0] : undefined;
+
+  return (
+    <div>
+      <label className="block text-xs font-medium mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        type="date"
+        value={toNativeFormat(value)}
+        onChange={handleChange}
+        min={minValue}
+        max={maxValue}
+        className={`w-full px-3 py-2 border rounded-md ${
+          displayError ? 'border-red-300' : 'border-gray-300'
+        }`}
+      />
+      {displayError && <p className="text-red-500 text-xs mt-1">{displayError}</p>}
+    </div>
+  );
+};
