@@ -100,7 +100,7 @@ export default function TccResultPage() {
             </div>
 
             <p className="text-xs text-green-700 bg-green-100/50 px-4 py-2 rounded-full">
-              Confirmation sent to registered number
+              Confirmation sent to whatsapp
             </p>
           </div>
         </Card>

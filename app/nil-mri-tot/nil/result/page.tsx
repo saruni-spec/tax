@@ -65,7 +65,7 @@ export default function NilResultPage() {
         </Card>
 
         {/* WhatsApp Button */}
-        <WhatsAppButton label="Download Receipt" />
+        <WhatsAppButton label="Open in Whatsapp" />
 
         {/* Action Buttons */}
         <div className="space-y-3 pt-2">
