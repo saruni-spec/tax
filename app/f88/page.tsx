@@ -13,7 +13,9 @@ import {
   getEntryPoints,
   getCurrencies,
   sendWhatsappNotification,
-  initializeDeclaration
+  initializeDeclaration,
+  sendOtp,
+  verifyOtp
 } from '../actions/customs';
 import { Layout } from '../_components/Layout';
 import { PINInput } from '../_components/KRAInputs';
@@ -624,7 +626,11 @@ const DeclarationModal = ({ isOpen, onClose, declarationType, onSave }: any) => 
 const PassengerInformation = () => {
   const { formData, updateFormData, setCurrentStep, setLoading, refNo, countries } = useFormContext();
   const [errors, setErrors] = useState<any>({});
-
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
 
   const validate = () => {
     const newErrors: any = {};
@@ -647,6 +653,12 @@ const PassengerInformation = () => {
     if (!formData.phone) newErrors.phone = 'Required';
     if (!formData.email) newErrors.email = 'Required';
     if (!formData.physicalAddress) newErrors.physicalAddress = 'Required';
+    
+    // KRA PIN OTP validation - if OTP was sent, it must be verified
+    if (formData.citizenship === 'Kenyan' && formData.kraPin && otpSent && !otpVerified) {
+      setOtpError('Please verify your OTP to continue');
+      newErrors.otp = 'OTP verification required';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -837,17 +849,101 @@ const PassengerInformation = () => {
         </div>
 
         {formData.citizenship === 'Kenyan' && (
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <PINInput
-                required={false}
-                value={formData.kraPin}
-                onChange={(pin) => updateFormData({ kraPin: pin})}
-              />
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <div className="w-1/2">
+                <PINInput
+                  label="PIN"
+                  required={false}
+                  value={formData.kraPin}
+                  onChange={(pin) => {
+                    updateFormData({ kraPin: pin });
+                    // Reset OTP state when PIN changes
+                    if (otpSent) {
+                      setOtpSent(false);
+                      setOtpVerified(false);
+                      setOtpValue('');
+                      setOtpError('');
+                    }
+                  }}
+                />
+              </div>
+              {!otpSent && !otpVerified && (
+                <button 
+                  onClick={async () => {
+                    if (!formData.kraPin || formData.kraPin.length < 11) {
+                      setOtpError('Enter a valid KRA PIN first');
+                      return;
+                    }
+                    setOtpLoading(true);
+                    setOtpError('');
+                    const result = await sendOtp(formData.kraPin);
+                    setOtpLoading(false);
+                    if (result.success) {
+                      setOtpSent(true);
+                    } else {
+                      setOtpError(result.error || 'Failed to send OTP');
+                    }
+                  }}
+                  disabled={otpLoading || !formData.kraPin}
+                  className="mt-7 px-4 py-4 bg-[#CC0000] text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 whitespace-nowrap shadow-sm"
+                >
+                  {otpLoading ? 'Sending...' : 'Send OTP'}
+                </button>
+              )}
+              {otpVerified && (
+                <div className="mt-7 flex items-center gap-1 px-3 py-3 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Verified
+                </div>
+              )}
             </div>
-            <button className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded text-sm font-medium hover:bg-gray-200 whitespace-nowrap">
-              Verify OTP
-            </button>
+            
+            {/* OTP Input - show after OTP sent */}
+            {otpSent && !otpVerified && (
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium mb-1">Enter OTP</label>
+                  <input
+                    type="text"
+                    value={otpValue}
+                    onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                    maxLength={6}
+                  />
+                </div>
+                <button 
+                  onClick={async () => {
+                    if (!otpValue || otpValue.length < 4) {
+                      setOtpError('Enter a valid OTP');
+                      return;
+                    }
+                    setOtpLoading(true);
+                    setOtpError('');
+                    const result = await verifyOtp(otpValue);
+                    setOtpLoading(false);
+                    if (result.success) {
+                      setOtpVerified(true);
+                      setOtpSent(false);
+                    } else {
+                      setOtpError(result.error || 'Invalid OTP');
+                    }
+                  }}
+                  disabled={otpLoading || !otpValue}
+                  className="px-4 py-2.5 bg-[#CC0000] text-white rounded text-sm font-medium hover:bg-red-700 disabled:opacity-50 whitespace-nowrap"
+                >
+                  {otpLoading ? 'Verifying...' : 'Verify OTP'}
+                </button>
+              </div>
+            )}
+            
+            {/* Error display */}
+            {otpError && (
+              <p className="text-red-500 text-xs">{otpError}</p>
+            )}
           </div>
         )}
 

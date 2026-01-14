@@ -112,19 +112,33 @@ export async function searchHsCodes(search: string, pageSize: number = 50) {
 
 export async function sendOtp(pin: string) {
   try {
-    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/send-otp`, { pin });
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
+    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration/send-otp`, { pin });
+
+    console.log(response.data);
+    
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    console.error('Send OTP Error:', error.response?.data || error.message);
+    return { 
+      success: false, 
+      error: error.response?.data?.message || error.message || 'Failed to send OTP' 
+    };
   }
 }
 
 export async function verifyOtp(otp: string) {
   try {
-    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/verify-otp`, { otp });
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
+    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration/verify-otp`, { otp });
+
+    console.log(response.data);
+    
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    console.error('Verify OTP Error:', error.response?.data || error.message);
+    return { 
+      success: false, 
+      error: error.response?.data?.message || error.message || 'Failed to verify OTP' 
+    };
   }
 }
 
