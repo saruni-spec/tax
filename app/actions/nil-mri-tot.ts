@@ -183,11 +183,25 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
         };
       }
 
+      let pin = response.data.pin;
+      
+      // FALLBACK: If PIN is missing, try GUI lookup
+      if (!pin) {
+        console.log('PIN missing in primary lookup, attempting GUI lookup fallback...');
+        const guiResult = await guiLookup(idNumber.trim());
+        if (guiResult.success && guiResult.pin) {
+           pin = guiResult.pin;
+           console.log('PIN retrieved via GUI lookup');
+        } else {
+           console.warn('GUI lookup fallback failed:', guiResult.error);
+        }
+      }
+
       return {
         success: true,
         idNumber: response.data.id_number || idNumber.trim(),
         name: response.data.name,
-        pin: response.data.pin,
+        pin: pin,
       };
     } else {
       return { 
@@ -198,6 +212,43 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   } catch (error: any) {
     console.error('ID lookup error:', error.response?.data || error.message);
     return { success: false, error: error.response?.data?.message || 'ID lookup failed' };
+  }
+}
+
+/**
+ * Fallback: Get PIN via GUI Lookup
+ */
+export async function guiLookup(idNumber: string): Promise<{ success: boolean; pin?: string; name?: string; error?: string }> {
+  try {
+    const headers = await getApiHeaders(true);
+    const response = await axios.get(
+      `https://kratest.pesaflow.com/api/itax/gui-lookup`,
+      {
+        params: {
+          gui: idNumber,
+          tax_payer_type: 'KE'
+        },
+        headers
+      }
+    );
+
+    console.log('GUI Lookup Response:', response.data);
+
+    const pin = response.data.pin || response.data.PIN;
+    const name = response.data.name || response.data.TaxpayerName;
+
+    if (pin) {
+      return {
+        success: true,
+        pin: pin,
+        name: name
+      };
+    }
+    
+    return { success: false, error: 'PIN not found in GUI lookup' };
+  } catch (error: any) {
+    console.error('GUI Lookup Error:', error.message);
+    return { success: false, error: error.message };
   }
 }
 
