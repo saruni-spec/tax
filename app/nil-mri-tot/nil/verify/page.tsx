@@ -220,12 +220,14 @@ No action is required at this time.`;
                 <IdentityStrip label="PIN" value={taxpayerInfo.pin} />
               </div>
 
-               <button 
-                onClick={() => router.push('/nil-mri-tot/nil/validation')}
-                className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
-              >
-                Not your profile? Go back to Edit your details
-              </button>
+               {!selectedObligation && (
+                 <button 
+                  onClick={() => router.push('/nil-mri-tot/nil/validation')}
+                  className="text-[var(--kra-red)] text-xs font-medium mt-3 hover:underline text-left block"
+                >
+                  Not your profile? Go back to Edit your details
+                </button>
+               )}
             </div>
          </Card>
 
