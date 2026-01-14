@@ -16,6 +16,7 @@ class TaxpayerStore {
     taxAmount?: number;
     prn?: string;
     filingPeriod?: string;
+    error?: string;
   } = {
     msisdn: '',
     idNumber: '',
@@ -70,6 +71,10 @@ class TaxpayerStore {
 
   setPrn(prn: string) {
     this.data.prn = prn;
+  }
+
+  setError(error: string) {
+    this.data.error = error;
   }
 
   setTaxAmount(amount: number) {

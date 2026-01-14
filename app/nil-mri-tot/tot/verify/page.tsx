@@ -164,6 +164,7 @@ function TotVerifyContent() {
     
     setLoading(true);
     setError('');
+    taxpayerStore.setError(''); // Clear any previous store errors
     setPaymentStatus('');
     setPrn('');
     
@@ -179,7 +180,9 @@ function TotVerifyContent() {
      
 
       if (!result.success) {
-        setError(result.message || 'Failed to file TOT return');
+        taxpayerStore.setFilingPeriod(filingPeriod);
+        taxpayerStore.setError(result.message || 'Failed to file TOT return');
+        router.push('/nil-mri-tot/tot/result');
         setLoading(false);
         return;
       }
@@ -216,7 +219,9 @@ function TotVerifyContent() {
              
     
               if (!prnRes.success || !prnRes.prn) {
-                 setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
+                 taxpayerStore.setFilingPeriod(filingPeriod);
+                 taxpayerStore.setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
+                 router.push('/nil-mri-tot/tot/result');
                  setLoading(false);
                  return;
               }
@@ -260,7 +265,10 @@ function TotVerifyContent() {
       }
 
     } catch (err: any) {
-      setError(err.message || 'An error occurred filing return');
+       console.error(err);
+       taxpayerStore.setFilingPeriod(filingPeriod);
+       taxpayerStore.setError(err.message || 'An unexpected error occurred');
+       router.push('/nil-mri-tot/tot/result');
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
 import { taxpayerStore } from '../../_lib/store';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function TotResultPage() {
   const router = useRouter();
@@ -29,55 +29,78 @@ export default function TotResultPage() {
   };
 
   return (
-    <Layout title="Success" showHeader={false}>
+    <Layout title={taxpayerInfo?.error ? "Filing Error" : "Success"} showHeader={false}>
       <div className="space-y-4">
         {/* Success Card */}
-        <Card className="bg-green-50 border-green-200 text-center py-8">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
-            
-            <div>
-              <h2 className="text-green-900 text-xl font-bold mb-4">Turnover Tax Return Submitted</h2>
+        {/* Success/Error Card */}
+        {taxpayerInfo?.error ? (
+           <Card className="bg-red-50 border-red-200 text-center py-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center shadow-sm">
+                <AlertCircle className="w-10 h-10 text-red-600" />
+              </div>
               
-              <div className="w-full text-left space-y-3 bg-white/60 p-4 rounded-lg border border-green-100">
-                <div className="flex justify-between items-start border-b border-green-100 pb-2">
-                  <span className="text-sm text-gray-600">Taxpayer</span>
-                  <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.fullName}</span>
-                </div>
-                
-                <div className="flex justify-between items-start border-b border-green-100 pb-2">
-                   <span className="text-sm text-gray-600">Period</span>
-                   <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.filingPeriod || 'N/A'}</span>
-                </div>
-                
-                 <div className="flex justify-between items-start">
-                   <span className="text-sm text-gray-600">Tax Due</span>
-                   <span className="text-sm font-bold text-[var(--kra-red)] text-right">KES {(taxpayerInfo?.taxAmount || 0).toLocaleString()}</span>
-                </div>
+              <div>
+                <h2 className="text-red-900 text-xl font-bold mb-2">Filing Failed</h2>
+                <p className="text-sm text-red-800 px-4">
+                  {taxpayerInfo.error}
+                </p>
               </div>
 
-              {/* PRN Display */}
-              {taxpayerInfo?.prn && (
-                <div className="mt-4 block">
-                    <div className="bg-yellow-50 px-4 py-3 rounded-lg border border-yellow-200">
-                        <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
-                        <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
-                        <p className="text-xs text-yellow-700 mt-2">Use this PRN to pay</p>
-                    </div>
-                </div>
-              )}
+               <p className="text-xs text-red-700 bg-red-100/50 px-4 py-2 rounded-full">
+                Please try again or contact support
+              </p>
             </div>
-
-            <p className="text-xs text-green-700 bg-green-100/50 px-4 py-2 rounded-full">
-              Confirmation sent to whatsapp
-            </p>
-          </div>
-        </Card>
+          </Card>
+        ) : (
+          <Card className="bg-green-50 border-green-200 text-center py-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              
+              <div>
+                <h2 className="text-green-900 text-xl font-bold mb-4">Turnover Tax Return Submitted</h2>
+                
+                <div className="w-full text-left space-y-3 bg-white/60 p-4 rounded-lg border border-green-100">
+                  <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                    <span className="text-sm text-gray-600">Taxpayer</span>
+                    <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.fullName}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-start border-b border-green-100 pb-2">
+                     <span className="text-sm text-gray-600">Period</span>
+                     <span className="text-sm font-semibold text-gray-900 text-right">{taxpayerInfo?.filingPeriod || 'N/A'}</span>
+                  </div>
+                  
+                   <div className="flex justify-between items-start">
+                     <span className="text-sm text-gray-600">Tax Due</span>
+                     <span className="text-sm font-bold text-[var(--kra-red)] text-right">KES {(taxpayerInfo?.taxAmount || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+  
+                {/* PRN Display */}
+                {taxpayerInfo?.prn && (
+                  <div className="mt-4 block">
+                      <div className="bg-yellow-50 px-4 py-3 rounded-lg border border-yellow-200">
+                          <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
+                          <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
+                          <p className="text-xs text-yellow-700 mt-2">Use this PRN to pay</p>
+                      </div>
+                  </div>
+                )}
+              </div>
+  
+              <p className="text-xs text-green-700 bg-green-100/50 px-4 py-2 rounded-full">
+                Confirmation sent to whatsapp
+              </p>
+            </div>
+          </Card>
+        )}
 
         {/* WhatsApp Button */}
-        <WhatsAppButton label="Open in Whatsapp" />
+        {/* WhatsApp Button */}
+        <WhatsAppButton label={taxpayerInfo?.error ? "Back to WhatsApp" : "Open in Whatsapp"} />
 
         {/* Action Buttons */}
         <div className="space-y-3 pt-2">

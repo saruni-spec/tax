@@ -120,6 +120,7 @@ function NilVerifyContent() {
     
     setLoading(true);
     setError('');
+    taxpayerStore.setError(''); // Clear any previous store errors
     
     try {
       // selectedObligation is serving as the obligation ID in the new dynamic list
@@ -131,18 +132,33 @@ function NilVerifyContent() {
         filingPeriod
       );
 
+      // Find the name of the selected obligation
+      const selectedObsObj = obligations.find(o => o.value === selectedObligation);
+      const obligationName = selectedObsObj ? selectedObsObj.label : 'NIL Return';
+
       if (result.success) {
-        taxpayerStore.setSelectedNilType(selectedObligation);
-        try {
-          // @ts-ignore
-          taxpayerStore.receiptNumber = result.receiptNumber; 
-        } catch (e) {}
+        taxpayerStore.setSelectedNilType(obligationName);
+        taxpayerStore.setReceiptNumber(result.receiptNumber || '');
+        // Clear any previous error
+        taxpayerStore.setError('');
+        
         router.push('/nil-mri-tot/nil/result');
       } else {
-        setError(result.message || 'Failed to file NIL return');
+        // Handle API error by redirecting to result page
+        taxpayerStore.setSelectedNilType(obligationName);
+        taxpayerStore.setError(result.message || 'Failed to file NIL return');
+        router.push('/nil-mri-tot/nil/result');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while filing the return');
+       // Handle Exception by redirecting to result page
+       console.error(err);
+       // Re-calculate name if needed or fallback
+       const selectedObsObj = obligations.find(o => o.value === selectedObligation);
+       const obligationName = selectedObsObj ? selectedObsObj.label : 'NIL Return';
+       
+       taxpayerStore.setSelectedNilType(obligationName);
+       taxpayerStore.setError(err.message || 'An unexpected error occurred');
+       router.push('/nil-mri-tot/nil/result');
     } finally {
       setLoading(false);
     }

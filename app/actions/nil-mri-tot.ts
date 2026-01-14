@@ -748,13 +748,19 @@ export async function generatePrn(
       { headers }
     );
 
-    console.log('Generate PRN Response:', response.data);
+    const data = response.data;
+    console.log('Generate PRN Response:', data);
+
+    // Handle PascalCase response (PaymentRegNo) and standard response (prn)
+    const prn = data.PaymentRegNo || data.prn;
+    // Check for success indicators: Status=OK, ResponseCode=50000 (success), or presence of PRN
+    const isSuccess = data.Status === 'OK' || data.ResponseCode === '50000' || !!prn;
 
     return {
-      success: true,
-      message: response.data.message || 'PRN generated successfully',
-      prn: response.data.prn,
-      data: response.data
+      success: isSuccess,
+      message: data.ResponseMsg || data.message || 'PRN generated successfully',
+      prn: prn,
+      data: data
     };
   } catch (error: any) {
     console.error('Generate PRN Error:', error.response?.data || error.message);

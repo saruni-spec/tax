@@ -264,6 +264,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
 
     setLoading(true);
     setError('');
+    taxpayerStore.setError(''); // Clear any previous store errors
     setPaymentStatus('');
     setPrn('');
     
@@ -278,7 +279,11 @@ If you have rental income in the future, please contact *KRA* to update your tax
       );
 
       if (!result.success) {
-        setError(result.message || 'Failed to file MRI return');
+        // Handle error: redirect to result page
+        taxpayerStore.setRentalIncome(Number(rentalIncome));
+        taxpayerStore.setFilingPeriod(filingPeriod);
+        taxpayerStore.setError(result.message || 'Failed to file MRI return');
+        router.push('/nil-mri-tot/mri/result');
         setLoading(false);
         return;
       }
@@ -286,7 +291,9 @@ If you have rental income in the future, please contact *KRA* to update your tax
       // If file-only, redirect
       if (!withPayment) {
           taxpayerStore.setRentalIncome(Number(rentalIncome));
+          taxpayerStore.setFilingPeriod(filingPeriod);
           taxpayerStore.setPaymentType('file-only');
+          taxpayerStore.setError(''); // Clear error
           try {
              (taxpayerStore as any).setReceiptNumber(result.receiptNumber || '');
           } catch (e) {}
@@ -312,7 +319,11 @@ If you have rental income in the future, please contact *KRA* to update your tax
           );
 
           if (!prnRes.success || !prnRes.prn) {
-             setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
+             // Handle PRN Error
+             taxpayerStore.setRentalIncome(Number(rentalIncome));
+             taxpayerStore.setFilingPeriod(filingPeriod);
+             taxpayerStore.setError(`Return filed, but PRN generation failed: ${prnRes.message}`);
+             router.push('/nil-mri-tot/mri/result');
              setLoading(false);
              return;
           }
@@ -322,30 +333,40 @@ If you have rental income in the future, please contact *KRA* to update your tax
 
           // 3. Make Payment
           const phone = await getStoredPhone();
+          
+          // Set Store Data
+          taxpayerStore.setRentalIncome(Number(rentalIncome));
+          taxpayerStore.setFilingPeriod(filingPeriod);
+          taxpayerStore.setPaymentType('file-and-pay');
+          taxpayerStore.setPrn(prnRes.prn);
+          taxpayerStore.setTaxAmount(Number(taxPayable));
+          taxpayerStore.setError('');
+           try {
+             (taxpayerStore as any).setReceiptNumber(result.receiptNumber || '');
+          } catch (e) {}
+
           if (phone) {
              const payRes = await makePayment(phone, prnRes.prn);
              if (payRes.success) {
                 setPaymentStatus('Payment initiated. Check your phone.');
-                // Update store for result page
-                taxpayerStore.setRentalIncome(Number(rentalIncome));
-                taxpayerStore.setPaymentType('file-and-pay');
-                try {
-                   (taxpayerStore as any).setReceiptNumber(result.receiptNumber || '');
-                } catch (e) {}
-                
                 setTimeout(() => {
                    router.push('/nil-mri-tot/mri/result');
                 }, 2000);
              } else {
-                setError(`PRN generated (${prnRes.prn}), but payment failed: ${payRes.message}`);
+                 // Payment failed but PRN exists - redirect to result (not error state, show PRN)
+                 router.push('/nil-mri-tot/mri/result');
              }
           } else {
-             setError(`PRN generated (${prnRes.prn}), but phone number not found for payment.`);
+             // Phone missing - redirect to result (show PRN)
+             router.push('/nil-mri-tot/mri/result');
           }
       }
 
     } catch (err: any) {
-      setError(err.message || 'An error occurred while filing the return');
+       console.error(err);
+       taxpayerStore.setRentalIncome(Number(rentalIncome));
+       taxpayerStore.setError(err.message || 'An unexpected error occurred');
+       router.push('/nil-mri-tot/mri/result');
     } finally {
       setLoading(false);
     }
