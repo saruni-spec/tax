@@ -1595,20 +1595,33 @@ const TaxComputation = () => {
         >
           ← Back
         </button>
-        <div className="flex gap-2">
+        
+        {/* Show different buttons based on whether there's tax to pay */}
+        {formData.hasItemsToDeclare === 'No' || totalTax === 0 ? (
+          // No items or zero tax - just show Finish button
           <button 
             onClick={() => handlePayment(false)}
-            className="px-4 py-2 border border-gray-400 text-gray-700 rounded text-sm"
+            className="px-6 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
           >
-            Pay Later
+            {useFormContext().loading ? 'Processing...' : 'Finish'}
           </button>
-          <button 
-            onClick={() => handlePayment(true)}
-            className="px-4 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
-          >
-            {useFormContext().loading ? 'Processing...' : 'Pay Now'}
-          </button>
-        </div>
+        ) : (
+          // Has items with tax - show Pay Now and Pay Later
+          <div className="flex gap-2">
+            <button 
+              onClick={() => handlePayment(false)}
+              className="px-4 py-2 border border-gray-400 text-gray-700 rounded text-sm"
+            >
+              Pay Later
+            </button>
+            <button 
+              onClick={() => handlePayment(true)}
+              className="px-4 py-2 bg-[#CC0000] text-white rounded text-sm font-medium"
+            >
+              {useFormContext().loading ? 'Processing...' : 'Pay Now'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
