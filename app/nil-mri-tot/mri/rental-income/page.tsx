@@ -527,24 +527,49 @@ If you have rental income in the future, please contact *KRA* to update your tax
 
             {/* Action Buttons - Only show if properties exist */}
             {properties.length > 0 && (
-              <div className="grid grid-cols-2 gap-3">
-                 <Button
-                    onClick={() => handleFileReturn(true)}
-                    disabled={loading || !rentalIncome || !filingPeriod}
-                    className="bg-[var(--kra-red)] hover:bg-red-700"
-                 >
-                    {loading && paymentStatus ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    File & Pay
-                 </Button>
-                 <Button
-                    onClick={() => handleFileReturn(false)}
-                    disabled={loading || !rentalIncome || !filingPeriod}
-                    variant="secondary"
-                    className="border border-[var(--kra-red)] text-[var(--kra-red)] hover:bg-red-50"
-                 >
-                    File Only
-                 </Button>
-              </div>
+              <>
+                {/* Finish button when no filing period or period error */}
+                {!loadingPeriod && (!filingPeriod || periodError) && (
+                  <Button 
+                    onClick={async () => {
+                      const storedPhone = await getStoredPhone();
+                      if (storedPhone && taxpayerInfo) {
+                        const message = `*Monthly Rental Income Status*\n\nDear *${taxpayerInfo.fullName}*,\nYour PIN: *${taxpayerInfo.pin}* currently has no available filing period for Monthly Rental Income (MRI).\n\n${periodError || 'No filing is required at this time.'}\n\nPlease try again later or contact KRA for assistance.`;
+                        await sendWhatsAppMessage({
+                          recipientPhone: storedPhone,
+                          message: message
+                        });
+                      }
+                      router.push('/');
+                    }}
+                    className="w-full bg-[var(--kra-red)] hover:bg-red-700"
+                  >
+                    Finish
+                  </Button>
+                )}
+
+                {/* File & Pay buttons - Only show when valid filing period */}
+                {filingPeriod && !periodError && (
+                  <div className="grid grid-cols-2 gap-3">
+                     <Button
+                        onClick={() => handleFileReturn(true)}
+                        disabled={loading || !rentalIncome || !filingPeriod}
+                        className="bg-[var(--kra-red)] hover:bg-red-700"
+                     >
+                        {loading && paymentStatus ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        File & Pay
+                     </Button>
+                     <Button
+                        onClick={() => handleFileReturn(false)}
+                        disabled={loading || !rentalIncome || !filingPeriod}
+                        variant="secondary"
+                        className="border border-[var(--kra-red)] text-[var(--kra-red)] hover:bg-red-50"
+                     >
+                        File Only
+                     </Button>
+                  </div>
+                )}
+              </>
             )}
         </div>
       </div>

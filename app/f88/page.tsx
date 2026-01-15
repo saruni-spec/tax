@@ -199,7 +199,7 @@ const LandingPage = () => {
 
         <p className="text-gray-600 text-sm mb-4">
           This form MUST be completed by ALL passengers prior to arrival in Kenya.
-          Please read the <span className="text-orange-500 font-medium">restrictions and prohibitions</span> notes before applying.
+          Please read the <a href="/f88/restrictions" className="text-orange-500 font-medium hover:underline cursor-pointer">restrictions and prohibitions</a> notes before applying.
         </p>
 
         <h2 className="text-base font-semibold mb-3 text-gray-800">What you need to know...</h2>

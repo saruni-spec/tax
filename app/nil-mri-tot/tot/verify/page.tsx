@@ -494,8 +494,8 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
 
           {/* Action Buttons - Conditional based on filing mode */}
           <div className="space-y-3 pt-2">
-             {/* Finish button for Monthly mode with no filing period */}
-             {filingMode === 'Monthly' && !loadingPeriod && !filingPeriod && (
+             {/* Finish button for Monthly mode with no filing period or period error */}
+             {filingMode === 'Monthly' && !loadingPeriod && (!filingPeriod || periodError) && (
                <Button 
                   onClick={async () => {
                     const storedPhone = await getStoredPhone();
@@ -524,7 +524,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                    Pay Now
                 </Button>
-             ) : filingPeriod ? (
+             ) : filingPeriod && !periodError ? (
                 // Monthly with valid period: File & Pay + File Only
                 <div className="grid grid-cols-2 gap-3">
                   <Button 
