@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { X, Upload, AlertCircle} from 'lucide-react';
 import { 
   getDeclaration, 
@@ -1632,6 +1632,7 @@ export default function Home() {
 
 // Main Content
 const MainContent = () => {
+  const router = useRouter();
   const { currentStep, setCurrentStep, formData } = useFormContext();
 
   const getStepTitle = () => {
@@ -1664,11 +1665,12 @@ const MainContent = () => {
     <Layout
       title={getStepTitle()}
       step={getStepIndicator()}
-      onBack={currentStep > 0 ? handleBack : undefined}
+      onBack={currentStep > 0 ? handleBack : () => {router.back()}}
       phone={formData?.phone}
       showMenu={true}
       showHeader={true}
       showFooter={true}
+      
     >
       {currentStep === 0 ? (
         <LandingPage />

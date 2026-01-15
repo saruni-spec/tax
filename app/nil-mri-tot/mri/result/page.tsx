@@ -1,7 +1,8 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, MessageCircle, Receipt, AlertCircle } from 'lucide-react';
+import { CheckCircle, MessageCircle, AlertCircle } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
+import { WhatsAppButton } from '../../../_components/QuickMenu';
 
 export default function MriResultPage() {
   const router = useRouter();
@@ -45,45 +46,40 @@ export default function MriResultPage() {
                     <CheckCircle className="w-10 h-10 text-green-600" />
                     </div>
 
-                    <h1 className="text-green-900 mb-4">
-                    {isPayment ? 'MRI Return Filed & Payment Successful!' : 'MRI Return Filed Successfully!'}
+                    <h1 className="text-green-900 text-xl font-bold mb-2">
+                    Monthly Rental Income Return Submitted Successfully
                     </h1>
-
-                    <p className="text-gray-700">
-                    Your MRI return for {taxpayerInfo.fullName} has been filed successfully.
-                    </p>
                 </div>
 
-                <div className="p-6 bg-purple-50 border border-purple-200 rounded-lg mb-6">
-                    <h3 className="text-purple-900 mb-4">Return Summary</h3>
+                <div className="p-6 bg-green-50 border border-green-200 rounded-lg mb-6">
                     <div className="space-y-3">
                     <div className="flex justify-between">
-                        <span className="text-gray-600">Rental Income:</span>
-                        <span className="text-gray-900">KES {(taxpayerInfo.rentalIncome || 0).toFixed(2)}</span>
+                        <span className="text-gray-600">Taxpayer:</span>
+                        <span className="text-gray-900 font-semibold text-right">{taxpayerInfo.fullName}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-gray-600">MRI Tax (10%):</span>
-                        <span className="text-gray-900">KES {mriTax}</span>
+                        <span className="text-gray-600">Period:</span>
+                        <span className="text-gray-900 font-semibold">{taxpayerInfo.filingPeriod || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between pt-3 border-t border-green-200">
+                        <span className="text-gray-900 font-bold">Tax Due:</span>
+                        <span className="text-[var(--kra-red)] font-bold">KES {mriTax}</span>
                     </div>
                     {isPayment && (
-                        <div className="flex justify-between pt-3 border-t border-purple-200">
-                        <span className="text-purple-900">Amount Paid:</span>
-                        <span className="text-purple-900">KES {mriTax}</span>
-                        </div>
-                    )}
-                    {taxpayerInfo.prn && !isPayment && (
-                        <div className="flex justify-between pt-3 border-t border-purple-200 font-bold">
-                             <span className="text-purple-900">PRN:</span>
-                             <span className="text-purple-900">{taxpayerInfo.prn}</span>
+                        <div className="flex justify-between">
+                        <span className="text-green-800">Amount Paid:</span>
+                        <span className="text-green-800 font-bold">KES {mriTax}</span>
                         </div>
                     )}
                     </div>
                 </div>
 
+                {/* PRN Display for File Only */}
                 {taxpayerInfo.prn && !isPayment && (
                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6 text-center">
-                        <p className="text-yellow-800 font-bold mb-2">Payment Required</p>
-                        <p className="text-sm text-yellow-700">Please pay KES {mriTax} using PRN: {taxpayerInfo.prn}</p>
+                        <p className="text-xs text-yellow-800 uppercase font-bold mb-1">Payment Reference Number (PRN)</p>
+                        <p className="text-xl font-mono text-gray-900 font-bold tracking-wider">{taxpayerInfo.prn}</p>
+                        <p className="text-sm text-yellow-700 mt-2">Please pay KES {mriTax} using this PRN</p>
                      </div>
                 )}
              </>
@@ -92,26 +88,28 @@ export default function MriResultPage() {
 
           {!taxpayerInfo.error && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 flex items-center gap-3">
-                {isPayment ? (
-                <>
-                    <Receipt className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                    <p className="text-blue-800">WhatsApp payment receipt sent to your registered number</p>
-                </>
-                ) : (
-                <>
+               
                     <MessageCircle className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                    <p className="text-blue-800">WhatsApp confirmation sent to your registered number</p>
-                </>
-                )}
+                    <p className="text-blue-800">WhatsApp confirmation sent to your number</p>
+              
             </div>
           )}
 
-          <button
-            onClick={handleReturnHome}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            {taxpayerInfo.error ? "Try Again" : "Return to Home"}
-          </button>
+          {/* WhatsApp Button */}
+          <WhatsAppButton label={taxpayerInfo.error ? "Back to WhatsApp" : "Open in Whatsapp"} />
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => {
+                const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+                router.push(`/nil-mri-tot/mri/validation${phone ? `?phone=${phone}` : ''}`);
+              }}
+              className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            >
+              Rental Income
+            </button>
+          </div>
         </div>
       </div>
     </div>
