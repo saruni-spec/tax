@@ -33,6 +33,7 @@ function TotVerifyContent() {
 
   const [hasTotObligation, setHasTotObligation] = useState<boolean | null>(null);
   const [checkingObligation, setCheckingObligation] = useState(true);
+  const [totObligationCode, setTotObligationCode] = useState<string>('8');
 
   // Get today's date in DD/MM/YYYY format for daily filing
   const getTodayDate = () => {
@@ -54,6 +55,7 @@ function TotVerifyContent() {
              const result = await calculateTax(
                  taxpayerInfo.pin,
                  '8', // TOT Obligation ID
+                 totObligationCode,
                  filingMode === 'Daily' ? getTodayDate() : filingPeriod,
                  Number(grandTotal),
                  filingMode === 'Daily' ? 'D' : 'M'
@@ -105,6 +107,16 @@ function TotVerifyContent() {
           const hasTot = result.obligations.some(obs => 
             obs.obligationName.toLowerCase().includes('turnover tax')
           );
+          
+          if (hasTot) {
+             const totObligation = result.obligations.find(obs => 
+                obs.obligationName.toLowerCase().includes('turnover tax')
+             );
+             if (totObligation && totObligation.obligationCode) {
+                 setTotObligationCode(totObligation.obligationCode);
+             }
+          }
+
           setHasTotObligation(hasTot);
 
           if (hasTot && filingMode === 'Monthly') {

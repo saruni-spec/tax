@@ -34,6 +34,9 @@ function MriRentalIncomeContent() {
   // Properties state
   const [properties, setProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
+  
+  // Obligation Code
+  const [mriObligationCode, setMriObligationCode] = useState<string>('33');
 
   // Filing Period state
   const [filingPeriod, setFilingPeriod] = useState<string>('');
@@ -68,6 +71,7 @@ function MriRentalIncomeContent() {
              const result = await calculateTax(
                  taxpayerInfo.pin,
                  '33', // MRI Obligation ID
+                 mriObligationCode, 
                  filingPeriod,
                  Number(rentalIncome),
                  'M'
@@ -108,6 +112,17 @@ function MriRentalIncomeContent() {
             obs.obligationName.toLowerCase().includes('mri') ||
             obs.obligationName.toLowerCase().includes('rental')
           );
+          
+          if (hasMri) {
+             const mriObligation = result.obligations.find(obs => 
+                obs.obligationName.toLowerCase().includes('mri') ||
+                obs.obligationName.toLowerCase().includes('rental')
+             );
+             if (mriObligation && mriObligation.obligationCode) {
+                 setMriObligationCode(mriObligation.obligationCode);
+             }
+          }
+
           setHasMriObligation(hasMri);
 
           if (hasMri) {

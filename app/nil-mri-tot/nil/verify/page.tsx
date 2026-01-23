@@ -55,7 +55,8 @@ function NilVerifyContent() {
             .map(obs => ({
               value: obs.obligationId, 
               label: obs.obligationName,
-              obligationId: obs.obligationId
+              obligationId: obs.obligationId,
+              obligationCode: obs.obligationCode
             }));
           setObligations(formattedObligations);
         }
@@ -125,15 +126,18 @@ function NilVerifyContent() {
     try {
       // selectedObligation is serving as the obligation ID in the new dynamic list
       const obligationId = selectedObligation;
+      const selectedObsObj = obligations.find(o => o.value === selectedObligation);
+      const obligationCode = selectedObsObj?.obligationCode || obligationId;
 
       const result = await fileNilReturn(
         taxpayerInfo.pin,
         obligationId,
+        obligationCode,
         filingPeriod
       );
 
       // Find the name of the selected obligation
-      const selectedObsObj = obligations.find(o => o.value === selectedObligation);
+      // selectedObsObj is already defined above
       const obligationName = selectedObsObj ? selectedObsObj.label : 'NIL Return';
 
       if (result.success) {

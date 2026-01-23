@@ -33,6 +33,7 @@ const OBLIGATION_IDS = {
 
 export interface TaxpayerObligation {
   obligationId: string;
+  obligationCode: string;
   obligationName: string;
 }
 
@@ -274,11 +275,13 @@ export async function getTaxpayerObligations(
     if (Array.isArray(data)) {
       obligations = data.map((item: any) => ({
         obligationId: item.obligation_id || item.id,
+        obligationCode: item.obligation_code,
         obligationName: item.obligation_name || item.name,
       }));
     } else if (data.obligations && Array.isArray(data.obligations)) {
       obligations = data.obligations.map((item: any) => ({
         obligationId: item.obligation_id || item.id,
+        obligationCode: item.obligation_code,
         obligationName: item.obligation_name || item.name,
       }));
     }
@@ -372,12 +375,13 @@ export async function getFilingPeriods(
 export async function fileNilReturn(
   taxPayerPin: string,
   obligationId: string,
+  obligationCode: string,
   returnPeriod: string
 ): Promise<FileReturnResult> {
   try {
     const payload = {
       kra_obligation_id: obligationId,
-      obligation_code: obligationId,
+      obligation_code: obligationCode,
       returnPeriod: returnPeriod,
       returnType: 'nil_return',
       tax_payer_pin: taxPayerPin,
@@ -588,6 +592,7 @@ export interface CalculateTaxResult {
 export async function calculateTax(
   taxPayerPin: string,
   obligationId: string,
+  obligationCode: string,
   returnPeriod: string,
   amount: number,
   filingCycle: string = 'M'
@@ -610,7 +615,7 @@ export async function calculateTax(
     const payload = {
         tax_payer_pin: taxPayerPin,
         kra_obligation_id: obligationId,
-        obligation_code: obligationId,
+        obligation_code: obligationCode,
         start_date: startDate,
         end_date: endDate,
         filingCycle: filingCycle,
