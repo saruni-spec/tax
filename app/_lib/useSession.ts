@@ -7,33 +7,18 @@ import { getUserSession, isSessionValid, refreshSession, clearUserSession, getKn
 // Pages that don't require authentication check
 // NOTE: /pin-registration and /nil-mri-tot are NOT here because we want to intercept them 
 // and redirect to their specific OTP pages if no session exists.
-const PUBLIC_PATHS = [
-    '*/auth', 
-    '*/auth/login', 
-    '*/auth/signup', 
-    '*/auth/otp',
-    '*/otp',
-    '*/otp',
-    '/',
-    '/confirm',
-    '/f88/*',
-    '/f88',
-    '*/checkers',
-    '*/checkers/*',
-];
-
 const isPathPublic = (pathname: string | null) => {
   if (!pathname) return false;
   
-  return PUBLIC_PATHS.some(pattern => {
-    // Escape special regex chars except *
-    const regexPattern = pattern
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&') 
-      .replace(/\*/g, '.*');
-      
-    // Use strict start and end anchors
-    return new RegExp(`^${regexPattern}$`).test(pathname);
-  });
+  // Only etims paths require authentication, but some etims subpaths are public
+  if (pathname.startsWith('/etims') && 
+      !pathname.startsWith('/etims/auth') && 
+      !pathname.startsWith('/etims/help')
+  ) {
+    return false;
+  }
+  
+  return true;
 };
 
 export function useSessionManager() {
