@@ -400,13 +400,30 @@ export async function fileNilReturn(
     );
 
     const data = response.data;
-    const isSuccess = data.code === 1 || data.code === 200 || data.success === true;
+    console.log('File NIL Return Response:', data);
+    // Check for various success formats
+    // 1. Standard format: code=1/200 or success=true
+    // 2. Nested response format: response.Status='OK' (common in KRA APIs)
+    const isSuccess = 
+      data.code === 1 || 
+      data.code === 200 || 
+      data.success === true ||
+      (data.response && data.response.Status === 'OK');
     
+    // Extract message and receipt based on format
+    let message = data.message || 'NIL Return filed successfully';
+    let receiptNumber = data.receipt_number || data.receiptNumber;
+    
+    if (data.response) {
+       if (data.response.Message) message = data.response.Message;
+       if (data.response.AckNumber) receiptNumber = data.response.AckNumber;
+    }
+
     return {
       success: isSuccess,
-      code: data.code || 200,
-      message: data.message || 'NIL Return filed successfully',
-      receiptNumber: data.receipt_number || data.receiptNumber,
+      code: data.code || (isSuccess ? 200 : 500),
+      message: message,
+      receiptNumber: receiptNumber,
     };
   } catch (error: any) {
     console.error('File NIL Return Error:', error.response?.data || error.message);
