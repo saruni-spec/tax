@@ -342,7 +342,7 @@ No action is required at this time.`;
               </div>
             )}
 
-            {obligations.length > 0 && (
+            {obligations.length > 0 && filingPeriod && !periodError && (
               <Button 
                 onClick={handleFileReturn}
                 disabled={!selectedObligation || !filingPeriod || loading}
