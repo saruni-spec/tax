@@ -238,13 +238,6 @@ export async function sendWhatsAppMessage(
     return { success: false, error: 'Recipient phone and message are required' };
   }
 
-  const cleanNumber = cleanPhoneNumber(recipientPhone).replace(/^254/, ''); // API expects no prefix? Or 254? 
-  // Wait, existing code:
-  // if (cleanNumber.startsWith('0')) cleanNumber = '254' + ...
-  // Payload 'to' field usually expects country code without +
-  // In payments.ts: if (cleanNumber.startsWith('+')) cleanNumber = cleanNumber.substring(1);
-  // It seems it expects 2547...
-  
   const finalNumber = cleanPhoneNumber(recipientPhone);
 
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
@@ -267,6 +260,8 @@ export async function sendWhatsAppMessage(
       body: message
     }
   };
+
+  console.log('Sending WhatsApp message to:', finalNumber);
 
   try {
     const response = await axios.post(url, payload, {

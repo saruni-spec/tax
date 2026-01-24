@@ -12,6 +12,7 @@ class TaxpayerStore {
     tccReason?: string;
     tccNumber?: string;
     tccStatus?: string;
+    error?: string;
   } = {
     msisdn: '',
     idNumber: '',
@@ -50,6 +51,11 @@ class TaxpayerStore {
     this.data.tccReason = reason;
     this.data.tccNumber = tccNumber;
     this.data.tccStatus = status;
+    this.data.error = undefined; // Clear error on success
+  }
+
+  setError(error: string) {
+    this.data.error = error;
   }
 
   getTccApplication() {
@@ -57,6 +63,7 @@ class TaxpayerStore {
       reason: this.data.tccReason,
       tccNumber: this.data.tccNumber,
       status: this.data.tccStatus,
+      error: this.data.error,
     };
   }
 
