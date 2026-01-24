@@ -230,7 +230,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      'process.env.API_URL/itax/gui-lookup',
+      `${process.env.API_URL}/itax/gui-lookup`,
       {
         params: {
           gui: idNumber.trim(),
@@ -286,7 +286,7 @@ export async function submitTccApplication(
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
-      'process.env.API_URL/ussd/tcc-application',
+      `${BASE_URL}/tcc-application`,
       {
         tax_payer_pin: taxPayerPin,
         reason_for_tcc: reasonForTcc,

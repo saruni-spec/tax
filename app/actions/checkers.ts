@@ -8,10 +8,10 @@ import {
   checkServerSession as sharedCheckSession,
   logout as sharedLogout,
   getStoredPhoneServer,
-  OTPResult
+
 } from './auth';
 
-const BASE_URL = 'process.env.API_URL';
+const BASE_URL = process.env.API_URL;
 
 // ============= Types =============
 

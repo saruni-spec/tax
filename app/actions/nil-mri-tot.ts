@@ -1,7 +1,6 @@
 'use server';
 
 import axios from 'axios';
-import { cookies } from 'next/headers';
 import { 
   getAuthHeaders, 
   generateOTP as sharedGenerateOTP, 
@@ -225,7 +224,7 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `process.env.API_URL/itax/gui-lookup`,
+      `${process.env.API_URL}/itax/gui-lookup`,
       {
         params: {
           gui: idNumber,
@@ -720,7 +719,7 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `process.env.API_URL/properties/lookup/${pin}`,
+      `${process.env.API_URL}/properties/lookup/${pin}`,
       { headers }
     );
 

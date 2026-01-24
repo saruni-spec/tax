@@ -243,7 +243,7 @@ export async function sendWhatsappNotification(payload: {
 
 export async function initializeDeclaration() {
   try {
-    const res = await fetch('process.env.API_URL/customs/passenger-declaration', {
+    const res = await fetch(`${process.env.API_URL}/customs/passenger-declaration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
