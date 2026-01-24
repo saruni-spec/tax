@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
-import { lookupById, checkSession, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { lookupById, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 
@@ -26,9 +26,7 @@ function NilValidationContent() {
   // Check session on mount
   useEffect(() => {
     const performSessionCheck = async () => {
-      console.log('=== NIL VALIDATION SESSION CHECK START ===');
-      console.log('phone from URL:', phone);
-      console.log('pathname:', pathname);
+      console.log('=== NIL VALIDATION PHONE CHECK START ===');
       
       try {
         // First, try to get phone from various sources if not in URL
@@ -38,7 +36,6 @@ function NilValidationContent() {
           // Try localStorage first
           try {
             const localPhone = localStorage.getItem('phone_Number');
-            console.log('localStorage phone:', localPhone);
             if (localPhone) {
               currentPhone = localPhone;
             }
@@ -48,47 +45,21 @@ function NilValidationContent() {
         }
         
         if (!currentPhone) {
-          // Try server-side cookie
+          // Try server-side cookie (for convenience, not auth)
           const storedPhone = await getStoredPhone();
-          console.log('server cookie phone:', storedPhone);
           if (storedPhone) {
             currentPhone = storedPhone;
           }
         }
         
-        console.log('currentPhone resolved to:', currentPhone);
-        
         // If we found a phone, update URL if needed
         if (currentPhone && currentPhone !== phone) {
-          console.log('Updating URL with phone, will re-run effect');
-          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-          return; // Let the effect re-run with new URL
+           router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
         }
         
-        // Now check session
-        const hasSession = await checkSession();
-        console.log('hasSession:', hasSession, 'currentPhone:', currentPhone);
-        
-        if (!hasSession) {
-          console.log('NO SESSION - redirecting to OTP');
-          // Redirect to OTP with phone if available
-          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) {
-            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
-          }
-          router.push(redirectUrl);
-        } else {
-          if (!currentPhone) {
-            console.log('HAS SESSION but NO PHONE - redirecting to OTP');
-            // No phone anywhere, must go to OTP
-            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-          } else {
-            console.log('HAS SESSION and HAS PHONE - proceeding');
-            setCheckingSession(false);
-          }
-        }
+        setCheckingSession(false);
       } catch (err) {
-        console.error('Session check failed', err);
+        console.error('Phone check failed', err);
         setCheckingSession(false); 
       }
     };

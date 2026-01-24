@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { IDInput } from '@/app/_components/KRAInputs';
 import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
-import { lookupById, checkSession, getStoredPhone } from '@/app/actions/nil-mri-tot';
+import { lookupById, getStoredPhone } from '@/app/actions/nil-mri-tot';
 import { taxpayerStore } from '../../_lib/store';
 import { Loader2 } from 'lucide-react';
 
@@ -52,28 +52,11 @@ function TotValidationContent() {
         // If we found a phone, update URL if needed
         if (currentPhone && currentPhone !== phone) {
           router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-          return; // Let the effect re-run with new URL
         }
         
-        // Now check session
-        const hasSession = await checkSession();
-        if (!hasSession) {
-          // Redirect to OTP with phone if available
-          let redirectUrl = `/otp?redirect=${encodeURIComponent(pathname)}`;
-          if (currentPhone) {
-            redirectUrl += `&phone=${encodeURIComponent(currentPhone)}`;
-          }
-          router.push(redirectUrl);
-        } else {
-          if (!currentPhone) {
-            // No phone anywhere, must go to OTP
-            router.push(`/otp?redirect=${encodeURIComponent(pathname)}`);
-          } else {
-            setCheckingSession(false);
-          }
-        }
+        setCheckingSession(false);
       } catch (err) {
-        console.error('Session check failed', err);
+        console.error('Phone check failed', err);
         setCheckingSession(false);
       }
     };
