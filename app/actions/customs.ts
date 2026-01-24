@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'https://kratest.pesaflow.com';
+const BASE_URL = process.env.API_URL;
 
 // Helper to handle API errors
 const handleApiError = (error: any) => {
@@ -28,7 +28,7 @@ const handleApiError = (error: any) => {
 
 export async function submitPassengerInfo(data: any) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration`, data);
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration`, data);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -37,7 +37,7 @@ export async function submitPassengerInfo(data: any) {
 
 export async function submitTravelInfo(data: any) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration`, data);
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration`, data);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -47,10 +47,10 @@ export async function submitTravelInfo(data: any) {
 export async function submitDeclarationItems(data: any) {
   // 
   console.log('Submitting items:', JSON.stringify(data, null, 2));
-  console.log(`${BASE_URL}/api/customs/passenger-declaration`);
+  console.log(`${BASE_URL}/customs/passenger-declaration`);
 
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration`, data);
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration`, data);
 
     console.log(response.data);
     
@@ -67,7 +67,7 @@ export async function submitDeclarationItems(data: any) {
 
 export async function finalizeDeclaration(ref_no: string) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration/${ref_no}`, {
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/${ref_no}`, {
       checkout: true
     });
     return response.data;
@@ -78,7 +78,7 @@ export async function finalizeDeclaration(ref_no: string) {
 
 export async function getDeclaration(ref_no: string) {
   try {
-    const response = await axios.get(`${BASE_URL}/api/customs/passenger-declaration/${ref_no}`);
+    const response = await axios.get(`${BASE_URL}/customs/passenger-declaration/${ref_no}`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -90,7 +90,7 @@ export async function getStaticData(type: string, code?: string) {
     const params: any = { type };
     if (code) params.code = code;
     
-    const response = await axios.get(`${BASE_URL}/api/static/custom/f88`, { params });
+    const response = await axios.get(`${BASE_URL}/static/custom/f88`, { params });
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -99,7 +99,7 @@ export async function getStaticData(type: string, code?: string) {
 
 export async function getCountries() {
   try {
-    const response = await axios.get(`${BASE_URL}/api/static/custom/countries`);
+    const response = await axios.get(`${BASE_URL}/static/custom/countries`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -108,7 +108,7 @@ export async function getCountries() {
 
 export async function getCurrencies() {
   try {
-    const response = await axios.get(`${BASE_URL}/api/static/custom/currencies`);
+    const response = await axios.get(`${BASE_URL}/static/custom/currencies`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -117,7 +117,7 @@ export async function getCurrencies() {
 
 export async function searchHsCodes(search: string, pageSize: number = 50) {
   try {
-    const response = await axios.get(`${BASE_URL}/api/customs/hs-codes`, {
+    const response = await axios.get(`${BASE_URL}/customs/hs-codes`, {
       params: { search, page_size: pageSize }
     });
     return response.data;
@@ -128,7 +128,7 @@ export async function searchHsCodes(search: string, pageSize: number = 50) {
 
 export async function sendOtp(pin: string) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration/send-otp`, { pin });
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/send-otp`, { pin });
 
     console.log(response.data);
     
@@ -144,7 +144,7 @@ export async function sendOtp(pin: string) {
 
 export async function verifyOtp(otp: string) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/customs/passenger-declaration/verify-otp`, { otp });
+    const response = await axios.post(`${BASE_URL}/customs/passenger-declaration/verify-otp`, { otp });
 
     console.log(response.data);
     
@@ -160,7 +160,7 @@ export async function verifyOtp(otp: string) {
 
 export async function getEntryPoints() {
   try {
-    const response = await axios.get(`${BASE_URL}/api/entry_points`);
+    const response = await axios.get(`${BASE_URL}/entry_points`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -268,12 +268,12 @@ export async function initializeDeclaration() {
 
 // Get payment slip download URL
 export async function getPaymentSlipUrl(refNo: string) {
-  return `${BASE_URL}/api/customs/passenger-declaration/${refNo}/download-payment-slip`;
+  return `${BASE_URL}/customs/passenger-declaration/${refNo}/download-payment-slip`;
 }
 
 // Get F88 form download URL
 export async function getF88FormUrl(refNo: string) {
-  return `${BASE_URL}/api/customs/passenger-declaration/${refNo}/download-form`;
+  return `${BASE_URL}/customs/passenger-declaration/${refNo}/download-form`;
 }
 
 // Send document via WhatsApp (using same pattern as auth.ts)
