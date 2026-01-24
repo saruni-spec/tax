@@ -4,7 +4,7 @@
 # Tests all eTIMS endpoints and reports on infrastructure errors vs business logic errors
 # Run: bash scripts/test_etims_apis.sh
 
-BASE_URL="https://kratest.pesaflow.com/api/ussd"
+BASE_URL="process.env.API_URL/ussd"
 
 # Test phone number - should be a valid format
 TEST_PHONE="254745050238"

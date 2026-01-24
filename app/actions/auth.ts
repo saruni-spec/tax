@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { cookies } from 'next/headers';
 
-const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // ============= Types =============
 

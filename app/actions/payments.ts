@@ -16,7 +16,7 @@ import {
 } from './auth';
 
 
-const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // Obligation IDs for KRA Payment Services
 const OBLIGATION_IDS = {
@@ -144,7 +144,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
-      'https://kratest.pesaflow.com/api/ussd/id-lookup',
+      `${BASE_URL}/id-lookup`,
       { 
         id_number: idNumber.trim(),
         msisdn: cleanNumber

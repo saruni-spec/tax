@@ -12,11 +12,11 @@ echo ""
 echo "=== 1. GUI LOOKUP (ID Validation) ==="
 echo "Used in: /pin-registration/kenyan/identity"
 echo ""
-echo "curl -X GET 'https://kratest.pesaflow.com/api/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \\"
+echo "curl -X GET 'process.env.API_URL/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \\"
 echo "  -H 'x-source-for: whatsapp'"
 echo ""
 echo "Response:"
-curl -s -X GET 'https://kratest.pesaflow.com/api/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \
+curl -s -X GET 'process.env.API_URL/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \
   -H 'x-source-for: whatsapp'
 echo ""
 echo ""
@@ -25,13 +25,13 @@ echo ""
 echo "=== 2. ID LOOKUP (with phone validation) ==="
 echo "Used in: /pin-registration/kenyan/identity (fallback)"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/id-lookup' \\"
+echo "curl -X POST `${BASE_URL}/id-lookup` \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"id_number\":\"36447996\",\"msisdn\":\"254748104591\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/id-lookup' \
+curl -s -X POST `${BASE_URL}/id-lookup` \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"id_number":"36447996","msisdn":"254748104591"}'
@@ -42,13 +42,13 @@ echo ""
 echo "=== 3. INITIATE SESSION ==="
 echo "Used in: /pin-registration (before registration)"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/initiate-session' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/initiate-session' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"id_number\":\"36447996\",\"msisdn\":\"254748104591\",\"type\":\"citizen\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/initiate-session' \
+curl -s -X POST 'process.env.API_URL/ussd/initiate-session' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"id_number":"36447996","msisdn":"254748104591","type":"citizen"}'
@@ -59,13 +59,13 @@ echo ""
 echo "=== 4. PIN REGISTRATION (Citizen) ==="
 echo "Used in: /pin-registration/kenyan/declaration"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/pin-registration' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/pin-registration' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"type\":\"citizen\",\"email\":\"test@example.com\",\"msisdn\":\"254748104591\",\"id_number\":\"36447996\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/pin-registration' \
+curl -s -X POST 'process.env.API_URL/ussd/pin-registration' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"type":"citizen","email":"test@example.com","msisdn":"254748104591","id_number":"36447996"}'
@@ -76,13 +76,13 @@ echo ""
 echo "=== 5. PIN REGISTRATION (Resident/Non-Kenyan) ==="
 echo "Used in: /pin-registration/non-kenyan/declaration"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/pin-registration' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/pin-registration' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"type\":\"resident\",\"email\":\"test@example.com\",\"msisdn\":\"254748104591\",\"id_number\":\"A1234567\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/pin-registration' \
+curl -s -X POST 'process.env.API_URL/ussd/pin-registration' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"type":"resident","email":"test@example.com","msisdn":"254748104591","id_number":"A1234567"}'

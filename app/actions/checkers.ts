@@ -11,7 +11,7 @@ import {
   OTPResult
 } from './auth';
 
-const BASE_URL = 'https://kratest.pesaflow.com/api';
+const BASE_URL = 'process.env.API_URL';
 
 // ============= Types =============
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_URL="https://kratest.pesaflow.com/api/ussd/post-sale"
+BASE_URL="process.env.API_URL/ussd/post-sale"
 PHONE="254745050238"
 
 echo "=== Test 1: Standard Request ==="

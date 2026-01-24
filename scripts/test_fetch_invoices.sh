@@ -3,7 +3,7 @@
 # Test script for buyer-initiated fetch invoices API
 # Checks invoice data structure and consistency
 
-BASE_URL="https://kratest.pesaflow.com/api/ussd/buyer-initiated/fetch"
+BASE_URL="process.env.API_URL/ussd/buyer-initiated/fetch"
 HEADER="x-forwarded-for: triple_2_ussd"
 PHONE="254745050238"
 

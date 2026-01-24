@@ -14,11 +14,11 @@ echo ""
 echo "=== 1. GUI LOOKUP (Taxpayer Validation) ==="
 echo "Used in: /nil-mri-tot/*/validation"
 echo ""
-echo "curl -X GET 'https://kratest.pesaflow.com/api/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \\"
+echo "curl -X GET 'process.env.API_URL/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \\"
 echo "  -H 'x-source-for: whatsapp'"
 echo ""
 echo "Response:"
-curl -s -X GET 'https://kratest.pesaflow.com/api/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \
+curl -s -X GET 'process.env.API_URL/itax/gui-lookup?gui=36447996&tax_payer_type=KE' \
   -H 'x-source-for: whatsapp'
 echo ""
 echo ""
@@ -27,13 +27,13 @@ echo ""
 echo "=== 2. FETCH FILING PERIODS (NIL - obligation_id: 1) ==="
 echo "Used in: /nil-mri-tot/nil/select"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/obligation-filling-period' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"branch_id\":\"\",\"from_date\":\"\",\"from_itms_or_prtl\":\"PRTL\",\"is_amended\":\"N\",\"obligation_id\":\"1\",\"pin\":\"A016678608H\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \
+curl -s -X POST 'process.env.API_URL/ussd/obligation-filling-period' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"branch_id":"","from_date":"","from_itms_or_prtl":"PRTL","is_amended":"N","obligation_id":"1","pin":"A016678608H"}'
@@ -44,13 +44,13 @@ echo ""
 echo "=== 3. FETCH FILING PERIODS (MRI - obligation_id: 33) ==="
 echo "Used in: /nil-mri-tot/mri/obligation"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/obligation-filling-period' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"branch_id\":\"\",\"from_date\":\"\",\"from_itms_or_prtl\":\"PRTL\",\"is_amended\":\"N\",\"obligation_id\":\"33\",\"pin\":\"A016678608H\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \
+curl -s -X POST 'process.env.API_URL/ussd/obligation-filling-period' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"branch_id":"","from_date":"","from_itms_or_prtl":"PRTL","is_amended":"N","obligation_id":"33","pin":"A016678608H"}'
@@ -61,13 +61,13 @@ echo ""
 echo "=== 4. FETCH FILING PERIODS (TOT - obligation_id: 8) ==="
 echo "Used in: /nil-mri-tot/tot/obligation"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/obligation-filling-period' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"branch_id\":\"\",\"from_date\":\"\",\"from_itms_or_prtl\":\"PRTL\",\"is_amended\":\"N\",\"obligation_id\":\"8\",\"pin\":\"A016678608H\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/obligation-filling-period' \
+curl -s -X POST 'process.env.API_URL/ussd/obligation-filling-period' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"branch_id":"","from_date":"","from_itms_or_prtl":"PRTL","is_amended":"N","obligation_id":"8","pin":"A016678608H"}'
@@ -78,13 +78,13 @@ echo ""
 echo "=== 5. FILE NIL RETURN ==="
 echo "Used in: /nil-mri-tot/nil/verify -> result"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/file-return' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"kra_obligation_id\":\"1\",\"returnPeriod\":\"01/12/2024 - 31/12/2024\",\"returnType\":\"nil_return\",\"tax_payer_pin\":\"A016678608H\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \
+curl -s -X POST 'process.env.API_URL/ussd/file-return' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"kra_obligation_id":"1","returnPeriod":"01/12/2024 - 31/12/2024","returnType":"nil_return","tax_payer_pin":"A016678608H"}'
@@ -95,13 +95,13 @@ echo ""
 echo "=== 6. FILE MRI RETURN ==="
 echo "Used in: /nil-mri-tot/mri/rental-income -> result"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/file-return' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"kra_obligation_id\":\"33\",\"returnPeriod\":\"01/12/2024 - 31/12/2024\",\"returnType\":\"mri_return\",\"tax_payer_pin\":\"A016678608H\",\"rental_income\":50000,\"tax_amount\":5000}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \
+curl -s -X POST 'process.env.API_URL/ussd/file-return' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"kra_obligation_id":"33","returnPeriod":"01/12/2024 - 31/12/2024","returnType":"mri_return","tax_payer_pin":"A016678608H","rental_income":50000,"tax_amount":5000}'
@@ -112,13 +112,13 @@ echo ""
 echo "=== 7. FILE TOT RETURN (Daily) ==="
 echo "Used in: /nil-mri-tot/tot/daily -> result"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/file-return' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"kra_obligation_id\":\"8\",\"returnPeriod\":\"15/12/2024\",\"returnType\":\"tot_return\",\"tax_payer_pin\":\"A016678608H\",\"gross_sales\":100000,\"tax_amount\":3000,\"filing_mode\":\"daily\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \
+curl -s -X POST 'process.env.API_URL/ussd/file-return' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"kra_obligation_id":"8","returnPeriod":"15/12/2024","returnType":"tot_return","tax_payer_pin":"A016678608H","gross_sales":100000,"tax_amount":3000,"filing_mode":"daily"}'
@@ -129,13 +129,13 @@ echo ""
 echo "=== 8. FILE TOT RETURN (Monthly) ==="
 echo "Used in: /nil-mri-tot/tot/monthly -> result"
 echo ""
-echo "curl -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \\"
+echo "curl -X POST 'process.env.API_URL/ussd/file-return' \\"
 echo "  -H 'Content-Type: application/json' \\"
 echo "  -H 'x-forwarded-for: triple_2_ussd' \\"
 echo "  -d '{\"kra_obligation_id\":\"8\",\"returnPeriod\":\"01/12/2024 - 31/12/2024\",\"returnType\":\"tot_return\",\"tax_payer_pin\":\"A016678608H\",\"gross_sales\":500000,\"tax_amount\":15000,\"filing_mode\":\"monthly\"}'"
 echo ""
 echo "Response:"
-curl -s -X POST 'https://kratest.pesaflow.com/api/ussd/file-return' \
+curl -s -X POST 'process.env.API_URL/ussd/file-return' \
   -H 'Content-Type: application/json' \
   -H 'x-forwarded-for: triple_2_ussd' \
   -d '{"kra_obligation_id":"8","returnPeriod":"01/12/2024 - 31/12/2024","returnType":"tot_return","tax_payer_pin":"A016678608H","gross_sales":500000,"tax_amount":15000,"filing_mode":"monthly"}'

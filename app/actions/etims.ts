@@ -29,7 +29,7 @@ import {
   SubmitBuyerInitiatedInvoiceResult
 } from '../etims/_lib/definitions';
 
-const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // getAuthHeaders is imported from ./auth
 
@@ -886,7 +886,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
 
   try {
     const response = await axios.post(
-      'https://kratest.pesaflow.com/api/ussd/id-lookup',
+      `${BASE_URL}/id-lookup`,
       { 
         id_number: idNumber.trim(),
         msisdn: cleanNumber

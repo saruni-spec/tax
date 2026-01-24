@@ -8,14 +8,13 @@ import {
   checkServerSession as sharedCheckSession,
   logout as sharedLogout,
   getStoredPhoneServer,
-  OTPResult,
   sendWhatsAppMessage as sharedSendWhatsAppMessage,
   SendWhatsAppMessageParams,
   SendWhatsAppMessageResult,
 } from './auth';
-import { cleanPhoneNumber } from '../_lib/utils';
 
-const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+
+const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // Obligation IDs
 const OBLIGATION_IDS = {
@@ -152,7 +151,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
-      'https://kratest.pesaflow.com/api/ussd/id-lookup',
+      `${BASE_URL}/id-lookup`,
       { 
         id_number: idNumber.trim(),
         msisdn: cleanNumber
@@ -219,7 +218,7 @@ export interface TccApplicationResult {
 
 /**
  * GUI Lookup - Verify taxpayer before TCC application
- * GET https://kratest.pesaflow.com/api/itax/gui-lookup
+ * GET process.env.API_URL/itax/gui-lookup
  */
 export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
   if (!idNumber || idNumber.trim().length < 6) {
@@ -231,7 +230,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      'https://kratest.pesaflow.com/api/itax/gui-lookup',
+      'process.env.API_URL/itax/gui-lookup',
       {
         params: {
           gui: idNumber.trim(),
@@ -269,7 +268,7 @@ export async function guiLookup(idNumber: string): Promise<GuiLookupResult> {
 
 /**
  * Submit TCC Application
- * POST https://kratest.pesaflow.com/api/ussd/tcc-application
+ * POST process.env.API_URL/ussd/tcc-application
  */
 export async function submitTccApplication(
   taxPayerPin: string,
@@ -287,7 +286,7 @@ export async function submitTccApplication(
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
-      'https://kratest.pesaflow.com/api/ussd/tcc-application',
+      'process.env.API_URL/ussd/tcc-application',
       {
         tax_payer_pin: taxPayerPin,
         reason_for_tcc: reasonForTcc,
@@ -593,7 +592,7 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `https://kratest.pesaflow.com/api/properties/lookup/${pin}`,
+      `process.env.API_URL/properties/lookup/${pin}`,
       { headers }
     );
 

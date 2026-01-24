@@ -80,7 +80,7 @@ The application runs on port **3000** by default.
 
 ## 5. API Endpoints Integrated
 
-All API calls route through `https://kratest.pesaflow.com/api/ussd`
+All API calls route through `process.env.API_URL/ussd`
 
 | Endpoint | Description |
 |:---------|:------------|

@@ -16,7 +16,7 @@ import {
 import { cleanPhoneNumber } from '../_lib/utils';
 
 
-const BASE_URL = 'https://kratest.pesaflow.com/api/ussd';
+const BASE_URL = `${process.env.API_URL}/ussd`;
 
 // Obligation IDs
 const OBLIGATION_IDS = {
@@ -160,7 +160,7 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.post(
-      'https://kratest.pesaflow.com/api/ussd/id-lookup',
+      `${BASE_URL}/id-lookup`,
       { 
         id_number: idNumber.trim(),
         msisdn: cleanNumber
@@ -225,7 +225,7 @@ export async function guiLookup(idNumber: string): Promise<{ success: boolean; p
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `https://kratest.pesaflow.com/api/itax/gui-lookup`,
+      `process.env.API_URL/itax/gui-lookup`,
       {
         params: {
           gui: idNumber,
@@ -720,7 +720,7 @@ export async function getProperties(pin: string): Promise<PropertiesResult> {
   try {
     const headers = await getApiHeaders(true);
     const response = await axios.get(
-      `https://kratest.pesaflow.com/api/properties/lookup/${pin}`,
+      `process.env.API_URL/properties/lookup/${pin}`,
       { headers }
     );
 
