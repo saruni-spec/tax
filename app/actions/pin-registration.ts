@@ -97,7 +97,7 @@ export async function getStoredPhone(): Promise<string | null> {
 /**
  * Lookup user details by ID number using lookup API
  */
-export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string,name?:string): Promise<LookupByIdResult> {
+export async function lookupById(idNumber: string, phoneNumber: string, yearOfBirth: string,name?:string, type: "citizen" | "alien" = "citizen"): Promise<LookupByIdResult> {
   if (!idNumber || idNumber.trim().length < 6) {
     return { success: false, error: 'ID number must be at least 6 characters' };
   }
@@ -113,16 +113,22 @@ export async function lookupById(idNumber: string, phoneNumber: string, yearOfBi
   if (cleanNumber.startsWith('0')) cleanNumber = '254' + cleanNumber.substring(1);
   else if (!cleanNumber.startsWith('254')) cleanNumber = '254' + cleanNumber;
 
-  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth);
+  console.log('Looking up ID:', idNumber, 'Phone:', cleanNumber, 'YOB to verify:', yearOfBirth, 'id type:', type, 'name:', name);
+
+  const payload = {
+    id_number: idNumber.trim(),
+    msisdn: cleanNumber,
+    id_type: type,
+  };
+
+  console.log(`${BASE_URL}/id-lookup`);
+  console.log('ID lookup payload:', JSON.stringify(payload, null, 2));
 
   try {
     const headers = await getAuthHeaders();
     const response = await axios.post(
       `${BASE_URL}/id-lookup`,
-      { 
-        id_number: idNumber.trim(),
-        msisdn: cleanNumber
-      },
+      payload,
       { 
         headers, 
         timeout: 30000 

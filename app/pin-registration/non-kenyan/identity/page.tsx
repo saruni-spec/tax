@@ -57,7 +57,7 @@ export default function NonKenyanIdentityInput() {
 
     try {
       // For non-Kenyan, we attempt lookup but allow continuation even if not found
-      const result = await lookupById(formData.alienId,phoneNumber, formData.yearOfBirth, formData.firstName);
+      const result = await lookupById(formData.alienId,phoneNumber, formData.yearOfBirth, formData.firstName,"alien");
       
       // Save registration data
       saveRegistrationData({
