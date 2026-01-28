@@ -6,8 +6,8 @@ import { Layout, Card, Button } from '../../../_components/Layout';
 import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function TotResultPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function TotResultPage() {
       // Only send if success and not already sent
       if (!info.error && info.pin) {
          try {
-           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
            if (phone) {
              let message = `*Turnover Tax Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour TOT Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${(info.taxAmount || 0).toLocaleString()}`;
              
@@ -58,7 +58,7 @@ export default function TotResultPage() {
   }
 
   const handleReturnHome = () => {
-    const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+    const phone = taxpayerStore.getMsisdn() || getKnownPhone();
     taxpayerStore.clear();
     router.push(`/?msisdn=${phone || ''}`);
   };
@@ -140,7 +140,7 @@ export default function TotResultPage() {
           
           <button 
             onClick={() => {
-               const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+               const phone = taxpayerStore.getMsisdn() || getKnownPhone();
                router.push(`/nil-mri-tot/tot/validation${phone ? `?phone=${phone}` : ''}`);
             }}
             className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"

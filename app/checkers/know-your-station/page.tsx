@@ -6,6 +6,7 @@ import { Layout, Card, Button } from '../../_components/Layout';
 import { Loader2, MapPin } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkPin } from '@/app/actions/checkers';
 import { PINInput } from '@/app/_components/KRAInputs';
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
 function KnowYourStationContent() {
   const router = useRouter();
@@ -28,7 +29,7 @@ function KnowYourStationContent() {
         
         if (!currentPhone) {
           try {
-            const localPhone = localStorage.getItem('phone_Number');
+            const localPhone = getKnownPhone();
             if (localPhone) currentPhone = localPhone;
           } catch (e) {}
         }
@@ -43,6 +44,7 @@ function KnowYourStationContent() {
           if (currentPhone !== urlPhone) {
             router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
           }
+          saveKnownPhone(currentPhone);
         }
       } finally {
         setCheckingSession(false);

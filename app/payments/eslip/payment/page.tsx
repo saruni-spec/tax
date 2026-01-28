@@ -6,6 +6,7 @@ import { Loader2, AlertCircle, Receipt } from 'lucide-react';
 import { getStoredPhone, makePayment } from '@/app/actions/payments';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, Input } from '../../../_components/Layout';
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
 function EslipPaymentContent() {
   const router = useRouter();
@@ -23,23 +24,30 @@ function EslipPaymentContent() {
   useEffect(() => {
     const performSessionCheck = async () => {
       try {
-        if (!phone) {
+        let currentPhone = phone;
+        
+        if (!currentPhone) {
           const storedPhone = await getStoredPhone();
           if (storedPhone) {
-            const redirectUrl = `${pathname}?phone=${encodeURIComponent(storedPhone)}`;
-            router.replace(redirectUrl);
+            currentPhone = storedPhone;
           } else {
             try {
-              const localPhone = localStorage.getItem('phone_Number');
+              const localPhone = getKnownPhone();
               if (localPhone) {
-                const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
-                router.replace(redirectUrl);
-                return;
+                currentPhone = localPhone;
               }
             } catch (e) {
-              console.error('Error accessing local storage', e);
+              console.error('Error accessing session store', e);
             }
           }
+        }
+
+        if (currentPhone) {
+          if (currentPhone !== phone) {
+            const redirectUrl = `${pathname}?phone=${encodeURIComponent(currentPhone)}`;
+            router.replace(redirectUrl);
+          }
+          saveKnownPhone(currentPhone);
         }
         
         setCheckingSession(false);

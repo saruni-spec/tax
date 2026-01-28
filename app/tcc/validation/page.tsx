@@ -8,6 +8,7 @@ import { YearOfBirthInput } from '@/app/_components/YearOfBirthInput';
 import { lookupById, getStoredPhone } from '@/app/actions/tcc';
 import { taxpayerStore } from '../_lib/store';
 import { Loader2 } from 'lucide-react';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 function TccValidationContent() {
   const router = useRouter();
@@ -37,14 +38,14 @@ function TccValidationContent() {
           } else {
              // Priority 2: Check client-side local storage
              try {
-               const localPhone = localStorage.getItem('phone_Number');
-               if (localPhone) {
-                  const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
-                  router.replace(redirectUrl);
-                  return;
-               }
+                const localPhone = getKnownPhone();
+                if (localPhone) {
+                   const redirectUrl = `${pathname}?phone=${encodeURIComponent(localPhone)}`;
+                   router.replace(redirectUrl);
+                   return;
+                }
              } catch (e) {
-               console.error('Error accessing local storage', e);
+                console.error('Error accessing local storage', e);
              }
           }
         }

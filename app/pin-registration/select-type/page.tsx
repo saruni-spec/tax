@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout } from '../../_components/Layout';
 import { Globe, Flag, Loader2 } from 'lucide-react';
 import { getStoredPhone } from '@/app/actions/pin-registration';
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
 function SelectResidencyTypeContent() {
   const router = useRouter();
@@ -23,14 +24,14 @@ function SelectResidencyTypeContent() {
         let currentPhone = urlPhone;
         
         if (!currentPhone) {
-          // Try localStorage first
+          // Try session store first
           try {
-            const localPhone = localStorage.getItem('phone_Number');
+            const localPhone = getKnownPhone();
             if (localPhone) {
               currentPhone = localPhone;
             }
           } catch (e) {
-            console.error('Error accessing localStorage', e);
+            console.error('Error accessing session store', e);
           }
         }
         
@@ -42,12 +43,18 @@ function SelectResidencyTypeContent() {
           }
         }
         
-        // If we found a phone, update state and URL
-        if (currentPhone && currentPhone !== urlPhone) {
-          setPhone(currentPhone);
-          router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
-        } else if (currentPhone) {
-          setPhone(currentPhone);
+        // If we found a phone, update state, persistence and URL
+        if (currentPhone) {
+          try {
+            saveKnownPhone(currentPhone);
+          } catch (e) {}
+
+          if (currentPhone !== urlPhone) {
+            setPhone(currentPhone);
+            router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
+          } else {
+            setPhone(currentPhone);
+          }
         }
         
         setCheckingSession(false);

@@ -18,6 +18,7 @@ import {
 } from '@/app/actions/nil-mri-tot';
 import { Layout, Card, IdentityStrip, Input, Button, TotalsCard } from '@/app/_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 
 function MriRentalIncomeContent() {
@@ -201,7 +202,7 @@ function MriRentalIncomeContent() {
       const storedPhone = await getStoredPhone();
       if (storedPhone && taxpayerInfo) {
         const message = `*Monthly Rental Income Status*
-
+ 
 Dear *${taxpayerInfo.fullName}*,
 Your PIN: *${taxpayerInfo.pin}* currently has *no Monthly Rental Income (MRI) obligation*.
 
@@ -216,7 +217,7 @@ If you have rental income in the future, please contact *KRA* to update your tax
       }
       
       // Redirect to home
-      const msisdn = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+      const msisdn = taxpayerStore.getMsisdn() || getKnownPhone();
       taxpayerStore.clear();
       router.push(`/?msisdn=${msisdn || ''}`);
     };

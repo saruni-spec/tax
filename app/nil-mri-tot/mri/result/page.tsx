@@ -6,6 +6,7 @@ import { WhatsAppButton } from '../../../_components/QuickMenu';
 
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { useState, useEffect } from 'react';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function MriResultPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function MriResultPage() {
       // Only send if success and not already sent
       if (!info.error && info.pin) {
          try {
-           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
            if (phone) {
              const mriTax = ((info.rentalIncome || 0) * 0.1).toFixed(2);
              let message = `*MRI Return Filed Successfully*\n\nDear *${info.fullName}*,\nYour Monthly Rental Income Return for *${info.filingPeriod}* has been filed.\n\nTax Due: KES ${mriTax}`;
@@ -66,7 +67,7 @@ export default function MriResultPage() {
   const isPayment = taxpayerInfo.paymentType === 'file-and-pay';
 
   const handleReturnHome = () => {
-    const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+    const phone = taxpayerStore.getMsisdn() || getKnownPhone();
     taxpayerStore.clear();
     router.push(`/?msisdn=${phone || ''}`);
   };
@@ -149,7 +150,7 @@ export default function MriResultPage() {
           <div className="space-y-3 pt-2">
             <button
               onClick={() => {
-                const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+                const phone = taxpayerStore.getMsisdn() || getKnownPhone();
                 router.push(`/nil-mri-tot/mri/validation${phone ? `?phone=${phone}` : ''}`);
               }}
               className="w-full py-3 text-white bg-[var(--kra-red)] hover:bg-red-700 rounded-lg text-sm font-medium transition-colors shadow-sm"

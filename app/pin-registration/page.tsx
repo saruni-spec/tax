@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { FileText } from 'lucide-react';
 import { Layout, Button, Card } from '../_components/Layout';
 import { savePhoneNumber, getPhoneNumber } from './_lib/store';
+import { getKnownPhone, saveKnownPhone } from '../_lib/session-store';
 
 function PinRegistrationContent() {
   const router = useRouter();
@@ -21,7 +22,7 @@ function PinRegistrationContent() {
     
     if (!currentPhone) {
       try {
-        const localPhone = localStorage.getItem('phone_Number') || getPhoneNumber();
+        const localPhone = getKnownPhone() || getPhoneNumber();
         if (localPhone) {
           currentPhone = localPhone;
         }
@@ -31,6 +32,9 @@ function PinRegistrationContent() {
     if (currentPhone) {
       setPhone(currentPhone);
       savePhoneNumber(currentPhone);
+      try {
+        saveKnownPhone(currentPhone);
+      } catch (e) {}
       
       if (currentPhone !== urlPhone) {
         router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);

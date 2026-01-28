@@ -7,6 +7,7 @@ import { taxpayerStore } from '../../_lib/store';
 import { fileTotReturn, getTaxpayerObligations, getFilingPeriods, generatePrn, makePayment, getStoredPhone, sendWhatsAppMessage, calculateTax } from '@/app/actions/nil-mri-tot';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 function TotVerifyContent() {
   const router = useRouter();
@@ -207,6 +208,7 @@ function TotVerifyContent() {
        
       );
      
+ 
 
 
       if (!result.success) {
@@ -344,7 +346,7 @@ function TotVerifyContent() {
       const storedPhone = await getStoredPhone();
       if (storedPhone && taxpayerInfo) {
         const message = `*Turnover Tax Status*
-
+ 
 Dear *${taxpayerInfo.fullName}*,
 Your PIN: *${taxpayerInfo.pin}* currently has *no Turnover Tax (TOT) obligation*.
 
@@ -359,7 +361,7 @@ If your business income qualifies for TOT in the future, please contact *KRA* to
       }
       
       // Redirect to home
-      const msisdn = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+      const msisdn = taxpayerStore.getMsisdn() || getKnownPhone();
       taxpayerStore.clear();
       router.push(`/?msisdn=${msisdn || ''}`);
     };

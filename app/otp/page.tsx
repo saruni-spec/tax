@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { generateOTP, validateOTP } from '../actions/auth';
 import { Button, Card, Layout } from '../_components/Layout';
-import { saveUserSession } from '../_lib/session-store';
+import { saveUserSession, getKnownPhone, saveKnownPhone } from '../_lib/session-store';
 
 function OTPContent() {
   const router = useRouter();
@@ -96,7 +96,7 @@ function OTPContent() {
       
       // Save phone to localStorage for persistence
       try {
-        localStorage.setItem('phone_Number', phoneNumber);
+        saveKnownPhone(phoneNumber);
       } catch (e) {
         console.error('Failed to save phone to local storage', e);
       }

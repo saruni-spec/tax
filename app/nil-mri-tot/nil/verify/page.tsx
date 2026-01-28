@@ -7,6 +7,7 @@ import { taxpayerStore } from '../../_lib/store';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { fileNilReturn, getFilingPeriods, getTaxpayerObligations, getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { analytics } from '@/app/_lib/analytics';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 function NilVerifyContent() {
   const router = useRouter();
@@ -189,7 +190,7 @@ function NilVerifyContent() {
       router.push(`/nil-mri-tot/nil/validation?phone=${encodeURIComponent(storedPhone)}`);
     } else {
        try {
-          const localPhone = localStorage.getItem('phone_Number');
+          const localPhone = getKnownPhone();
           if (localPhone) {
              router.push(`/nil-mri-tot/nil/validation?phone=${encodeURIComponent(localPhone)}`);
           } else {

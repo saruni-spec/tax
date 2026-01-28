@@ -7,6 +7,8 @@ import { IdCard, FileText, Shield, UserCheck, MapPin, FileCheck } from 'lucide-r
 import { Layout, Card } from '../_components/Layout';
 import { taxpayerStore } from './_lib/store';
 
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
+
 function CheckersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,7 +20,7 @@ function CheckersContent() {
       taxpayerStore.setMsisdn(phoneNumber);
       setMsisdn(phoneNumber);
       try {
-        localStorage.setItem('phone_Number', phoneNumber);
+        saveKnownPhone(phoneNumber);
       } catch (e) {}
     } else {
       const storedMsisdn = taxpayerStore.getMsisdn();
@@ -26,7 +28,7 @@ function CheckersContent() {
         setMsisdn(storedMsisdn);
       } else {
         try {
-          const localPhone = localStorage.getItem('phone_Number');
+          const localPhone = getKnownPhone();
           if (localPhone) {
             setMsisdn(localPhone);
             taxpayerStore.setMsisdn(localPhone);

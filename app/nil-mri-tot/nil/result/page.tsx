@@ -7,6 +7,7 @@ import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
+import { getKnownPhone } from '@/app/_lib/session-store';
 
 export default function NilResultPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function NilResultPage() {
       // Only send if success and not already sent (we can use a flag or just run once on mount)
       if (!info.error && info.pin) {
          try {
-           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || localStorage.getItem('phone_Number');
+           const phone = taxpayerStore.getMsisdn() || await getStoredPhone() || getKnownPhone();
            if (phone) {
              const baseMessage = info.successMessage || 'Successfully Filled NIL Return';
              const receipt = (taxpayerStore as any).receiptNumber || 'N/A';
@@ -51,7 +52,7 @@ export default function NilResultPage() {
   }
 
   const handleReturnHome = async () => {
-    const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+    const phone = taxpayerStore.getMsisdn() || getKnownPhone();
     taxpayerStore.clear();
     router.push(`/?msisdn=${phone || ''}`);
   };
@@ -118,7 +119,7 @@ export default function NilResultPage() {
           
           <button 
             onClick={() => {
-               const phone = taxpayerStore.getMsisdn() || localStorage.getItem('phone_Number');
+               const phone = taxpayerStore.getMsisdn() || getKnownPhone();
                router.push(`/nil-mri-tot/nil/validation${phone ? `?phone=${phone}` : ''}`);
             }}
             className="w-full py-3 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors border border-blue-200"

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Layout, Card, Button, Input } from '../../_components/Layout';
 import { Loader2, FileText } from 'lucide-react';
 import { checkSession, getStoredPhone, initSession, checkInvoice } from '@/app/actions/checkers';
+import { getKnownPhone, saveKnownPhone } from '@/app/_lib/session-store';
 
 function InvoiceCheckerContent() {
   const router = useRouter();
@@ -26,7 +27,7 @@ function InvoiceCheckerContent() {
         
         if (!currentPhone) {
           try {
-            const localPhone = localStorage.getItem('phone_Number');
+            const localPhone = getKnownPhone();
             if (localPhone) currentPhone = localPhone;
           } catch (e) {}
         }
@@ -41,6 +42,7 @@ function InvoiceCheckerContent() {
           if (currentPhone !== urlPhone) {
             router.replace(`${pathname}?phone=${encodeURIComponent(currentPhone)}`);
           }
+          saveKnownPhone(currentPhone);
         }
       } finally {
         setCheckingSession(false);
