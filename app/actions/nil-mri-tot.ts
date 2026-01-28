@@ -759,15 +759,22 @@ export async function generatePrn(
 ): Promise<GeneratePrnResult> {
   try {
     const headers = await getApiHeaders(true);
-    const response = await axios.post(
-      `${BASE_URL}/generate-prn`,
-      {
+
+    const payload= {
         tax_payer_pin: taxPayerPin,
         obligation_id: obligationId,
         tax_period_from: taxPeriodFrom,
         tax_period_to: taxPeriodTo,
         amount: amount,
-      },
+      }
+
+      console.log(`${BASE_URL}/generate-prn`)
+      console.log('Generate PRN Payload:', payload);
+
+    const response = await axios.post(
+      `${BASE_URL}/generate-prn`,
+      payload
+     ,
       { headers }
     );
 
@@ -806,12 +813,18 @@ export async function makePayment(
 ): Promise<MakePaymentResult> {
   try {
     const headers = await getApiHeaders(true);
-    const response = await axios.post(
-      `${BASE_URL}/make-payment`,
-      {
+    console.log(`${BASE_URL}/make-payment`)
+ const payload={
         msisdn: msisdn,
         prn: prn,
-      },
+      }
+
+    console.log('Make Payment Payload:', payload);
+
+    const response = await axios.post(
+      `${BASE_URL}/make-payment`,
+      payload
+      ,
       { headers }
     );
 

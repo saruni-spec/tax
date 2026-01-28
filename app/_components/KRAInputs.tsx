@@ -27,7 +27,7 @@ export const IDInput = forwardRef<HTMLInputElement, IDInputProps>(
       }
 
       // Limit to 8 digits
-      const truncatedValue = inputValue.slice(0, 8);
+      const truncatedValue = inputValue.slice(0, 12);
       
       // Validate
       let validationError = '';
