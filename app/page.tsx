@@ -145,8 +145,11 @@ function HomeContent() {
         window.location.href = url;
       }
     } else {
-      setToast(`${serviceKey} - Coming Soon`);
-      setTimeout(() => setToast(null), 2000);
+       // Connect to Agent logic for unmapped services
+       analytics.track("service_agent_connect", { service_name: serviceKey });
+       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '254745050238';
+       const message = `I need help with ${serviceKey}`;
+       window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
     }
   };
 
@@ -183,7 +186,7 @@ function HomeContent() {
                     className={`px-2.5 py-0.8 text-[10px] font-medium rounded-md transition-colors ${
                       isAvailable(item.key)
                         ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
-                        : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
+                        : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
                     }`}
                   >
                     {item.label}
