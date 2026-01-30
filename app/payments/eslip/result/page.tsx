@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Copy, Check, ExternalLink } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button } from '../../../_components/Layout';
+import { ResultActions } from '../../../_components/ResultActions';
 
 export default function EslipResultPage() {
   const router = useRouter();
@@ -124,13 +125,7 @@ export default function EslipResultPage() {
             </Button>
           )}
           
-          <Button
-            onClick={handleNewPayment}
-            variant="secondary"
-            className="w-full"
-          >
-            Back to Home
-          </Button>
+          <ResultActions />
         </div>
       </div>
     </Layout>

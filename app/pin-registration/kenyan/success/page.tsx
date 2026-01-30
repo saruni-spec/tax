@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout, Button, SuccessState } from '../../../_components/Layout';
+import { ResultActions } from '../../../_components/ResultActions';
 import { FileDown, Menu, Plus } from 'lucide-react';
 
 export default function KenyanSuccess() {
@@ -58,8 +59,8 @@ export default function KenyanSuccess() {
             </div>
           </div>
         </button>
-
         
+        <ResultActions />
       </div>
 
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">

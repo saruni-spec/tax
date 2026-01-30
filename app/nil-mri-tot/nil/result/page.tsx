@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Layout, Card, Button } from '../../../_components/Layout';
 import { WhatsAppButton, QuickMenu } from '../../../_components/QuickMenu';
+import { ResultActions } from '../../../_components/ResultActions';
 import { taxpayerStore } from '../../_lib/store';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
@@ -108,14 +109,8 @@ export default function NilResultPage() {
         )}
 
         {/* WhatsApp Button */}
-        {/* WhatsApp Button */}
-        <WhatsAppButton label={taxpayerInfo?.error ? "Back to WhatsApp" : "Open in Whatsapp"} />
-
         {/* Action Buttons */}
         <div className="space-y-3 pt-2">
-          <Button onClick={handleReturnHome}>
-            Return to Home
-          </Button>
           
           <button 
             onClick={() => {
@@ -126,6 +121,8 @@ export default function NilResultPage() {
           >
             File Another Return
           </button>
+
+          <ResultActions />
         </div>
       </div>
     </Layout>

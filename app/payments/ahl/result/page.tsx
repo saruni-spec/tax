@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Copy, Check, ExternalLink } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
 import { Layout, Card, Button, IdentityStrip } from '../../../_components/Layout';
+import { ResultActions } from '../../../_components/ResultActions';
 
 export default function AhlResultPage() {
   const router = useRouter();
@@ -143,13 +144,7 @@ export default function AhlResultPage() {
             </Button>
           )}
           
-          <Button
-            onClick={handleNewPayment}
-            variant="secondary"
-            className="w-full"
-          >
-            Make New Payment
-          </Button>
+          <ResultActions />
         </div>
       </div>
     </Layout>

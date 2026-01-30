@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, MessageCircle, AlertCircle } from 'lucide-react';
 import { taxpayerStore } from '../../_lib/store';
 import { WhatsAppButton } from '../../../_components/QuickMenu';
+import { ResultActions } from '../../../_components/ResultActions';
 
 import { getStoredPhone, sendWhatsAppMessage } from '@/app/actions/nil-mri-tot';
 import { useState, useEffect } from 'react';
@@ -143,9 +144,6 @@ export default function MriResultPage() {
             </div>
           )}
 
-          {/* WhatsApp Button */}
-          <WhatsAppButton label={taxpayerInfo.error ? "Back to WhatsApp" : "Open in Whatsapp"} />
-
           {/* Action Buttons */}
           <div className="space-y-3 pt-2">
             <button
@@ -157,6 +155,8 @@ export default function MriResultPage() {
             >
               Rental Income
             </button>
+
+            <ResultActions />
           </div>
         </div>
       </div>
