@@ -217,13 +217,26 @@ export async function submitPinRegistration(
 
     const data = response.data;
     
-    return {
+    const result = {
       success: data.success !== false && !data.error,
       code: data.code,
       message: data.message || 'PIN Registration submitted successfully',
       pin: data.pin || data.kra_pin,
       receiptNumber: data.receipt_number || data.receiptNumber || `REG-${Date.now()}`,
     };
+
+    // Send WhatsApp notification if we have a PIN
+    if (result.pin) {
+      const waMessage = `*KRA PIN Registration*\n\n${result.message}\n\n*PIN:* ${result.pin}\n*Receipt No:* ${result.receiptNumber}`;
+      
+      // Fire and forget - don't block response
+      sharedSendWhatsAppMessage({
+        recipientPhone: cleanNumber,
+        message: waMessage
+      }).catch(err => console.error('Failed to send successful registration WhatsApp:', err));
+    }
+
+    return result;
   } catch (error: any) {
     console.error('PIN Registration error:', error.response?.data || error.message);
     

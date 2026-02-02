@@ -17,10 +17,7 @@ export default function KenyanSuccess() {
     }
   }, []);
 
-  const handleDownloadCertificate = () => {
-    // In a real implementation, this would download the PDF
-    alert('PIN Certificate download will start shortly. Check your email for the certificate.');
-  };
+ 
 
   return (
     <Layout title="Registration Successful">
@@ -40,12 +37,7 @@ export default function KenyanSuccess() {
       )}
 
       <div className="space-y-3 mt-8">
-        <Button onClick={handleDownloadCertificate}>
-          <div className="flex items-center justify-center gap-2">
-            <FileDown className="w-5 h-5" />
-            Download PIN Certificate
-          </div>
-        </Button>
+     
 <button
           onClick={() => router.push('/pin-registration/kenyan/identity')}
           className="w-full bg-white border-2 border-gray-300 rounded-xl p-5 hover:border-green-600 hover:bg-green-50 transition-all"
