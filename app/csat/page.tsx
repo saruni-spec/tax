@@ -24,7 +24,7 @@ export default function CsatPage() {
 
   const handleSubmit = async () => {
     // Track feedback submission
-    analytics.track('csat_feedback_submitted', {
+    analytics.track('csat_submitted', {
       rating,
       feedback,
       journey: journey || 'Unknown'
