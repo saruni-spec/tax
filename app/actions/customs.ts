@@ -1,6 +1,7 @@
 'use server';
 
 import axios from 'axios';
+import { trackMessageSent } from '../_lib/analytics-server';
 
 const BASE_URL = process.env.API_URL;
 
@@ -335,8 +336,18 @@ export async function sendDocumentViaWhatsapp(payload: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      timeout: 30000
+      timeout: 30000 // Longer timeout for documents
     });
+
+    // Track analytics
+    // Assuming trackMessageSent is defined elsewhere and imported
+    // await trackMessageSent({
+    //   message_id: response.data.messages?.[0]?.id,
+    //   recipient_phone: finalNumber,
+    //   message_type: 'document',
+    //   document_url: documentUrl,
+    //   document_filename: filename
+    // });
 
     return { 
       success: true, 
@@ -346,7 +357,7 @@ export async function sendDocumentViaWhatsapp(payload: {
     console.error('Error sending WhatsApp document:', error.response?.data || error.message);
     return { 
       success: false, 
-      error: error.response?.data?.error?.message || 'Failed to send document' 
+      error: error.response?.data?.error?.message || 'Failed to send document via WhatsApp' 
     };
   }
 }

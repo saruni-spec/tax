@@ -39,6 +39,8 @@ export interface SendWhatsAppDocumentResult {
   error?: string;
 }
 
+import { trackMessageSent } from '../_lib/analytics-server';
+
 
 
 // ============= Helper Functions =============
@@ -272,6 +274,14 @@ export async function sendWhatsAppMessage(
       timeout: 30000
     });
 
+    // Track analytics
+    await trackMessageSent({
+      message_id: response.data.messages?.[0]?.id,
+      recipient_phone: finalNumber,
+      message_type: 'text',
+      content: message
+    });
+
     return {
       success: true,
       messageId: response.data.messages?.[0]?.id
@@ -326,6 +336,15 @@ export async function sendWhatsAppDocument(
         'Content-Type': 'application/json'
       },
       timeout: 30000
+    });
+
+    // Track analytics
+    await trackMessageSent({
+      message_id: response.data.messages?.[0]?.id,
+      recipient_phone: finalNumber,
+      message_type: 'document',
+      document_url: documentUrl,
+      document_filename: filename
     });
 
     return {
@@ -409,6 +428,15 @@ export async function sendConnectToAgentMessage(recipientPhone: string): Promise
       timeout: 30000
     });
 
+    // Track analytics
+    await trackMessageSent({
+      message_id: response.data.messages?.[0]?.id,
+      recipient_phone: finalNumber,
+      message_type: 'interactive',
+      interactive_type: 'button',
+      interactive_id: 'Connect to Agent'
+    });
+
     return {
       success: true,
       messageId: response.data.messages?.[0]?.id
@@ -484,6 +512,15 @@ export async function sendServiceAgentConnectMessage(recipientPhone: string, ser
         'Content-Type': 'application/json'
       },
       timeout: 30000
+    });
+
+    // Track analytics
+    await trackMessageSent({
+      message_id: response.data.messages?.[0]?.id,
+      recipient_phone: finalNumber,
+      message_type: 'interactive',
+      interactive_type: 'button',
+      interactive_id: `Agent Help: ${serviceName}`
     });
 
     return {

@@ -15,6 +15,8 @@ import {
   SendWhatsAppDocumentResult
 } from './auth';
 
+import { trackMessageSent } from '../_lib/analytics-server';
+
 import {
   CustomerLookupResult,
   InvoiceSubmissionRequest,
@@ -1129,6 +1131,14 @@ export async function sendBuyerInvoiceAlert(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'inoice_alert_buyer'
+    });
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -1221,6 +1231,16 @@ export async function sendBuyerStatusUpdateWithPdf(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'buyer_alert_for_invoice_status_update',
+      document_url: pdfUrl,
+      document_filename: 'invoice.pdf'
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error('WhatsApp Template Error:', error.response?.data || error.message);
@@ -1285,6 +1305,14 @@ export async function sendBuyerInitiatedInvoiceAlert(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'alert_seller_invoice_buyer_initiated'
+    });
+    
     return { success: true };
   } catch (error: any) {
     console.error('WhatsApp template error:', error.response?.data || error.message);
@@ -1357,6 +1385,16 @@ export async function sendInvoiceCreditDocTemplate(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'invoice_credit_doc',
+      document_url: pdfUrl,
+      document_filename: 'document.pdf'
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error('WhatsApp Template Error:', error.response?.data || error.message);
@@ -1427,6 +1465,16 @@ export async function sendDownloadInvoicesTemplate(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'download_invoices',
+      document_url: pdfUrl,
+      document_filename: 'document.pdf'
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error('WhatsApp Template Error:', error.response?.data || error.message);
@@ -1498,6 +1546,16 @@ export async function sendDownloadInvoiceTemplate(
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: 10000
     });
+    
+    // Track analytics
+    await trackMessageSent({
+      recipient_phone: cleanNumber,
+      message_type: 'template',
+      template_name: 'download_invoices',
+      document_url: pdfUrl,
+      document_filename: 'document.pdf'
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error('WhatsApp Template Error:', error.response?.data || error.message);
