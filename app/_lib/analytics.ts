@@ -104,6 +104,7 @@ class AnalyticsClient {
     let eventType: 'track' | 'identify' = 'track';
     let journeyStart = false;
     let journeyEnd = false;
+    let channel: string | undefined; // Added channel variable
 
     // Handle legacy signature (third arg is eventType string)
     if (typeof options === 'string') {
@@ -118,6 +119,9 @@ class AnalyticsClient {
         if ('journey_end' in options && options.journey_end) {
             journeyEnd = true;
         }
+        if ('channel' in options && typeof options.channel === 'string') {
+            channel = options.channel;
+        }
     }
 
     this.sendEvent({
@@ -125,7 +129,8 @@ class AnalyticsClient {
       event_type: eventType,
       properties: properties,
       journey_start: journeyStart,
-      journey_end: journeyEnd
+      journey_end: journeyEnd,
+      channel: channel // Pass channel to sendEvent
     });
   }
 
@@ -134,7 +139,8 @@ class AnalyticsClient {
     event_type: 'page' | 'track' | 'identify', 
     properties?: Record<string, any>,
     journey_start?: boolean,
-    journey_end?: boolean
+    journey_end?: boolean,
+    channel?: string // Added channel to baseData type
   }) {
     if (!this.initialized && !this.writeKey) {
         // Warn or silently fail? Silent fail for now or auto-init if env var exists
@@ -151,6 +157,7 @@ class AnalyticsClient {
       user_id: this.userId,
       session_id: this.sessionId,
       context: {
+        channel: baseData.channel, // Added channel to context
         page: {
           path: window.location.pathname,
           title: document.title,
@@ -190,6 +197,7 @@ class AnalyticsClient {
           },
           body: JSON.stringify(batch)
         });
+        console.log('Analytics event sent', batch);
       }
     } catch (error) {
       console.error('Failed to send analytics event', error);

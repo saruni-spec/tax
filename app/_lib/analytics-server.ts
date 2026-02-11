@@ -54,8 +54,6 @@ export interface AnalyticsBatch {
 }
 
 const ANALYTICS_ENDPOINT = 'https://analytics.chatnationbot.com/v1/capture';
-// Use a default sender ID if env var not set, or hardcode the known sender for now
-const SENDER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '254700000000'; 
 
 /**
  * Track a message sent event to the analytics service.

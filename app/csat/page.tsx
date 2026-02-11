@@ -16,6 +16,8 @@ export default function CsatPage() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone');
   const journey = searchParams.get('journey');
+  const channel = searchParams.get('channel') || 'webview';
+  const inboxSessionId = searchParams.get('session_id') || searchParams.get('inboxSessionId') || '';
 
   // Identify user if phone is present
   if (phone) {
@@ -23,12 +25,21 @@ export default function CsatPage() {
   }
 
   const handleSubmit = async () => {
+    console.log('Submitting feedback', {
+      rating,
+      feedback,
+      journey: journey || 'Unknown',
+      inboxSessionId
+    });
     // Track feedback submission
     analytics.track('csat_submitted', {
       rating,
       feedback,
-      journey: journey || 'Unknown'
-    });
+      journey: journey || 'Unknown',
+      inboxSessionId
+    }, {
+      channel
+    } as any);
     
     // Here we would typically send the data to the backend
     // await submitFeedback({ rating, feedback });
