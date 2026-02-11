@@ -49,6 +49,7 @@ export interface AnalyticsEvent {
 export interface AnalyticsBatch {
   batch: AnalyticsEvent[];
   sent_at: string;
+  write_key?: string;
 }
 
 const ANALYTICS_ENDPOINT = 'https://analytics.chatnationbot.com/v1/capture';
@@ -121,7 +122,8 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
 
     const payload: AnalyticsBatch = {
       batch: [event],
-      sent_at: new Date().toISOString()
+      sent_at: new Date().toISOString(),
+      write_key: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY
     };
 
     // Fire and forget - minimal await needed? 
@@ -130,7 +132,8 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
     
     await axios.post(ANALYTICS_ENDPOINT, payload, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Write-Key': process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || ''
       },
       timeout: 5000 // Short timeout to not block too long
     });
