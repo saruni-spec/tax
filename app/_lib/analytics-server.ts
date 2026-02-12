@@ -28,9 +28,9 @@ export interface AnalyticsEvent {
   };
   properties: {
     message_id?: string;
-    from: string; // "254..." (Our sender ID - standardizing on 'System' or the business number if available, but usually static)
-    to: string;
-    type: string;
+    from?: string; // "254..." (Our sender ID - standardizing on 'System' or the business number if available, but usually static)
+    to?: string;
+    type?: string;
     content?: string;
     template?: {
       name: string;
@@ -141,5 +141,67 @@ export async function trackMessageSent(props: WhatsAppAnalyticsProps): Promise<v
   } catch (error: any) {
     // Silent fail for analytics to not disrupt flow
     console.error('[Analytics] Failed to track message sent:', error.message);
+  }
+}
+
+export interface CSATAnalyticsProps {
+  rating: number;
+  feedback: string;
+  journey: string;
+  inboxSessionId: string;
+  phone: string;
+  channel?: string;
+}
+
+export async function trackCsatSubmitted(props: CSATAnalyticsProps): Promise<void> {
+  try {
+    const { rating, feedback, journey, inboxSessionId, phone, channel } = props;
+
+    // Clean phone number for user_id
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '254' + cleanPhone.substring(1);
+    else if (!cleanPhone.startsWith('254')) cleanPhone = '254' + cleanPhone;
+
+    const event: AnalyticsEvent = {
+        event_id: uuidv4(),
+        event_name: 'csat_submitted',
+        event_type: 'track',
+        timestamp: new Date().toISOString(),
+        session_id: uuidv4(),
+        user_id: cleanPhone,
+        anonymous_id: cleanPhone,
+        context: {
+            channel: channel || 'webview',
+            page: {
+                path: '/csat',
+                url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxObj.chatnation.co.ke'}/csat`
+            }
+        },
+        properties: {
+            rating,
+            feedback,
+            journey,
+            inboxSessionId
+        }
+    };
+
+    const payload: AnalyticsBatch = {
+        batch: [event],
+        sent_at: new Date().toISOString(),
+        write_key: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+    };
+
+    console.log('[Analytics] Sending csat_submitted event:', event.event_id, JSON.stringify(payload));
+
+    await axios.post(ANALYTICS_ENDPOINT, payload, {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Write-Key': process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY || ''
+        },
+        timeout: 5000
+    });
+
+  } catch (error: any) {
+    console.error('[Analytics] Failed to track CSAT:', error.message);
   }
 }

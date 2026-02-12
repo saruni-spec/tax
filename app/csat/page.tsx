@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout, Card, Button } from '../_components/Layout';
 import { analytics } from '@/app/_lib/analytics';
+import { submitCsatFeedback } from '../actions/csat';
 import { Star, CheckCircle, MessageSquare } from 'lucide-react';
 
 export default function CsatPage() {
@@ -31,15 +32,15 @@ export default function CsatPage() {
       journey: journey || 'Unknown',
       inboxSessionId
     });
-    // Track feedback submission
-    analytics.track('csat_submitted', {
+    // Submit to server action
+    await submitCsatFeedback({
       rating,
       feedback,
       journey: journey || 'Unknown',
-      inboxSessionId
-    }, {
-      channel
-    } as any);
+      inboxSessionId,
+      phone: phone || '', // Pass phone from URL params
+      channel: (channel as string) || 'webview'
+    });
     
     // Here we would typically send the data to the backend
     // await submitFeedback({ rating, feedback });
